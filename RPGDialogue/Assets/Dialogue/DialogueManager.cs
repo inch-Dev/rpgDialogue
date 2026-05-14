@@ -1,16 +1,24 @@
 using System.Collections;
+using NUnit.Framework;
 using UnityEditor.AdaptivePerformance.Editor;
 using UnityEditor.EditorTools;
 using UnityEngine;
-
+using System.Collections.Generic;
 public class DialogueManager : MonoBehaviour
 {
-    public static DialogueManager Instance;
+    [HideInInspector] public static DialogueManager Instance;
     [SerializeField] float defaultCharWaitMult;
     [Tooltip("The default multiplier of the waiting time between characters")]
     [SerializeField] float defaultFastCharWaitMult;
     [Tooltip("The fast multiplier of the waiting time between characters")]
 
+    [SerializeField] List<DialogueMarkup> customMarkups = new List<DialogueMarkup>();
+    [Tooltip("Markups to trigger custom functions to edit dialogue. Should follow TextMeshPro markup standard format")]
+    Dialogue curDialogue; 
+    float timeTillNextChar;
+    bool readingDialogue = false;
+
+    //Need some sort of markup handle event
     #region EVENTS
     public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText);
     public static event UpdateDialogue updateDialogue;
@@ -29,6 +37,8 @@ public class DialogueManager : MonoBehaviour
     {
         if(Instance == null)
         Instance = this;
+
+        timeTillNextChar = defaultCharWaitMult;
     }
 
     // Update is called once per frame
@@ -39,7 +49,11 @@ public class DialogueManager : MonoBehaviour
 
     public void ReadDialogue(Dialogue dialogue)
     {
-        bool isEndOfLine = false;
+        if(readingDialogue)
+            return;
+
+        curDialogue = dialogue;
+        readingDialogue = true; 
         ReadDialogueLine(dialogue, dialogue.dialogueLines[0]);
     }
 
@@ -58,6 +72,22 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
+    string CleanMarkupText(string dialogueSubString)
+    {
+        //NEED TO STORE PREVIOUS STRING TO IGNORE OLD MARKUPS
+        string cleanText = "";
+        char[] textArray  = dialogueSubString.ToCharArray();
+
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(textArray[i] == '<')
+            {
+                
+            }
+        }
+        return cleanText;
+    }
+
     IEnumerator TypewriterReadText(Dialogue dialogue, string dialogueLine, float timeTillNextText)
     {
         float textSpeed = timeTillNextText;
@@ -73,10 +103,13 @@ public class DialogueManager : MonoBehaviour
 
             
             curText = dialogueLine.Substring(0, charIndex);
-            //CHECK FOR MARKUP TEXT
+            curText = CleanMarkupText(curText);
+            
 
             updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, curText);
             yield return null;
         }
+        readingDialogue = false;
+        curDialogue = null;
     }
 }
