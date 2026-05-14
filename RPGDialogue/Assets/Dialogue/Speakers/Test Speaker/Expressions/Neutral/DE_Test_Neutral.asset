@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0517b5425a8bb5842ac09b573b37b38b, type: 3}
+  m_Name: DE_Test_Neutral
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueExpression
+  id: 0
+  staticSprite: {fileID: -5191791537354027122, guid: 80a28340ab61f45498c91e50fbf918c2, type: 3}
+  textSpeed: 0
+  isAnimated: 1
+  animationFrames:
+  - {fileID: -5191791537354027122, guid: 80a28340ab61f45498c91e50fbf918c2, type: 3}
+  - {fileID: 8967010228069615623, guid: df20c38723661424cbace5acc1620977, type: 3}
+  animationFPS: 0
