@@ -118,7 +118,7 @@ public class DM_Wait : DialogueMarkup
                         containsMarkup = true;
                         break;
                     case DialogueMarkupParameterType.DOUBLE:
-                        if(double.TryParse(parameterText, out double doubleResult)
+                        if(double.TryParse(parameterText, out double doubleResult))
                         {
                             if(doubleResult == null)
                             {
@@ -129,7 +129,7 @@ public class DM_Wait : DialogueMarkup
                             {
                                 containsMarkup = true;
                             }
-                        })
+                        }
                         break;         
                 }
 
