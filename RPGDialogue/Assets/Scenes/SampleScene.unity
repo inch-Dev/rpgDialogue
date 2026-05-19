@@ -370,10 +370,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb7d0df773c34834f97e135f19ca63f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  defaultCharWaitMult: 10
+  defaultCharWaitMult: 0.5
   defaultFastCharWaitMult: 5
-  customMarkups:
-  - {fileID: 634859739}
+  customMarkups: []
 --- !u!4 &634859738
 Transform:
   m_ObjectHideFlags: 0
@@ -401,11 +400,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0775b98cedd0d44bbd5379482478011, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DM_Wait
-  markupTitle: Wait
   formatTagStart: <
   formatTagEnd: w>
   hasParameter: 1
-  parameter: 1
+  parameterType: 0
 --- !u!1 &1007093996
 GameObject:
   m_ObjectHideFlags: 0

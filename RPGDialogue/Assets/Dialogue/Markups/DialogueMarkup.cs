@@ -1,4 +1,5 @@
 using NaughtyAttributes;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DialogueMarkup : MonoBehaviour
@@ -9,7 +10,7 @@ public class DialogueMarkup : MonoBehaviour
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
 
-    virtual public bool MarkupRecognition(string text)
+    virtual public bool MarkupRecognition(string text) //If it has the full tag then send event
     {
         bool containsFullTag = false;
 
@@ -20,6 +21,16 @@ public class DialogueMarkup : MonoBehaviour
         }
 
         return containsFullTag;
+    }
+
+    virtual public bool  IncompleteMarkupRecognition(string text) //If has incomplete tag delete from displayed string until ready
+        //Is this needed?
+    {
+        bool containsStartTag = false;
+
+        //Check for start of the tag and check that there is no end of tag
+        //Iterate from start of tag and check for ending tag format
+        return containsStartTag;
     }
 
     /*EXAMPLE EVENT?
