@@ -370,7 +370,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb7d0df773c34834f97e135f19ca63f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  defaultCharWaitMult: 0.5
+  defaultCharWaitMult: 4
   defaultFastCharWaitMult: 5
   customMarkups: []
 --- !u!4 &634859738

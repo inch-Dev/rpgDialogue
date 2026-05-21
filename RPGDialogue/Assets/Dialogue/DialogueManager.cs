@@ -4,6 +4,8 @@ using UnityEditor.AdaptivePerformance.Editor;
 using UnityEditor.EditorTools;
 using UnityEngine;
 using System.Collections.Generic;
+using System;
+using UnityEngine.UI;
 public class DialogueManager : MonoBehaviour
 {
     [HideInInspector] public static DialogueManager Instance;
@@ -17,7 +19,7 @@ public class DialogueManager : MonoBehaviour
     Dialogue curDialogue; 
     float timeTillNextChar;
     bool readingDialogue = false;
-    string lastDisplayedDialogue;
+    string lastDisplayedDialogue = "";
     float curWaitTime = 0;
     DialogueExpression curExpression;
     DialogueSpeaker curSpeaker;
@@ -90,65 +92,71 @@ public class DialogueManager : MonoBehaviour
 
     string CleanMarkupText (int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
     {
-    //skip till after previously displayed text
-        
-    //Increment index if in the middle of tag formatting
-    //Need to skip format tags
-        //NEED TO STORE PREVIOUS STRING TO IGNORE OLD MARKUPS
-        string cleanText = "";
-        string noTagsCleanText = "";
-        char[] textArray  = dialogueString.ToCharArray();
+        string fullText = "";
+        string visibleDisplayText = "";
 
+        char[] textArray = dialogueString.ToCharArray();
         bool isReadingTag = false;
-        string tagText = "";
 
-  
-        for(int i = 0; noTagsCleanText.Length < index + 1; i++) //Keep iterating until visible characters is one less than index of typewriter effect
+        for(int i = 0; i < dialogueString.Length; i++)
         {
-            if (i >= dialogueString.Length)
-                break;
-
-            if(textArray[i] == '<') //Grab tags and skip over adding to the string
-            {
+            if(textArray[i] == '<')
                 isReadingTag = true;
-                tagText = cleanText;
-            }
-
-            if(!isReadingTag)
-            {
-                cleanText += textArray[i];
-                noTagsCleanText += textArray[i];
-            } 
 
             if(isReadingTag)
+                fullText += textArray[i];
+            else
             {
-                tagText += textArray[i];
+                if(visibleDisplayText.Length < index + 1)
+                {
+                    visibleDisplayText += textArray[i];
+                    fullText += textArray[i];
+                }
+                else
+                {
+                    fullText = AppendEndingMarkupText(fullText, textArray, i);
+                    break;
+                }
             }
+            if(textArray[i] == '>')
+                isReadingTag = false;
+        }
 
-			if (textArray[i] == '>') //If complete tag re-add completed tag
-			{
-                cleanText = tagText;
-                Debug.Log($"Ending format tag. Adding... {tagText}|");
-				isReadingTag = false;
-			}
+        lastDisplayedDialogue = fullText;
+        return fullText;
 
-
-		}
-
-
-        lastDisplayedDialogue = cleanText;
-        return cleanText;
     }
+
+    string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
+    {
+        bool isReadingTag = false; 
+        string appendText = fullText;
+
+        for(int i = startIndex; i < textArray.Length; i++)
+        {
+            if(textArray[i] == '<')
+                isReadingTag = true;
+            if(isReadingTag)
+                appendText += textArray[i];
+            else
+                break;
+            if(textArray[i] == '>')
+                isReadingTag = false;
+        }
+
+        return appendText;
+    } 
 
     IEnumerator TypewriterReadText(Dialogue dialogue, string dialogueLine, float timeTillNextText)  //Find way to recognize if last of dialogue is a format tag
     {
+        //Dont use index? Check if displayed entire dialogueLine
         
         float textSpeed = timeTillNextText;
         float t = 0;
         int charIndex = 0;
         string curText = "";
 
-        while(charIndex < dialogueLine.Length)
+        while(curText.Length < dialogueLine.Length) 
         {
             t += Time.deltaTime * textSpeed; //Adjust value based on events
             yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
@@ -158,12 +166,13 @@ public class DialogueManager : MonoBehaviour
 
             
             curText = dialogueLine.Substring(0, charIndex);
-            curText = CleanMarkupText(charIndex, dialogueLine);
             
 
             //Need to update expression somehow
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
-			Debug.Log($"index is {charIndex}, typewrite {curText}|");
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, CleanMarkupText(charIndex, dialogueLine));
+            curText = CleanMarkupText(charIndex, dialogueLine);
+            Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
+			Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
 			yield return null;
         }
         readingDialogue = false;
