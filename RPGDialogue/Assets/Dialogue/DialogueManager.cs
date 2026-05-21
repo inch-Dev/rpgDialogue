@@ -11,8 +11,11 @@ public class DialogueManager : MonoBehaviour
     [HideInInspector] public static DialogueManager Instance;
     [SerializeField] float defaultCharWaitMult;
     [Tooltip("The default multiplier of the waiting time between characters")]
+    [SerializeField] float defaultTimeBetweenLines;
+
     [SerializeField] float defaultFastCharWaitMult;
     [Tooltip("The fast multiplier of the waiting time between characters")]
+    [SerializeField] float defaultFastTimeBetweenLines;
 
     [SerializeField] List<DialogueMarkup> customMarkups = new List<DialogueMarkup>();
     [Tooltip("Markups to trigger custom functions to edit dialogue. Should follow TextMeshPro markup standard format")]
@@ -63,17 +66,17 @@ public class DialogueManager : MonoBehaviour
         curSpeaker = dialogue.speaker;
         curExpression = dialogue.startingExpression;
         readingDialogue = true; 
-        ReadDialogueLine(dialogue, dialogue.dialogueLines[0]);
+        ReadDialogueLine(dialogue, 0, dialogue.dialogueLines[0]);
     }
 
-    void ReadDialogueLine(Dialogue dialogue, string dialogueLine)
+    void ReadDialogueLine(Dialogue dialogue, int dialogueLineIndex, string dialogueLine)
     {
         //Read all words in each dialog line then clear to next line
         //PER WORD text read timer and update ui
 
         //NEEDS MARKUP TEXT TO WAIT AND CHANGE EXPRESSIONS
         if(dialogue.hasTypeWriterEffect)
-            StartCoroutine(TypewriterReadText(dialogue, dialogueLine, defaultCharWaitMult));
+            StartCoroutine(TypewriterReadDialogueLine(dialogue));
         else
         {
             //Eventually need function that reads for markup text 
@@ -81,17 +84,9 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    //Take dialog string
-    //Get string of last displayed text
-    //Skip over tags until has displayed enough visible characters
-    //Add added visible characters with the tags and clean up any incomplete ones
-    //If new completed tag run event
-    //Add new text to previous dialogue string and display
-   
-
-
     string CleanMarkupText (int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
     {
+        Debug.Log("Reading from {dialogueLine}");
         string fullText = "";
         string visibleDisplayText = "";
 
@@ -122,6 +117,12 @@ public class DialogueManager : MonoBehaviour
                 isReadingTag = false;
         }
 
+        string newAddedText;
+        if(fullText.Length > lastDisplayedDialogue.Length)
+        newAddedText = fullText.Substring(lastDisplayedDialogue.Length, fullText.Length - lastDisplayedDialogue.Length);
+        else
+        newAddedText = fullText.Substring(0, fullText.Length); //Starting new line of dialogue
+
         lastDisplayedDialogue = fullText;
         return fullText;
 
@@ -147,34 +148,47 @@ public class DialogueManager : MonoBehaviour
         return appendText;
     } 
 
-    IEnumerator TypewriterReadText(Dialogue dialogue, string dialogueLine, float timeTillNextText)  //Find way to recognize if last of dialogue is a format tag
+    //Change to read ALL dialogue
+    IEnumerator TypewriterReadDialogueLine(Dialogue dialogue) 
     {
-        //Dont use index? Check if displayed entire dialogueLine
-        
-        float textSpeed = timeTillNextText;
         float t = 0;
         int charIndex = 0;
         string curText = "";
+        string[] dialogueLines = dialogue.dialogueLines;
 
-        while(curText.Length < dialogueLine.Length) 
+
+        for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
-            t += Time.deltaTime * textSpeed; //Adjust value based on events
-            yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
+            curText = "";
+            charIndex = 0;
+            t = 0;
+            string dialogueLine = dialogueLines[i];
+            float textSpeed = defaultCharWaitMult;
 
-            charIndex = Mathf.FloorToInt(t);
-            charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
+            while(curText.Length < dialogueLine.Length) 
+            {
+                
+                t += Time.deltaTime * textSpeed; //Adjust value based on events
+                yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
 
-            
-            curText = dialogueLine.Substring(0, charIndex);
-            
+                charIndex = Mathf.FloorToInt(t);
+                charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
+                
+                
+                curText = dialogueLine.Substring(0, charIndex);
+                
 
-            //Need to update expression somehow
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, CleanMarkupText(charIndex, dialogueLine));
-            curText = CleanMarkupText(charIndex, dialogueLine);
-            Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
-			Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
-			yield return null;
+                //Need to update expression somehow
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, CleanMarkupText(charIndex, dialogueLine));
+                curText = CleanMarkupText(charIndex, dialogueLine);
+
+                //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
+                Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
+                yield return null;
+            }
+            yield return new WaitForSeconds(defaultTimeBetweenLines);
         }
+        
         readingDialogue = false;
         curDialogue = null;
     }

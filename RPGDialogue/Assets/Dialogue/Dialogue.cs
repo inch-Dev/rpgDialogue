@@ -5,6 +5,6 @@ public class Dialogue : ScriptableObject
 {
     [SerializeField] public DialogueSpeaker speaker;
     [SerializeField] public DialogueExpression startingExpression;
-    [SerializeField] public List<string> dialogueLines;
+    [SerializeField] public string[] dialogueLines;
     [SerializeField] public bool hasTypeWriterEffect = true;
 }
