@@ -17,12 +17,14 @@ public class DialogueManager : MonoBehaviour
     [Tooltip("The fast multiplier of the waiting time between characters")]
     [SerializeField] float defaultFastTimeBetweenLines;
 
-    [SerializeField] List<DialogueMarkup> customMarkups = new List<DialogueMarkup>();
+    [SerializeField] List<DialogueMarkup> dialogueMarkups = new List<DialogueMarkup>();
     [Tooltip("Markups to trigger custom functions to edit dialogue. Should follow TextMeshPro markup standard format")]
     Dialogue curDialogue; 
     float timeTillNextChar;
     bool readingDialogue = false;
-    string lastDisplayedDialogue = "";
+    
+    string lastDialogueSource = "";
+    string lastDisplayedDialogueText = "";
     float curWaitTime = 0;
     DialogueExpression curExpression;
     DialogueSpeaker curSpeaker;
@@ -50,13 +52,6 @@ public class DialogueManager : MonoBehaviour
         timeTillNextChar = defaultCharWaitMult;
         
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void ReadDialogue(Dialogue dialogue)
     {
         if(readingDialogue)
@@ -66,17 +61,14 @@ public class DialogueManager : MonoBehaviour
         curSpeaker = dialogue.speaker;
         curExpression = dialogue.startingExpression;
         readingDialogue = true; 
-        ReadDialogueLine(dialogue, 0, dialogue.dialogueLines[0]);
+        StartCoroutine(TypewriterReadDialogue(dialogue));
     }
 
     void ReadDialogueLine(Dialogue dialogue, int dialogueLineIndex, string dialogueLine)
     {
-        //Read all words in each dialog line then clear to next line
-        //PER WORD text read timer and update ui
-
         //NEEDS MARKUP TEXT TO WAIT AND CHANGE EXPRESSIONS
         if(dialogue.hasTypeWriterEffect)
-            StartCoroutine(TypewriterReadDialogueLine(dialogue));
+            StartCoroutine(TypewriterReadDialogue(dialogue));
         else
         {
             //Eventually need function that reads for markup text 
@@ -84,9 +76,13 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    string CleanMarkupText (int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
+    void HandleMarkupEvent()
     {
-        Debug.Log("Reading from {dialogueLine}");
+        
+    }
+
+    string GetDisplayText(int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
+    {
         string fullText = "";
         string visibleDisplayText = "";
 
@@ -117,17 +113,40 @@ public class DialogueManager : MonoBehaviour
                 isReadingTag = false;
         }
 
-        string newAddedText;
-        if(fullText.Length > lastDisplayedDialogue.Length)
-        newAddedText = fullText.Substring(lastDisplayedDialogue.Length, fullText.Length - lastDisplayedDialogue.Length);
-        else
-        newAddedText = fullText.Substring(0, fullText.Length); //Starting new line of dialogue
+        if(dialogueString != lastDialogueSource)
+        {
+            lastDialogueSource = dialogueString;
+            lastDisplayedDialogueText = "";
+        }
 
-        lastDisplayedDialogue = fullText;
+        string newAddedText;
+        if(fullText.Length > lastDisplayedDialogueText.Length)
+        {
+            newAddedText = fullText.Substring(lastDisplayedDialogueText.Length);
+        }
+        else
+        {
+            newAddedText = "";
+        }
+
+        if(newAddedText != null && newAddedText != "")
+        {   
+            GetMarkupEvents(newAddedText);
+        }
+
+        lastDisplayedDialogueText = fullText;
         return fullText;
 
     }
 
+    void GetMarkupEvents(string newText)
+    {
+       foreach(DialogueMarkup dm in dialogueMarkups)
+        {
+            dm.MarkupRecognition(newText);
+            //Find way to remove custom markups from the displat text
+        } 
+    }
     string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
     {
         bool isReadingTag = false; 
@@ -148,8 +167,7 @@ public class DialogueManager : MonoBehaviour
         return appendText;
     } 
 
-    //Change to read ALL dialogue
-    IEnumerator TypewriterReadDialogueLine(Dialogue dialogue) 
+    IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
         float t = 0;
         int charIndex = 0;
@@ -164,6 +182,7 @@ public class DialogueManager : MonoBehaviour
             t = 0;
             string dialogueLine = dialogueLines[i];
             float textSpeed = defaultCharWaitMult;
+            lastDisplayedDialogueText = null; 
 
             while(curText.Length < dialogueLine.Length) 
             {
@@ -179,11 +198,11 @@ public class DialogueManager : MonoBehaviour
                 
 
                 //Need to update expression somehow
-                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, CleanMarkupText(charIndex, dialogueLine));
-                curText = CleanMarkupText(charIndex, dialogueLine);
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, GetDisplayText(charIndex, dialogueLine));
+                curText = GetDisplayText(charIndex, dialogueLine);
 
                 //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
-                Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
+                //Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
                 yield return null;
             }
             yield return new WaitForSeconds(defaultTimeBetweenLines);

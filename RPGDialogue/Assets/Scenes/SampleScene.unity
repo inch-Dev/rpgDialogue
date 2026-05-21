@@ -374,7 +374,8 @@ MonoBehaviour:
   defaultTimeBetweenLines: 1
   defaultFastCharWaitMult: 5
   defaultFastTimeBetweenLines: 0.5
-  customMarkups: []
+  dialogueMarkups:
+  - {fileID: 634859739}
 --- !u!4 &634859738
 Transform:
   m_ObjectHideFlags: 0
