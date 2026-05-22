@@ -76,11 +76,6 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    void HandleMarkupEvent()
-    {
-        
-    }
-
     string GetDisplayText(int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
     {
         string fullText = "";
@@ -105,6 +100,7 @@ public class DialogueManager : MonoBehaviour
                 }
                 else
                 {
+                    //Grab any stray tags attached to visible text
                     fullText = AppendEndingMarkupText(fullText, textArray, i);
                     break;
                 }
@@ -119,6 +115,7 @@ public class DialogueManager : MonoBehaviour
             lastDisplayedDialogueText = "";
         }
 
+        //Get text added to display string per call
         string newAddedText;
         if(fullText.Length > lastDisplayedDialogueText.Length)
         {
@@ -129,23 +126,30 @@ public class DialogueManager : MonoBehaviour
             newAddedText = "";
         }
 
+        string newDisplayText = "";
         if(newAddedText != null && newAddedText != "")
         {   
-            GetMarkupEvents(newAddedText);
+            newDisplayText = GetMarkupHandledText(newAddedText);
         }
 
         lastDisplayedDialogueText = fullText;
-        return fullText;
+        return GetMarkupHandledText(fullText);
+
+        //Way to call events that are new through delta text
+        //Need to remove all tag text even after subsequent call 
 
     }
 
-    void GetMarkupEvents(string newText)
+    string GetMarkupHandledText(string newText)
     {
-       foreach(DialogueMarkup dm in dialogueMarkups)
+        Debug.Log($"New delta text:{newText}");
+        string handledMarkupText = newText;
+       for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            dm.MarkupRecognition(newText);
-            //Find way to remove custom markups from the displat text
-        } 
+            handledMarkupText = dialogueMarkups[i].HandleMarkup(handledMarkupText);
+        }
+
+        return handledMarkupText;
     }
     string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
     {

@@ -1,3 +1,4 @@
+using System.Data.Common;
 using NaughtyAttributes;
 using NUnit.Framework;
 using Unity.VisualScripting;
@@ -11,11 +12,69 @@ public class DialogueMarkup : MonoBehaviour
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
 
-    virtual public bool MarkupRecognition(string text) //If it has the full tag then send event
+    virtual public string HandleMarkup(string text) //If it has the full tag then send event
     {
         //Return markup to check and null if not found?
-        bool containsMarkup = false;
+        string handledMarkupText = "";
 
+        if(RecognizeMarkup(text))
+        {
+            Debug.Log($"Recognized markup in {text}");
+            handledMarkupText = GetRemovedText(text);
+
+            return handledMarkupText;
+        }
+
+        return text;
+    }
+
+    virtual public string GetRemovedText(string text)
+    {
+        string excludedMarkupText = "";
+        char[] textArray = text.ToCharArray();
+        bool isReadingTag = false;
+
+
+        Debug.Log($"Size of new text:{text.Length}");
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(i + formatTagStart.Length - 1 <= textArray.Length) //Skip over beginning tag
+            {
+                string tryTag = text.Substring(i, formatTagStart.Length);
+
+                if(tryTag == formatTagStart)
+                {
+                    isReadingTag = true;
+                    i += formatTagStart.Length - 1;
+                    continue;
+                }
+            }
+
+
+            if(i + formatTagEnd.Length <= textArray.Length) //Skip over closing tag
+            {
+                string tryTag = text.Substring(i, formatTagEnd.Length);
+
+                if(tryTag == formatTagEnd)
+                {
+                    isReadingTag = false;
+                    i += formatTagEnd.Length - 1;
+                    continue;
+                }
+            }
+
+            if(!isReadingTag)
+            {
+                excludedMarkupText += textArray[i];
+            }
+        }
+        Debug.Log($"Getting {excludedMarkupText}");
+        return excludedMarkupText;
+    }
+
+    virtual public bool RecognizeMarkup(string text)
+    {
+        bool containsMarkup = false;
         if(text.Contains(formatTagStart) && text.Contains(formatTagEnd))
         {
             containsMarkup = true;
@@ -29,7 +88,7 @@ public class DialogueMarkup : MonoBehaviour
                 char formatTagStartFirstChar = formatTagStart.ToCharArray()[0];
                 char formatTagEndFirstChar = formatTagEnd.ToCharArray()[0];
 
-                Debug.Log($"Starting char:{formatTagStartFirstChar}, Ending char:{formatTagEndFirstChar}");
+                //Debug.Log($"Starting char:{formatTagStartFirstChar}, Ending char:{formatTagEndFirstChar}");
 
                 char[] textArray = text.ToCharArray();
 
@@ -125,15 +184,8 @@ public class DialogueMarkup : MonoBehaviour
                 }
 
             }
-
-            //Send some sort of event
         }
 
-        Debug.Log($"{text} Contains markup:{containsMarkup}");
         return containsMarkup;
     }
-
-    /*EXAMPLE EVENT?
-    pass self as reference and get parameter string and parameter type to cast as?
-     */
 }
