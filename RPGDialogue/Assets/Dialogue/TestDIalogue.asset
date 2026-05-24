@@ -18,4 +18,5 @@ MonoBehaviour:
   - <2w>has a wait markup
   - This is a <b>test!</b>
   - Another line of dialogue....
+  - Also has a markup <2w>
   hasTypeWriterEffect: 1

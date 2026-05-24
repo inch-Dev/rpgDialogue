@@ -142,7 +142,6 @@ public class DialogueManager : MonoBehaviour
 
     string GetMarkupHandledText(string newText)
     {
-        Debug.Log($"New delta text:{newText}");
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
@@ -173,6 +172,8 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
+
+        Debug.Log("Reading dialogue");
         float t = 0;
         int charIndex = 0;
         string curText = "";
@@ -181,31 +182,30 @@ public class DialogueManager : MonoBehaviour
 
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
+            Debug.Log("Running dialogue for loop");
             curText = "";
             charIndex = 0;
             t = 0;
             string dialogueLine = dialogueLines[i];
+            string cleanedDialogue = GetMarkupHandledText(dialogueLine);
             float textSpeed = defaultCharWaitMult;
             lastDisplayedDialogueText = null; 
 
-            while(curText.Length < dialogueLine.Length) 
-            {
-                
+            while(curText.Length < cleanedDialogue.Length) //Find way to get cleaned version of dialogue line with all custom markups removed
+            {    
                 t += Time.deltaTime * textSpeed; //Adjust value based on events
                 yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
 
                 charIndex = Mathf.FloorToInt(t);
                 charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
                 
-                
                 curText = dialogueLine.Substring(0, charIndex);
                 
-
                 //Need to update expression somehow
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, GetDisplayText(charIndex, dialogueLine));
                 curText = GetDisplayText(charIndex, dialogueLine);
 
-                //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
+                Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
                 //Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
                 yield return null;
             }

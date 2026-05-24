@@ -34,8 +34,6 @@ public class DialogueMarkup : MonoBehaviour
         char[] textArray = text.ToCharArray();
         bool isReadingTag = false;
 
-
-        Debug.Log($"Size of new text:{text.Length}");
         for(int i = 0; i < textArray.Length; i++)
         {
             if(i + formatTagStart.Length - 1 <= textArray.Length) //Skip over beginning tag
@@ -68,7 +66,6 @@ public class DialogueMarkup : MonoBehaviour
                 excludedMarkupText += textArray[i];
             }
         }
-        Debug.Log($"Getting {excludedMarkupText}");
         return excludedMarkupText;
     }
 
