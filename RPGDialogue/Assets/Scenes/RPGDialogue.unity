@@ -350,7 +350,6 @@ GameObject:
   m_Component:
   - component: {fileID: 634859738}
   - component: {fileID: 634859737}
-  - component: {fileID: 634859739}
   m_Layer: 0
   m_Name: DialogueManager
   m_TagString: Untagged
@@ -375,7 +374,7 @@ MonoBehaviour:
   defaultFastCharWaitMult: 5
   defaultFastTimeBetweenLines: 0.5
   dialogueMarkups:
-  - {fileID: 634859739}
+  - {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
 --- !u!4 &634859738
 Transform:
   m_ObjectHideFlags: 0
@@ -391,22 +390,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &634859739
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 634859736}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0775b98cedd0d44bbd5379482478011, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DM_Wait
-  formatTagStart: <
-  formatTagEnd: w>
-  hasParameter: 1
-  parameterType: 0
 --- !u!1 &1007093996
 GameObject:
   m_ObjectHideFlags: 0

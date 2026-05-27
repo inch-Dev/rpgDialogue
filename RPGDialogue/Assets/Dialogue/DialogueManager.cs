@@ -25,7 +25,7 @@ public class DialogueManager : MonoBehaviour
     
     string lastDialogueSource = "";
     string lastDisplayedDialogueText = "";
-    float curWaitTime = 0;
+    float curWaitTime = 10;
     DialogueExpression curExpression;
     DialogueSpeaker curSpeaker;
 
@@ -126,26 +126,30 @@ public class DialogueManager : MonoBehaviour
             newAddedText = "";
         }
 
-        string newDisplayText = "";
         if(newAddedText != null && newAddedText != "")
         {   
-            newDisplayText = GetMarkupHandledText(newAddedText);
+            HandleMarkupLogic(newAddedText);
         }
 
         lastDisplayedDialogueText = fullText;
-        return GetMarkupHandledText(fullText);
-
-        //Way to call events that are new through delta text
-        //Need to remove all tag text even after subsequent call 
+        return HandleMarkupText(fullText);
 
     }
 
-    string GetMarkupHandledText(string newText)
+    void HandleMarkupLogic(string newText)
+    {
+        for(int i = 0; i < dialogueMarkups.Count; i++)
+        {
+            dialogueMarkups[i].HandleMarkupLogic(newText);
+        }
+    }
+
+    string HandleMarkupText(string newText)
     {
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].HandleMarkup(handledMarkupText);
+            handledMarkupText = dialogueMarkups[i].GetRemovedMarkupText(handledMarkupText);
         }
 
         return handledMarkupText;
@@ -173,7 +177,7 @@ public class DialogueManager : MonoBehaviour
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
 
-        Debug.Log("Reading dialogue");
+        //Debug.Log("Reading dialogue");
         float t = 0;
         int charIndex = 0;
         string curText = "";
@@ -182,17 +186,21 @@ public class DialogueManager : MonoBehaviour
 
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
-            Debug.Log("Running dialogue for loop");
+            //Debug.Log("Running dialogue for loop");
             curText = "";
             charIndex = 0;
             t = 0;
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = GetMarkupHandledText(dialogueLine);
+            string cleanedDialogue = HandleMarkupText(dialogueLine);
             float textSpeed = defaultCharWaitMult;
             lastDisplayedDialogueText = null; 
 
             while(curText.Length < cleanedDialogue.Length) //Find way to get cleaned version of dialogue line with all custom markups removed
-            {    
+            {   
+
+                //Function reset to default values
+                curWaitTime = 0;
+
                 t += Time.deltaTime * textSpeed; //Adjust value based on events
                 yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
 
@@ -205,7 +213,7 @@ public class DialogueManager : MonoBehaviour
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, GetDisplayText(charIndex, dialogueLine));
                 curText = GetDisplayText(charIndex, dialogueLine);
 
-                Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
+                //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
                 //Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
                 yield return null;
             }

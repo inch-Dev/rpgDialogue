@@ -6,18 +6,12 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor.U2D.Animation;
 using UnityEngine;
 
+[CreateAssetMenu(fileName = "DM_Wait", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DM_Wait", order = 2)]
 public class DM_Wait : DialogueMarkup
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void HandleMarkupLogic(string text)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+       base.HandleMarkupLogic(text);
     }
 
 }
