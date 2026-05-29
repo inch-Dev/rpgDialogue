@@ -15,4 +15,4 @@ MonoBehaviour:
   formatTagStart: <
   formatTagEnd: w>
   hasParameter: 1
-  parameterType: 0
+  parameterType: 1

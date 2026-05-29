@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Data.Common;
 using NaughtyAttributes;
 using NUnit.Compatibility;
@@ -6,6 +7,7 @@ using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.Rendering.Universal;
 
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
@@ -15,14 +17,7 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
-
-    string lastStoredParameter;
-    DialogueManager dialogueManager;
-
-    void Awake()
-    {
-        dialogueManager = DialogueManager.Instance;
-    }
+    protected string lastStoredParameter;
 
     //Call this when recognizing markup
      virtual public bool RecognizeParameterAsParameterType(string text)
@@ -71,7 +66,7 @@ public class DialogueMarkup : ScriptableObject
         return false;
     }
     
-    virtual public string GetParameterText(string text)
+    virtual public string GetValidParameterText(string text)
     {
         string parameterText = "";
 
@@ -110,7 +105,7 @@ public class DialogueMarkup : ScriptableObject
             }
                     
         }
-        Debug.Log($"Parameter text:{parameterText}");
+
         if(RecognizeParameterAsParameterType(parameterText))
             return parameterText;
         else
@@ -179,7 +174,7 @@ public class DialogueMarkup : ScriptableObject
         if(text.Contains(formatTagStart) && text.Contains(formatTagEnd))
         {
             containsMarkup = true;
-            if(hasParameter && GetParameterText(text) != null)
+            if(hasParameter && GetValidParameterText(text) != null)
             {
                 containsMarkup = true;
             }
@@ -188,17 +183,80 @@ public class DialogueMarkup : ScriptableObject
         return containsMarkup;
     }
 
-    virtual public void HandleMarkupLogic(string text)
+    virtual public bool RecognizeMarkupAtBeginning(string text)
+    {
+        bool isAtBeginning = false;
+        char[] textArray = text.ToCharArray();
+
+        if(text.Length < formatTagStart.Length)
+        return false;
+
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(i == 0)
+            {
+                if(formatTagStart.Length <= textArray.Length)
+                {
+                    string tryFormatTag = text.Substring(i, formatTagStart.Length);
+                    if(tryFormatTag == formatTagStart)
+                        return true;
+                }
+            }
+        }
+
+        return isAtBeginning;
+    }
+
+    virtual public bool RecognizeMarkupAtEnd(string text)
+    {
+        bool isAtEnd = false;
+        char[] textArray = text.ToCharArray();
+        
+        if(text.Length < formatTagEnd.Length)
+            return false;
+
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(i + formatTagEnd.Length == textArray.Length)
+            {
+                string tryFormatTag = text.Substring(i, formatTagEnd.Length);
+                if(tryFormatTag == formatTagEnd)
+                    return true;
+            }
+        }
+
+        return isAtEnd;
+    }    
+
+    virtual public void HandleMarkupLogic(DialogueManager dialogueManager, string text)
     {
         if(RecognizeMarkup(text))
         {
 
             Debug.Log("Recognized a markup for the first time!");   
-            if(hasParameter && GetParameterText(text) != null)
+            if(hasParameter && GetValidParameterText(text) != null)
             { 
-                lastStoredParameter = GetParameterText(text);
+                lastStoredParameter = GetValidParameterText(text);
 
                 Debug.Log($"Last stored parameter:{lastStoredParameter}");
+
+                //Run logic with parameter based on enum type
+
+                switch(parameterType)
+                {
+                    case DialogueMarkupParameterType.INT:
+                    break;
+                    case DialogueMarkupParameterType.FLOAT:
+                    break;
+                    case DialogueMarkupParameterType.BOOL:
+                    break;
+                    case DialogueMarkupParameterType.CHAR:
+                    break;
+                    case DialogueMarkupParameterType.STRING:
+                    break;
+                    case DialogueMarkupParameterType.DOUBLE:
+                    break;
+                }
             }
 
         }

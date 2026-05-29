@@ -25,8 +25,12 @@ public class DialogueManager : MonoBehaviour
     
     string lastDialogueSource = "";
     string lastDisplayedDialogueText = "";
-    float curWaitTime = 10;
-    DialogueExpression curExpression;
+    
+    
+    [Header("Editable By Markups")]
+    public float curStartWaitTime = 0;
+    public float curEndWaitTime = 0;
+    public DialogueExpression curExpression;
     DialogueSpeaker curSpeaker;
 
     //Need some sort of markup handle event
@@ -140,7 +144,7 @@ public class DialogueManager : MonoBehaviour
     {
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            dialogueMarkups[i].HandleMarkupLogic(newText);
+            dialogueMarkups[i].HandleMarkupLogic(this, newText);
         }
     }
 
@@ -176,7 +180,6 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
-
         //Debug.Log("Reading dialogue");
         float t = 0;
         int charIndex = 0;
@@ -199,22 +202,31 @@ public class DialogueManager : MonoBehaviour
             {   
 
                 //Function reset to default values
-                curWaitTime = 0;
 
                 t += Time.deltaTime * textSpeed; //Adjust value based on events
-                yield return new WaitForSeconds(curWaitTime); //If wait event called add time between characters;
-
+        
                 charIndex = Mathf.FloorToInt(t);
                 charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
                 
                 curText = dialogueLine.Substring(0, charIndex);
-                
+
+                               
                 //Need to update expression somehow
-                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, GetDisplayText(charIndex, dialogueLine));
                 curText = GetDisplayText(charIndex, dialogueLine);
+
+                yield return new WaitForSeconds(curStartWaitTime); //If wait event called add time between characters;
+                Debug.Log($"Waiting {curStartWaitTime}");
+
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
+
+                yield return new WaitForSeconds(curEndWaitTime);
 
                 //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
                 //Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
+
+                curStartWaitTime = 0;
+                curEndWaitTime = 0;
+
                 yield return null;
             }
             yield return new WaitForSeconds(defaultTimeBetweenLines);
