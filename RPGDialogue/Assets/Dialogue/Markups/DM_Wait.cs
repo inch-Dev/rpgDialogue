@@ -29,8 +29,16 @@ public class DM_Wait : DialogueMarkup
                     case DialogueMarkupParameterType.INT:
                     break;
                     case DialogueMarkupParameterType.FLOAT:
-                    dialogueManager.curStartWaitTime = float.Parse(lastStoredParameter);
-                    Debug.Log($"Setting wait time to {dialogueManager.curStartWaitTime}");
+                    if(RecognizeMarkupAtBeginning(text))
+                    {
+                        dialogueManager.curStartWaitTime = float.Parse(lastStoredParameter);
+                        Debug.Log($"Setting start wait time to {lastStoredParameter}");
+                    }
+                    else if(RecognizeMarkupAtEnd(text))
+                    {
+                        dialogueManager.curEndWaitTime = float.Parse(lastStoredParameter);
+                        Debug.Log($"Setting end wait time to {lastStoredParameter}");
+                    }
                     break;
                     case DialogueMarkupParameterType.BOOL:
                     break;
