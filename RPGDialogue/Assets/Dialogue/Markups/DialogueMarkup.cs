@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
@@ -17,6 +18,9 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
+    [SerializeField] protected bool hasSpecificParameters;
+    [ShowIf("hasSpecificParameters")]
+    [SerializeField] List<String> validParameters;
     protected string lastStoredParameter;
 
     //Call this when recognizing markup
@@ -80,11 +84,9 @@ public class DialogueMarkup : ScriptableObject
         char formatTagStartFirstChar = formatTagStart.ToCharArray()[0];
         char formatTagEndFirstChar = formatTagEnd.ToCharArray()[0];
 
-        //Debug.Log($"Starting char:{formatTagStartFirstChar}, Ending char:{formatTagEndFirstChar}");
-
         char[] textArray = text.ToCharArray();
 
-        //Get parameter
+        //Get parameter text
         for(int i = 0; i < textArray.Length; i++)
         {
             if(textArray[i] == formatTagEndFirstChar)
@@ -104,6 +106,22 @@ public class DialogueMarkup : ScriptableObject
                 parameterText += textArray[i];
             }
                     
+        }
+        
+        //If it is a valid parameter
+        if(hasSpecificParameters)
+        {
+            bool matchesValidParameter = false;
+            for(int i = 0; i < validParameters.Count; i++)
+            {
+                if(validParameters[i] == parameterText)
+                {
+                    matchesValidParameter = true;
+                }
+            }
+
+            if(!matchesValidParameter)
+                return null;
         }
 
         if(RecognizeParameterAsParameterType(parameterText))

@@ -31,6 +31,11 @@ public class DialogueManager : MonoBehaviour
     public float curStartWaitTime = 0;
     public float curEndWaitTime = 0;
     public DialogueExpression curExpression;
+
+    public void ChangeCurEpxression(DialogueEpressionID id)
+    {
+        curExpression = curSpeaker.getExpressionOf(id);
+    }
     DialogueSpeaker curSpeaker;
 
     //Need some sort of markup handle event
@@ -215,7 +220,7 @@ public class DialogueManager : MonoBehaviour
                 curText = GetDisplayText(charIndex, dialogueLine);
 
                 yield return new WaitForSeconds(curStartWaitTime); //If wait event called add time between characters;
-                Debug.Log($"Waiting {curStartWaitTime}");
+                //Debug.Log($"Waiting {curStartWaitTime}");
 
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
 

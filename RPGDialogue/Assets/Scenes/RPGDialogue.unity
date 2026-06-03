@@ -369,12 +369,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb7d0df773c34834f97e135f19ca63f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  defaultCharWaitMult: 4
+  defaultCharWaitMult: 6
   defaultTimeBetweenLines: 1
-  defaultFastCharWaitMult: 5
+  defaultFastCharWaitMult: 10
   defaultFastTimeBetweenLines: 0.5
   dialogueMarkups:
   - {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
+  - {fileID: 11400000, guid: 89b97e8569bf2a34d8ff47c59a440ca6, type: 2}
+  curStartWaitTime: 0
+  curEndWaitTime: 0
+  curExpression: {fileID: 0}
 --- !u!4 &634859738
 Transform:
   m_ObjectHideFlags: 0

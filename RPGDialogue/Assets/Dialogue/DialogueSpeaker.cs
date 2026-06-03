@@ -5,6 +5,15 @@ public class DialogueSpeaker : ScriptableObject
 {
     //Has expressions
     [SerializeField] public List<DialogueExpression> dialogueExpressions;
+    public DialogueExpression getExpressionOf(DialogueEpressionID id)
+    {
+        foreach(DialogueExpression d in dialogueExpressions)
+        {
+            if (d.id == id)
+                return d;
+        }
+        return null;
+    }
     [SerializeField] public string speakerName;
     [SerializeField] public bool shouldAnimate;
 }
