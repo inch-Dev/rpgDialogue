@@ -149,7 +149,8 @@ public class DialogueManager : MonoBehaviour
     {
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            dialogueMarkups[i].HandleMarkupLogic(this, newText);
+            Debug.Log("Markup logic");
+            dialogueMarkups[i].HandleMarkup(this, newText);
         }
     }
 
@@ -158,9 +159,12 @@ public class DialogueManager : MonoBehaviour
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].GetRemovedMarkupText(handledMarkupText);
+            Debug.Log("Text removal");
+            handledMarkupText = dialogueMarkups[i].RemoveFormatTags(handledMarkupText);
         }
 
+
+        Debug.Log($"Returned text is {handledMarkupText}");
         return handledMarkupText;
     }
     string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
@@ -206,9 +210,7 @@ public class DialogueManager : MonoBehaviour
             while(curText.Length < cleanedDialogue.Length) //Find way to get cleaned version of dialogue line with all custom markups removed
             {   
 
-                //Function reset to default values
-
-                t += Time.deltaTime * textSpeed; //Adjust value based on events
+                t += Time.deltaTime * textSpeed; 
         
                 charIndex = Mathf.FloorToInt(t);
                 charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
@@ -225,9 +227,6 @@ public class DialogueManager : MonoBehaviour
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
 
                 yield return new WaitForSeconds(curEndWaitTime);
-
-                //Debug.Log($"CurText:{curText.Length} DialogueLine:{dialogueLine.Length}");
-                //Debug.Log($"index is {charIndex}, typewrite |{curText}| dialogueLine is :{dialogueLine}");
 
                 curStartWaitTime = 0;
                 curEndWaitTime = 0;

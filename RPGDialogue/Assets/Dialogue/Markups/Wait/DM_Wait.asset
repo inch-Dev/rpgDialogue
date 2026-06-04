@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0775b98cedd0d44bbd5379482478011, type: 3}
   m_Name: DM_Wait
   m_EditorClassIdentifier: Assembly-CSharp::DM_Wait
-  formatTagStart: <
-  formatTagEnd: w>
+  openFormatTagStart: <
+  openFormatTagEnd: w>
+  closeFormatTagStart: </
+  closeFormatTagEnd: w>
   hasParameter: 1
   parameterType: 1
+  hasSpecificParameters: 0
+  validParameters: []

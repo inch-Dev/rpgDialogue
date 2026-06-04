@@ -9,14 +9,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DM_Wait", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DM_Wait", order = 2)]
 public class DM_Wait : DialogueMarkup
 {
-    public override void HandleMarkupLogic(DialogueManager dialogueManager, string text)
+    public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-
-        //Track if Tag is at the end of a string????
-       if(RecognizeMarkup(text))
-        {
-
-            //Debug.Log("Recognized a markup for the first time!");   
             if(hasParameter && GetValidParameterText(text) != null)
             { 
                 lastStoredParameter = GetValidParameterText(text);
@@ -50,8 +44,6 @@ public class DM_Wait : DialogueMarkup
                     break;
                 }
             }
-
-        }
 
         lastStoredParameter = "";
     }

@@ -4,18 +4,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DM_Expression", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DM_Expression", order = 3)]
 public class DM_Expression : DialogueMarkup
 {
-    public override void HandleMarkupLogic(DialogueManager dialogueManager, string text)
+    public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-
-        //Track if Tag is at the end of a string????
-       if(RecognizeMarkup(text))
-        {
-
-            //Debug.Log("Recognized a markup for the first time!");   
+        Debug.Log("Running logic for expression change");
             if(hasParameter && GetValidParameterText(text) != null)
             { 
                 lastStoredParameter = GetValidParameterText(text);
-
 
                 //Run logic with parameter based on enum type
 
@@ -45,9 +39,6 @@ public class DM_Expression : DialogueMarkup
                         break;
                 }
             }
-
-        }
-
         lastStoredParameter = "";
     }
 }

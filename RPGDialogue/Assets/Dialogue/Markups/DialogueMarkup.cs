@@ -9,12 +9,16 @@ using UnityEngine;
 using UnityEngine.InputSystem.Utilities;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
 {
-    [SerializeField] protected string formatTagStart;
-    [SerializeField] protected string formatTagEnd;
+    [SerializeField] protected string openFormatTagStart = "<";
+    [SerializeField] protected string openFormatTagEnd = ">";
+
+    [SerializeField] protected string closeFormatTagStart = "</";
+    [SerializeField] protected string closeFormatTagEnd = ">";
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
@@ -22,8 +26,6 @@ public class DialogueMarkup : ScriptableObject
     [ShowIf("hasSpecificParameters")]
     [SerializeField] List<String> validParameters;
     protected string lastStoredParameter;
-
-    //Call this when recognizing markup
      virtual public bool RecognizeParameterAsParameterType(string text)
     {
         switch(parameterType)
@@ -69,7 +71,6 @@ public class DialogueMarkup : ScriptableObject
         }
         return false;
     }
-    
     virtual public string GetValidParameterText(string text)
     {
         string parameterText = "";
@@ -81,8 +82,8 @@ public class DialogueMarkup : ScriptableObject
         bool shoudlAddToMarkupText = false;
 
         //Identify first char of format tag start and format tag end
-        char formatTagStartFirstChar = formatTagStart.ToCharArray()[0];
-        char formatTagEndFirstChar = formatTagEnd.ToCharArray()[0];
+        char formatTagStartFirstChar = openFormatTagStart.ToCharArray()[0];
+        char formatTagEndFirstChar = openFormatTagEnd.ToCharArray()[0];
 
         char[] textArray = text.ToCharArray();
 
@@ -98,7 +99,7 @@ public class DialogueMarkup : ScriptableObject
                 shoudlAddToMarkupText = true;
 
                 //Skip over format tag start char
-                i += formatTagStart.Length - 1;
+                i += openFormatTagStart.Length - 1;
                 continue;
             }
             if(shoudlAddToMarkupText)
@@ -129,22 +130,20 @@ public class DialogueMarkup : ScriptableObject
         else
             return null;
     }
-    virtual public string GetRemovedMarkupText(string text) //If it has the full tag then send event
-    {
-        //Return markup to check and null if not found?
-        string handledMarkupText = "";
-
-        if(RecognizeMarkup(text))
-        {
-            handledMarkupText = RemoveMarkupText(text);
-
-            return handledMarkupText;
-        }
-
-        return text;
-    }
     
-    virtual public string RemoveMarkupText(string text)
+    virtual public string RemoveFormatTags(string text)
+    {   
+        string excludedMarkupText = "";
+
+        if(!RecognizeMarkup(text))
+            return text;
+
+        excludedMarkupText = RemoveOpenFormatTag(text);
+        excludedMarkupText = RemoveCloseFormatTag(excludedMarkupText);
+        return excludedMarkupText;
+    }
+
+    virtual public string RemoveOpenFormatTag(string text)
     {
         string excludedMarkupText = "";
         char[] textArray = text.ToCharArray();
@@ -152,27 +151,27 @@ public class DialogueMarkup : ScriptableObject
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(i + formatTagStart.Length - 1 <= textArray.Length) //Skip over beginning tag
+            if(i + openFormatTagStart.Length - 1 <= textArray.Length) //Skip over beginning of tag
             {
-                string tryTag = text.Substring(i, formatTagStart.Length);
+                string tryTag = text.Substring(i, openFormatTagStart.Length);
 
-                if(tryTag == formatTagStart)
+                if(tryTag == openFormatTagStart)
                 {
                     isReadingTag = true;
-                    i += formatTagStart.Length - 1;
+                    i += openFormatTagStart.Length - 1;
                     continue;
                 }
             }
 
 
-            if(i + formatTagEnd.Length <= textArray.Length) //Skip over closing tag
+            if(i + openFormatTagEnd.Length <= textArray.Length) //Skip over ending of tag
             {
-                string tryTag = text.Substring(i, formatTagEnd.Length);
+                string tryTag = text.Substring(i, openFormatTagEnd.Length);
 
-                if(tryTag == formatTagEnd)
+                if(tryTag == openFormatTagEnd)
                 {
                     isReadingTag = false;
-                    i += formatTagEnd.Length - 1;
+                    i += openFormatTagEnd.Length - 1;
                     continue;
                 }
             }
@@ -185,20 +184,102 @@ public class DialogueMarkup : ScriptableObject
         return excludedMarkupText;
     }
 
+    virtual public string RemoveCloseFormatTag(string text)
+    {
+
+        //THE BUG IS IN HERE!!!!!!!
+        string excludedMarkupText = "";
+        char[] textArray = text.ToCharArray();
+        bool isReadingTag = false;
+
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(i + closeFormatTagStart.Length - 1 < textArray.Length) //Skip over beginning of tag
+            {
+                string tryTag = text.Substring(i, closeFormatTagStart.Length);
+
+                if(tryTag == closeFormatTagStart)
+                {
+                    isReadingTag = true;
+                    i += closeFormatTagStart.Length - 1;
+                    continue;
+                }
+            }
+
+
+            if(i + closeFormatTagEnd.Length <= textArray.Length) //Skip over end of tag
+            {
+                        Debug.Log("here!");
+                string tryTag = text.Substring(i, closeFormatTagEnd.Length);
+
+                if(tryTag == closeFormatTagEnd)
+                {
+                    isReadingTag = false;
+                    i += closeFormatTagEnd.Length - 1;
+                    continue;
+                }
+            }
+
+            if(!isReadingTag)
+            {
+                excludedMarkupText += textArray[i];
+            }
+        }
+        return excludedMarkupText;
+    }
+    virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
+    {
+        if(RecognizeOpenFormatTag(text))
+        {
+            HandleOpenMarkupLogic(dialogueManager,text);
+            return true;
+        }
+        else if(RecognizeCloseFormatTag(text))
+        {
+            HandleCloseMarkupLogic(dialogueManager, text);
+            return true;
+        }
+        return false;
+    }
+
     virtual public bool RecognizeMarkup(string text)
     {
-        //Debug.Log($"Recognizing from {text}");
-        bool containsMarkup = false;
-        if(text.Contains(formatTagStart) && text.Contains(formatTagEnd))
+        if(RecognizeOpenFormatTag(text))
+        return true;
+        if(RecognizeCloseFormatTag(text))
+        return true;
+
+        return false;
+    }
+
+    virtual public bool RecognizeOpenFormatTag(string text)
+    {
+        Debug.Log($"text is:{text}");
+        bool containsOpenFormatTag = false;
+        if(text.Contains(openFormatTagStart) && text.Contains(openFormatTagEnd))
         {
-            containsMarkup = true;
+            containsOpenFormatTag = true;
             if(hasParameter && GetValidParameterText(text) != null)
             {
-                containsMarkup = true;
+                containsOpenFormatTag = true;
+            }
+        }
+        return containsOpenFormatTag;
+    }
+    
+    virtual public bool RecognizeCloseFormatTag(string text)
+    {
+        bool containsCloseFormatTag = false;
+        if(text.Contains(closeFormatTagStart) && text.Contains(closeFormatTagEnd))
+        {
+            containsCloseFormatTag = true;
+            if(hasParameter && GetValidParameterText(text) != null)
+            {
+                containsCloseFormatTag = true;
             }
         }
 
-        return containsMarkup;
+        return containsCloseFormatTag;
     }
 
     virtual public bool RecognizeMarkupAtBeginning(string text)
@@ -206,17 +287,17 @@ public class DialogueMarkup : ScriptableObject
         bool isAtBeginning = false;
         char[] textArray = text.ToCharArray();
 
-        if(text.Length < formatTagStart.Length)
+        if(text.Length < openFormatTagStart.Length)
         return false;
 
         for(int i = 0; i < textArray.Length; i++)
         {
             if(i == 0)
             {
-                if(formatTagStart.Length <= textArray.Length)
+                if(openFormatTagStart.Length <= textArray.Length)
                 {
-                    string tryFormatTag = text.Substring(i, formatTagStart.Length);
-                    if(tryFormatTag == formatTagStart)
+                    string tryFormatTag = text.Substring(i, openFormatTagStart.Length);
+                    if(tryFormatTag == openFormatTagStart)
                         return true;
                 }
             }
@@ -230,15 +311,15 @@ public class DialogueMarkup : ScriptableObject
         bool isAtEnd = false;
         char[] textArray = text.ToCharArray();
         
-        if(text.Length < formatTagEnd.Length)
+        if(text.Length < openFormatTagEnd.Length)
             return false;
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(i + formatTagEnd.Length == textArray.Length)
+            if(i + openFormatTagEnd.Length == textArray.Length)
             {
-                string tryFormatTag = text.Substring(i, formatTagEnd.Length);
-                if(tryFormatTag == formatTagEnd)
+                string tryFormatTag = text.Substring(i, openFormatTagEnd.Length);
+                if(tryFormatTag == openFormatTagEnd)
                     return true;
             }
         }
@@ -246,17 +327,12 @@ public class DialogueMarkup : ScriptableObject
         return isAtEnd;
     }    
 
-    virtual public void HandleMarkupLogic(DialogueManager dialogueManager, string text)
+    virtual public void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        if(RecognizeMarkup(text))
-        {
 
-            Debug.Log("Recognized a markup for the first time!");   
             if(hasParameter && GetValidParameterText(text) != null)
             { 
                 lastStoredParameter = GetValidParameterText(text);
-
-                Debug.Log($"Last stored parameter:{lastStoredParameter}");
 
                 //Run logic with parameter based on enum type
 
@@ -277,8 +353,11 @@ public class DialogueMarkup : ScriptableObject
                 }
             }
 
-        }
-
         lastStoredParameter = "";
+    }
+
+    virtual public void HandleCloseMarkupLogic(DialogueManager dialogueManager, string text)
+    {
+        
     }
 }
