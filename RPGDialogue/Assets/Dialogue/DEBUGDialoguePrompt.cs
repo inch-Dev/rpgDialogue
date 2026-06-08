@@ -18,7 +18,7 @@ public class DialoguePrompt : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space))
         {
-            promptDialogue?.Invoke(dialogue);
+            DialogueManager.Instance.ReadDialogue(dialogue);
             //Debug.Log("sending");
         }
     }

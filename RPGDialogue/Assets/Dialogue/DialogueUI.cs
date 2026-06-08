@@ -7,8 +7,13 @@ using UnityEngine.UI;
 public class DialogueUI : MonoBehaviour
 {
     [SerializeField] Image portraitImage;
+    [SerializeField] GameObject portrait;
     [SerializeField] TextMeshProUGUI nameTF;
+    [SerializeField] GameObject nameTag;
     [SerializeField] TextMeshProUGUI dialogueTF;
+    [SerializeField] TextMeshProUGUI altDialogueTF;
+    [SerializeField] GameObject textBox;
+    [SerializeField] GameObject altTextBox;
 
     #region EVENTS
 
@@ -28,22 +33,57 @@ public class DialogueUI : MonoBehaviour
     {
         UpdateSpeakerName(speakerName);
         UpdateSpeakerExpression(expression);
-        UpdateTextbox(curText);
+        
+        if(expression == null)
+        {
+            UpdateAltTextbox(curText);
+        }
+        else
+        {
+            UpdateTextbox(curText);
+        }
 
     }
 
     void UpdateSpeakerName(string name)
     {
-        nameTF.text = name;
+        if(name == null)
+        {
+            nameTag.SetActive(false);
+        }
+        else
+        {
+            nameTag.SetActive(true);
+            nameTF.text = name;
+        }
     }
 
     void UpdateSpeakerExpression(DialogueExpression expression)
     {
-        portraitImage.sprite = expression.staticSprite;
+        if(expression == null)
+        {
+           portrait.SetActive(false);
+        }
+        else
+        {
+            portrait.SetActive(true);
+            portraitImage.sprite = expression.staticSprite;
+        }
+    }
+
+    void UpdateAltTextbox(String dialogueText)
+    {
+        textBox.SetActive(false);
+        altTextBox.SetActive(true);
+
+        altDialogueTF.text = dialogueText;
     }
 
     void UpdateTextbox(String dialogueText)
     {
+        altTextBox.SetActive(false);
+        textBox.SetActive(true);
+
         dialogueTF.text = dialogueText;
     }
 }

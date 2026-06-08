@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0073c0d2fb8fd8469f038cca1f77527, type: 3}
+  m_Name: TestDIalogueA
+  m_EditorClassIdentifier: Assembly-CSharp::Dialogue
+  speaker: {fileID: 11400000, guid: b6ab180ddaf7f8d45978bc4765c7973a, type: 2}
+  startingExpression: {fileID: 11400000, guid: b788f7f292d6d6e4682208e265f19673, type: 2}
+  dialogueLines:
+  - <Ax>expression text
+  - Also has a markup<20w>
+  - This is a <b>test!</b>
+  - Another line of dialogue....
+  hasTypeWriterEffect: 1

@@ -38,7 +38,6 @@ public class DialogueManager : MonoBehaviour
     }
     DialogueSpeaker curSpeaker;
 
-    //Need some sort of markup handle event
     #region EVENTS
     public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText);
     public static event UpdateDialogue updateDialogue;
@@ -67,10 +66,32 @@ public class DialogueManager : MonoBehaviour
             return;
 
         curDialogue = dialogue;
-        curSpeaker = dialogue.speaker;
-        curExpression = dialogue.startingExpression;
-        readingDialogue = true; 
-        StartCoroutine(TypewriterReadDialogue(dialogue));
+        if(dialogue.hasSpeaker)
+        {
+            curSpeaker = dialogue.speaker;
+            curExpression = dialogue.startingExpression;
+        }
+        else
+        {
+            curSpeaker = null;
+            curExpression = null;
+        }
+        readingDialogue = true;
+
+        if(dialogue.hasTypeWriterEffect)
+        {
+            StartCoroutine(TypewriterReadDialogue(dialogue));
+        }
+
+        else
+        {
+            string totalText = "";
+            for(int i = 0; i < dialogue.dialogueLines.Length; i++)
+            {
+                totalText += dialogue.dialogueLines[i] + "\n";
+            }
+            updateDialogue?.Invoke(null, null, RemoveMarkupText(totalText));
+        }
     }
 
     void ReadDialogueLine(Dialogue dialogue, int dialogueLineIndex, string dialogueLine)
@@ -141,7 +162,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         lastDisplayedDialogueText = fullText;
-        return HandleMarkupText(fullText);
+        return RemoveMarkupText(fullText);
 
     }
 
@@ -149,22 +170,18 @@ public class DialogueManager : MonoBehaviour
     {
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            Debug.Log("Markup logic");
             dialogueMarkups[i].HandleMarkup(this, newText);
         }
     }
 
-    string HandleMarkupText(string newText)
+    string RemoveMarkupText(string newText)
     {
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            Debug.Log("Text removal");
             handledMarkupText = dialogueMarkups[i].RemoveFormatTags(handledMarkupText);
         }
 
-
-        Debug.Log($"Returned text is {handledMarkupText}");
         return handledMarkupText;
     }
     string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
@@ -189,7 +206,6 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
-        //Debug.Log("Reading dialogue");
         float t = 0;
         int charIndex = 0;
         string curText = "";
@@ -198,36 +214,32 @@ public class DialogueManager : MonoBehaviour
 
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
-            //Debug.Log("Running dialogue for loop");
             curText = "";
             charIndex = 0;
             t = 0;
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = HandleMarkupText(dialogueLine);
+            string cleanedDialogue = RemoveMarkupText(dialogueLine);
             float textSpeed = defaultCharWaitMult;
             lastDisplayedDialogueText = null; 
 
-            while(curText.Length < cleanedDialogue.Length) //Find way to get cleaned version of dialogue line with all custom markups removed
+            while(curText.Length < cleanedDialogue.Length)
             {   
-
                 t += Time.deltaTime * textSpeed; 
         
                 charIndex = Mathf.FloorToInt(t);
                 charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
                 
                 curText = dialogueLine.Substring(0, charIndex);
-
-                               
-                //Need to update expression somehow
                 curText = GetDisplayText(charIndex, dialogueLine);
 
-                yield return new WaitForSeconds(curStartWaitTime); //If wait event called add time between characters;
-                //Debug.Log($"Waiting {curStartWaitTime}");
+                yield return new WaitForSeconds(curStartWaitTime); 
 
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
 
                 yield return new WaitForSeconds(curEndWaitTime);
 
+
+                //Reset all values to 0?
                 curStartWaitTime = 0;
                 curEndWaitTime = 0;
 
