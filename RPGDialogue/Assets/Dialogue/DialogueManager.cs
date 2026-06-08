@@ -90,7 +90,7 @@ public class DialogueManager : MonoBehaviour
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
-            updateDialogue?.Invoke(null, null, RemoveMarkupText(totalText));
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkupText(totalText));
         }
     }
 

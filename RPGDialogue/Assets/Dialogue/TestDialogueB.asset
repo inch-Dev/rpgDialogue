@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0073c0d2fb8fd8469f038cca1f77527, type: 3}
   m_Name: TestDialogueB
   m_EditorClassIdentifier: Assembly-CSharp::Dialogue
-  hasSpeaker: 0
-  speaker: {fileID: 0}
+  hasSpeaker: 1
+  speaker: {fileID: 11400000, guid: 5cafd533c8bd2dc4f842b55252fa72a5, type: 2}
   startingExpression: {fileID: 0}
   dialogueLines:
-  - Test dialogue for no speaker~
+  - <2w>Check for markups!
   - See if this works
   hasTypeWriterEffect: 0

@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -33,7 +34,7 @@ public class DialogueUI : MonoBehaviour
     {
         UpdateSpeakerName(speakerName);
         UpdateSpeakerExpression(expression);
-        
+
         if(expression == null)
         {
             UpdateAltTextbox(curText);
@@ -47,8 +48,9 @@ public class DialogueUI : MonoBehaviour
 
     void UpdateSpeakerName(string name)
     {
-        if(name == null)
+        if(name == null || name == "") 
         {
+            Debug.Log("kdjfdkfdkjf");
             nameTag.SetActive(false);
         }
         else
