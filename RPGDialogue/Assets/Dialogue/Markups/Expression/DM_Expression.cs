@@ -6,7 +6,6 @@ public class DM_Expression : DialogueMarkup
 {
     public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        Debug.Log("Running logic for expression change");
             if(hasParameter && GetValidParameterText(text) != null)
             { 
                 lastStoredParameter = GetValidParameterText(text);
@@ -20,19 +19,19 @@ public class DM_Expression : DialogueMarkup
                         {
                             case "A":
                             case "a":
-                            dialogueManager.ChangeCurEpxression(DialogueEpressionID.ANGRY);
+                            dialogueManager.ChangeCurExpression(DialogueEpressionID.ANGRY);
                             break;
                             case "H":
                             case "h":
-                            dialogueManager.ChangeCurEpxression(DialogueEpressionID.HAPPY);
+                            dialogueManager.ChangeCurExpression(DialogueEpressionID.HAPPY);
                             break;
                             case "N":
                             case "n":
-                            dialogueManager.ChangeCurEpxression(DialogueEpressionID.NEUTRAL);
+                            dialogueManager.ChangeCurExpression(DialogueEpressionID.NEUTRAL);
                             break;
                             case "S":
                             case "s":
-                            dialogueManager.ChangeCurEpxression(DialogueEpressionID.SAD);
+                            dialogueManager.ChangeCurExpression(DialogueEpressionID.SAD);
                             break;
 
                         }

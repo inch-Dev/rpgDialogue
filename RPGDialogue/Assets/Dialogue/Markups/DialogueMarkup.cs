@@ -209,7 +209,6 @@ public class DialogueMarkup : ScriptableObject
 
             if(i + closeFormatTagEnd.Length <= textArray.Length) //Skip over end of tag
             {
-                        Debug.Log("here!");
                 string tryTag = text.Substring(i, closeFormatTagEnd.Length);
 
                 if(tryTag == closeFormatTagEnd)

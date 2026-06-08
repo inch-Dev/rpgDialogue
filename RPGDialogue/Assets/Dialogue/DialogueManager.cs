@@ -32,9 +32,15 @@ public class DialogueManager : MonoBehaviour
     public float curEndWaitTime = 0;
     public DialogueExpression curExpression;
 
-    public void ChangeCurEpxression(DialogueEpressionID id)
+    public void ChangeCurExpression(DialogueEpressionID id)
     {
-        curExpression = curSpeaker.getExpressionOf(id);
+        if(curSpeaker == null)
+        {
+            return;
+        }
+        if(curSpeaker.getExpressionOf(id) != null)
+            curExpression = curSpeaker.getExpressionOf(id);
+        Debug.Log("Finished");
     }
     DialogueSpeaker curSpeaker;
 
