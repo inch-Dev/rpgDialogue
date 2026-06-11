@@ -253,7 +253,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public bool RecognizeOpenFormatTag(string text)
     {
-        Debug.Log($"text is:{text}");
         bool containsOpenFormatTag = false;
         if(text.Contains(openFormatTagStart) && text.Contains(openFormatTagEnd))
         {
@@ -357,6 +356,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public void HandleCloseMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        
+        Debug.Log("Closing makrup");
     }
 }
