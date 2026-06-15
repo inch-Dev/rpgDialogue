@@ -14,11 +14,11 @@ using System.Runtime.ExceptionServices;
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
 {
-    [SerializeField] protected string openFormatTagStart = "<";
-    [SerializeField] protected string openFormatTagEnd = ">";
-
-    [SerializeField] protected string closeFormatTagStart = "</";
-    [SerializeField] protected string closeFormatTagEnd = ">";
+    [SerializeField] protected char markupCharacter;
+    protected string openFormatTagStart = "<";
+    protected string openFormatTagEnd = ">";
+    protected string closeFormatTagStart = "</";
+    protected string closeFormatTagEnd = ">";
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
@@ -26,7 +26,19 @@ public class DialogueMarkup : ScriptableObject
     [ShowIf("hasSpecificParameters")]
     [SerializeField] List<String> validParameters;
     protected string lastStoredParameter;
-     virtual public bool RecognizeParameterAsParameterType(string text)
+
+    void OnValidate()
+    {
+        Debug.Log($"Markup character:{markupCharacter}");
+        //Reset values
+        openFormatTagEnd = ">";
+        closeFormatTagEnd = ">";
+
+        openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
+        closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
+        Debug.Log("Updating tag information");
+    }
+    virtual public bool RecognizeParameterAsParameterType(string text)
     {
         switch(parameterType)
         {
@@ -186,8 +198,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string RemoveCloseFormatTag(string text)
     {
-
-        //THE BUG IS IN HERE!!!!!!!
         string excludedMarkupText = "";
         char[] textArray = text.ToCharArray();
         bool isReadingTag = false;
@@ -243,12 +253,14 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public bool RecognizeMarkup(string text)
     {
+        bool isMarkup = false;
         if(RecognizeOpenFormatTag(text))
-        return true;
+        isMarkup = true;
         if(RecognizeCloseFormatTag(text))
-        return true;
+        isMarkup = true;
 
-        return false;
+        //Debug.Log($"Is markup:{isMarkup}");
+        return isMarkup;
     }
 
     virtual public bool RecognizeOpenFormatTag(string text)
