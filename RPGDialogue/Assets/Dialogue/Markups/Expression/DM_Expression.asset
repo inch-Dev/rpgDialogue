@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DM_Expression
   markupCharacter: 120
   hasParameter: 1
-  parameterType: 3
+  parameterType: 8
   hasSpecificParameters: 1
   validParameters:
   - A

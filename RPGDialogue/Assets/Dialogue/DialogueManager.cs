@@ -6,16 +6,21 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 public class DialogueManager : MonoBehaviour
 {
     [HideInInspector] public static DialogueManager Instance;
-    [SerializeField] float defaultCharWaitMult;
-    [Tooltip("The default multiplier of the waiting time between characters")]
-    [SerializeField] float defaultTimeBetweenLines;
 
-    [SerializeField] float defaultFastCharWaitMult;
-    [Tooltip("The fast multiplier of the waiting time between characters")]
-    [SerializeField] float defaultFastTimeBetweenLines;
+    [SerializeField] DialogueSpeed curSpeed;
+    public void ChangeCurSpeed(DialogueSpeed newSpeed)
+    {
+        curSpeed = newSpeed;
+        charWaitFrames = curSpeed.charWaitFrames;
+        lineWaitFrames = curSpeed.lineWaitFrames;
+    }
+    float charWaitFrames = 10;
+    float lineWaitFrames = 5;
+
 
     [SerializeField] List<DialogueMarkup> dialogueMarkups = new List<DialogueMarkup>();
     [Tooltip("Markups to trigger custom functions to edit dialogue. Should follow TextMeshPro markup standard format")]
@@ -32,6 +37,8 @@ public class DialogueManager : MonoBehaviour
     public float curEndWaitTime = 0;
     public DialogueExpression curExpression;
 
+
+
     public void ChangeCurExpression(DialogueEpressionID id)
     {
         if(curSpeaker == null)
@@ -40,7 +47,6 @@ public class DialogueManager : MonoBehaviour
         }
         if(curSpeaker.getExpressionOf(id) != null)
             curExpression = curSpeaker.getExpressionOf(id);
-        Debug.Log("Finished");
     }
     DialogueSpeaker curSpeaker;
 
@@ -48,22 +54,15 @@ public class DialogueManager : MonoBehaviour
     public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText);
     public static event UpdateDialogue updateDialogue;
 
-    void OnEnable()
-    {
-        DialoguePrompt.promptDialogue += ReadDialogue;
-    }
-
-    void OnDisable()
-    {
-        DialoguePrompt.promptDialogue -= ReadDialogue;
-    }
     #endregion
     void Start()
     {
         if(Instance == null)
         Instance = this;
 
-        timeTillNextChar = defaultCharWaitMult;
+
+
+        timeTillNextChar = charWaitFrames;
         
     }
     public void ReadDialogue(Dialogue dialogue)
@@ -129,14 +128,13 @@ public class DialogueManager : MonoBehaviour
                 fullText += textArray[i];
             else
             {
-                if(visibleDisplayText.Length < index + 1)
+                if(visibleDisplayText.Length <= index)
                 {
                     visibleDisplayText += textArray[i];
                     fullText += textArray[i];
                 }
                 else
                 {
-                    //Grab any stray tags attached to visible text
                     fullText = AppendEndingMarkupText(fullText, textArray, i);
                     break;
                 }
@@ -145,6 +143,7 @@ public class DialogueManager : MonoBehaviour
                 isReadingTag = false;
         }
 
+        //If new line of dialogue clear comparison text
         if(dialogueString != lastDialogueSource)
         {
             lastDialogueSource = dialogueString;
@@ -163,17 +162,19 @@ public class DialogueManager : MonoBehaviour
         }
 
         if(newAddedText != null && newAddedText != "")
-        {   
+        {   Debug.Log($"New text displayed is {newAddedText}");
             HandleMarkupLogic(newAddedText);
         }
 
         lastDisplayedDialogueText = fullText;
         return RemoveMarkupText(fullText);
 
+       
     }
 
     void HandleMarkupLogic(string newText)
     {
+        Debug.Log("Handling logic");
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
             dialogueMarkups[i].HandleMarkup(this, newText);
@@ -182,6 +183,7 @@ public class DialogueManager : MonoBehaviour
 
     string RemoveMarkupText(string newText)
     {
+        Debug.Log("Removing text");
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
@@ -225,7 +227,7 @@ public class DialogueManager : MonoBehaviour
             t = 0;
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = RemoveMarkupText(dialogueLine);
-            float textSpeed = defaultCharWaitMult;
+            float textSpeed = charWaitFrames;
             lastDisplayedDialogueText = null; 
 
             while(curText.Length < cleanedDialogue.Length)
@@ -251,7 +253,7 @@ public class DialogueManager : MonoBehaviour
 
                 yield return null;
             }
-            yield return new WaitForSeconds(defaultTimeBetweenLines);
+            yield return new WaitForSeconds(lineWaitFrames);
         }
         
         readingDialogue = false;

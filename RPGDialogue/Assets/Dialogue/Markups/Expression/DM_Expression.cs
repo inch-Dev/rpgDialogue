@@ -14,6 +14,7 @@ public class DM_Expression : DialogueMarkup
 
                 switch(parameterType)
                 {
+                    
                     case DialogueMarkupParameterType.CHAR:
                     switch(lastStoredParameter)
                         {

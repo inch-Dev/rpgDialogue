@@ -5,8 +5,7 @@ public class DialoguePrompt : MonoBehaviour
     [SerializeField] Dialogue dialogue;
     
     #region EVENTS
-    public delegate void PromptDialogue(Dialogue dialogue); 
-    public static event PromptDialogue promptDialogue;
+
     #endregion
     void Start()
     {

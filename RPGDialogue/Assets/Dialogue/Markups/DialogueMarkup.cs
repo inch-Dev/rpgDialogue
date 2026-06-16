@@ -21,7 +21,7 @@ public class DialogueMarkup : ScriptableObject
     protected string closeFormatTagEnd = ">";
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
-    [SerializeField] protected DialogueMarkupParameterType parameterType;
+    [EnumFlags][SerializeField] protected DialogueMarkupParameterType parameterType;
     [SerializeField] protected bool hasSpecificParameters;
     [ShowIf("hasSpecificParameters")]
     [SerializeField] List<String> validParameters;
@@ -29,14 +29,14 @@ public class DialogueMarkup : ScriptableObject
 
     void OnValidate()
     {
-        Debug.Log($"Markup character:{markupCharacter}");
+        //Debug.Log($"Markup character:{markupCharacter}");
         //Reset values
         openFormatTagEnd = ">";
         closeFormatTagEnd = ">";
 
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
         closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
-        Debug.Log("Updating tag information");
+        //Debug.Log("Updating tag information");
     }
     virtual public bool RecognizeParameterAsParameterType(string text)
     {
@@ -152,6 +152,7 @@ public class DialogueMarkup : ScriptableObject
 
         excludedMarkupText = RemoveOpenFormatTag(text);
         excludedMarkupText = RemoveCloseFormatTag(excludedMarkupText);
+
         return excludedMarkupText;
     }
 
@@ -272,6 +273,7 @@ public class DialogueMarkup : ScriptableObject
             if(hasParameter && GetValidParameterText(text) != null)
             {
                 containsOpenFormatTag = true;
+                //Debug.Log("Contains parameter");
             }
         }
         return containsOpenFormatTag;
@@ -339,7 +341,7 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-
+        Debug.Log("Opening logic");
             if(hasParameter && GetValidParameterText(text) != null)
             { 
                 lastStoredParameter = GetValidParameterText(text);
