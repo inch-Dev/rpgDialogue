@@ -1,11 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "DM_Expression", menuName = "ScriptableObjects/DialogueObjects/DialogueSpeed", order = 5)]
+[CreateAssetMenu(fileName = "DS", menuName = "ScriptableObjects/DialogueObjects/DialogueSpeed", order = 5)]
 
 
 public class DialogueSpeed : ScriptableObject
 {
-    DialogueSpeedID id;
+    public DialogueSpeedID id;
     public int charWaitFrames;
     public int lineWaitFrames;
 }

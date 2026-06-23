@@ -12,12 +12,25 @@ public class DialogueManager : MonoBehaviour
     [HideInInspector] public static DialogueManager Instance;
 
     [SerializeField] DialogueSpeed curSpeed;
+
+    public void ChangeCurSpeed(DialogueSpeedID ID)
+    {
+        foreach(DialogueSpeed ds in dialogueSpeeds)
+        {
+            if(ds.id == ID)
+            {
+                ChangeCurSpeed(ds);
+            }
+        }
+    }
     public void ChangeCurSpeed(DialogueSpeed newSpeed)
     {
         curSpeed = newSpeed;
         charWaitFrames = curSpeed.charWaitFrames;
         lineWaitFrames = curSpeed.lineWaitFrames;
     }
+
+    [SerializeField] List<DialogueSpeed> dialogueSpeeds;
     float charWaitFrames = 10;
     float lineWaitFrames = 5;
 

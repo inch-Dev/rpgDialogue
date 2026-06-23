@@ -11,6 +11,8 @@ public enum DialogueMarkupParameterType
     CHAR = 1 << 3,
     STRING = 1<< 4,
     DOUBLE = 1 << 5,
+    EXPRESSION = 1 << 6,
+    SPEED = 1 << 7,
     NUM_PARAMETER_TYPES
 }
 

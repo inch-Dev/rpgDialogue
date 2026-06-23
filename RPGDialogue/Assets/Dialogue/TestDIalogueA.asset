@@ -16,7 +16,7 @@ MonoBehaviour:
   speaker: {fileID: 11400000, guid: b6ab180ddaf7f8d45978bc4765c7973a, type: 2}
   startingExpression: {fileID: 11400000, guid: b788f7f292d6d6e4682208e265f19673, type: 2}
   dialogueLines:
-  - epression tet
+  - <ANGRY>Expression test
   - Also has a markup<1.5w>
   - This is a <b>test!</b>
   - Another line of dialogue....

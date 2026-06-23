@@ -14,6 +14,7 @@ using System.Runtime.ExceptionServices;
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
 {
+    [SerializeField] Dictionary<string, dynamic> parameterDictionary;
     [SerializeField] protected char markupCharacter;
     protected string openFormatTagStart = "<";
     protected string openFormatTagEnd = ">";
@@ -77,9 +78,18 @@ public class DialogueMarkup : ScriptableObject
                     return true;
                 }
             break;
+            case DialogueMarkupParameterType.EXPRESSION:
+            if(Enum.TryParse(text, out DialogueEpressionID expressionResult))
+                {
+                  lastStoredParameter = text;
+                  Debug.Log("Recognized parameter as expression");
+                  return true;  
+                }
+            break;
+
             case DialogueMarkupParameterType.STRING:
                 lastStoredParameter = text;
-            return true;
+                return true;
         }
         return false;
     }
