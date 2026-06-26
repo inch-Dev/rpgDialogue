@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DE", menuName = "ScriptableObjects/DialogueObjects/DialogueExpression", order = 3)]
 public class DialogueExpression : ScriptableObject
 {
-    [SerializeField] public DialogueEpressionID id;
+    [SerializeField] public DialogueExpressionID id;
     [SerializeField] public Sprite staticSprite;
     [SerializeField] bool isAnimated; //Is expression animated?
     [ShowIf("isAnimated")]

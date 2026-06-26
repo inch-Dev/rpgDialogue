@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53f2e61cf31c7bf4c9a85eb7b8f9a3a2, type: 3}
   m_Name: DM_Expression
   m_EditorClassIdentifier: Assembly-CSharp::DM_Expression
-  markupCharacter: 32
+  markupCharacter: 120
   hasParameter: 1
   parameterType: 64
-  hasSpecificParameters: 1
+  hasSpecificParameters: 0
   validParameters:
   - ANGRY
   - HAPPY

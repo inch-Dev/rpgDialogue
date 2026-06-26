@@ -50,9 +50,7 @@ public class DialogueManager : MonoBehaviour
     public float curEndWaitTime = 0;
     public DialogueExpression curExpression;
 
-
-
-    public void ChangeCurExpression(DialogueEpressionID id)
+    public void ChangeCurExpression(DialogueExpressionID id)
     {
         if(curSpeaker == null)
         {
@@ -72,11 +70,7 @@ public class DialogueManager : MonoBehaviour
     {
         if(Instance == null)
         Instance = this;
-
-
-
         timeTillNextChar = charWaitFrames;
-        
     }
     public void ReadDialogue(Dialogue dialogue)
     {
@@ -175,7 +169,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         if(newAddedText != null && newAddedText != "")
-        {   Debug.Log($"New text displayed is {newAddedText}");
+        {   //Debug.Log($"New text displayed is {newAddedText}");
             HandleMarkupLogic(newAddedText);
         }
 
@@ -187,7 +181,7 @@ public class DialogueManager : MonoBehaviour
 
     void HandleMarkupLogic(string newText)
     {
-        Debug.Log("Handling logic");
+        //Debug.Log("Handling logic");
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
             dialogueMarkups[i].HandleMarkup(this, newText);
@@ -196,7 +190,7 @@ public class DialogueManager : MonoBehaviour
 
     string RemoveMarkupText(string newText)
     {
-        Debug.Log("Removing text");
+        //Debug.Log("Removing text");
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {

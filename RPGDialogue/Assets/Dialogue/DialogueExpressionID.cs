@@ -1,5 +1,5 @@
 using UnityEngine;
-public enum DialogueEpressionID 
+public enum DialogueExpressionID 
 {
     NULL = -1,
     NEUTRAL,

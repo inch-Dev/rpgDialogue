@@ -49,43 +49,50 @@ public class DialogueMarkup : ScriptableObject
                     lastStoredParameter = text;
                     return true;
                 }
-            break;
+                break;
             case DialogueMarkupParameterType.FLOAT:
             if(float.TryParse(text, out float floatResult))
                 {
                     lastStoredParameter = text;
                     return true;
                 }
-            break;
+                break;
             case DialogueMarkupParameterType.BOOL:
             if(bool.TryParse(text, out bool boolResult))
                 {
                     lastStoredParameter = text;
                     return true;
                 }
-            break;
+                break;
             case DialogueMarkupParameterType.CHAR:
             if(char.TryParse(text, out char charResult))
                 {
                     lastStoredParameter = text;
                     return true;
                 }
-            break;
+                break;
             case DialogueMarkupParameterType.DOUBLE:
             if(double.TryParse(text, out double doubleResult))
                 {
                     lastStoredParameter = text;
                     return true;
                 }
-            break;
+                break;
             case DialogueMarkupParameterType.EXPRESSION:
-            if(Enum.TryParse(text, out DialogueEpressionID expressionResult))
+            if(Enum.TryParse(text, out DialogueExpressionID expressionResult))
                 {
                   lastStoredParameter = text;
-                  Debug.Log("Recognized parameter as expression");
+                  //Debug.Log("Recognized parameter as expression");
                   return true;  
                 }
-            break;
+                break;
+            case DialogueMarkupParameterType.SPEED:
+            if(Enum.TryParse(text, out DialogueSpeedID dialogueResult))
+                {
+                    lastStoredParameter = text;
+                    return true;
+                }
+                break;
 
             case DialogueMarkupParameterType.STRING:
                 lastStoredParameter = text;
@@ -251,6 +258,7 @@ public class DialogueMarkup : ScriptableObject
     {
         if(RecognizeOpenFormatTag(text))
         {
+            //Debug.Log("Recognize markup");
             HandleOpenMarkupLogic(dialogueManager,text);
             return true;
         }

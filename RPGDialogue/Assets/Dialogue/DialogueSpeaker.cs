@@ -5,7 +5,7 @@ public class DialogueSpeaker : ScriptableObject
 {
     //Has expressions
     [SerializeField] public List<DialogueExpression> dialogueExpressions;
-    public DialogueExpression getExpressionOf(DialogueEpressionID id)
+    public DialogueExpression getExpressionOf(DialogueExpressionID id)
     {
         foreach(DialogueExpression d in dialogueExpressions)
         {
