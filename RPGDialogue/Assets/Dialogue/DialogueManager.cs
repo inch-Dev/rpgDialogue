@@ -13,17 +13,17 @@ public class DialogueManager : MonoBehaviour
 
     [SerializeField] DialogueSpeed curSpeed;
 
-    public void ChangeCurSpeed(DialogueSpeedID ID)
+    public void ChangeSpeed(DialogueSpeedID ID)
     {
         foreach(DialogueSpeed ds in dialogueSpeeds)
         {
             if(ds.id == ID)
             {
-                ChangeCurSpeed(ds);
+                ChangeSpeed(ds);
             }
         }
     }
-    public void ChangeCurSpeed(DialogueSpeed newSpeed)
+    public void ChangeSpeed(DialogueSpeed newSpeed)
     {
         curSpeed = newSpeed;
         charWaitFrames = curSpeed.charWaitFrames;
@@ -50,7 +50,7 @@ public class DialogueManager : MonoBehaviour
     public float curEndWaitTime = 0;
     public DialogueExpression curExpression;
 
-    public void ChangeCurExpression(DialogueExpressionID id)
+    public void ChangeExpression(DialogueExpressionID id)
     {
         if(curSpeaker == null)
         {
@@ -71,6 +71,8 @@ public class DialogueManager : MonoBehaviour
         if(Instance == null)
         Instance = this;
         timeTillNextChar = charWaitFrames;
+
+        ChangeSpeed(DialogueSpeedID.DEFAULT);
     }
     public void ReadDialogue(Dialogue dialogue)
     {

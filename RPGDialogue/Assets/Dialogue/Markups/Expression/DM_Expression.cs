@@ -12,11 +12,9 @@ public class DM_Expression : DialogueMarkup
 
                 //Run logic with parameter based on enum type
 
-                Debug.Log($"Last stored expression parameter:{lastStoredParameter}");
                 if(Enum.TryParse(lastStoredParameter, out DialogueExpressionID expressionResult))
                 {
-                    dialogueManager.ChangeCurExpression(expressionResult);
-                    Debug.Log("Changing expression....");
+                    dialogueManager.ChangeExpression(expressionResult);
                 }
             }
         lastStoredParameter = "";

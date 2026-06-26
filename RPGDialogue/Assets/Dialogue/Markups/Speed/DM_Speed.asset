@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DM_Speed
   markupCharacter: 115
   hasParameter: 1
-  parameterType: 8
+  parameterType: 128
   hasSpecificParameters: 0
   validParameters: []

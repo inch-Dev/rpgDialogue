@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e43f51e314300441a7e203f75d0f302, type: 3}
   m_Name: DS_Slow
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSpeed
-  charWaitFrames: 8
-  lineWaitFrames: 8
+  id: 0
+  charWaitFrames: 10
+  lineWaitFrames: 10

@@ -45,6 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   curSpeed: {fileID: 11400000, guid: 317e6219eea40a946924444fdc0a75f3, type: 2}
+  dialogueSpeeds:
+  - {fileID: 11400000, guid: 317e6219eea40a946924444fdc0a75f3, type: 2}
+  - {fileID: 11400000, guid: 9a0af46254732b3448cdbc133a2dd7e5, type: 2}
+  - {fileID: 11400000, guid: ff45528c064b5584281fdc1e3657bbad, type: 2}
   dialogueMarkups:
   - {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
   - {fileID: 11400000, guid: 89b97e8569bf2a34d8ff47c59a440ca6, type: 2}
