@@ -11,11 +11,9 @@ public class DM_Speed : DialogueMarkup
 
                 //Run logic with parameter based on enum type
 
-                Debug.Log($"Last stored speed parameter:{lastStoredParameter}");
                 if(Enum.TryParse(lastStoredParameter, out DialogueSpeedID speedResult))
                 {
                     dialogueManager.ChangeSpeed(speedResult);
-                    Debug.Log("Changing speed....");
                 }
             }
         lastStoredParameter = "";

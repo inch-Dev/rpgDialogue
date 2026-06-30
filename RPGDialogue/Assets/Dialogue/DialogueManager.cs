@@ -15,6 +15,7 @@ public class DialogueManager : MonoBehaviour
 
     public void ChangeSpeed(DialogueSpeedID ID)
     {
+        Debug.Log($"Changing speed to {ID}");
         foreach(DialogueSpeed ds in dialogueSpeeds)
         {
             if(ds.id == ID)
@@ -31,8 +32,8 @@ public class DialogueManager : MonoBehaviour
     }
 
     [SerializeField] List<DialogueSpeed> dialogueSpeeds;
-    float charWaitFrames = 10;
-    float lineWaitFrames = 5;
+    [SerializeField] float charWaitFrames = 10;
+    [SerializeField] float lineWaitFrames = 5;
 
 
     [SerializeField] List<DialogueMarkup> dialogueMarkups = new List<DialogueMarkup>();
@@ -183,7 +184,6 @@ public class DialogueManager : MonoBehaviour
 
     void HandleMarkupLogic(string newText)
     {
-        //Debug.Log("Handling logic");
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
             dialogueMarkups[i].HandleMarkup(this, newText);
@@ -192,7 +192,6 @@ public class DialogueManager : MonoBehaviour
 
     string RemoveMarkupText(string newText)
     {
-        //Debug.Log("Removing text");
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
@@ -228,7 +227,6 @@ public class DialogueManager : MonoBehaviour
         string curText = "";
         string[] dialogueLines = dialogue.dialogueLines;
 
-
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
             curText = "";
@@ -236,12 +234,15 @@ public class DialogueManager : MonoBehaviour
             t = 0;
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = RemoveMarkupText(dialogueLine);
-            float textSpeed = charWaitFrames;
+
             lastDisplayedDialogueText = null; 
 
             while(curText.Length < cleanedDialogue.Length)
             {   
-                t += Time.deltaTime * textSpeed; 
+                Debug.Log(charWaitFrames);
+                Debug.Log(1 / (charWaitFrames * (1.0f / Time.deltaTime)));
+                yield return new WaitForSeconds(1 / (charWaitFrames * (1.0f / Time.deltaTime)));
+                t++; 
         
                 charIndex = Mathf.FloorToInt(t);
                 charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);

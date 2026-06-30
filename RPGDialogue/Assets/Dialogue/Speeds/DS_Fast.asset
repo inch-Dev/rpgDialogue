@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: DS_Fast
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSpeed
   id: 2
-  charWaitFrames: 3
-  lineWaitFrames: 3
+  charWaitFrames: 1
+  lineWaitFrames: 1

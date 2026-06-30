@@ -30,14 +30,12 @@ public class DialogueMarkup : ScriptableObject
 
     void OnValidate()
     {
-        //Debug.Log($"Markup character:{markupCharacter}");
         //Reset values
         openFormatTagEnd = ">";
         closeFormatTagEnd = ">";
 
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
         closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
-        //Debug.Log("Updating tag information");
     }
     virtual public bool RecognizeParameterAsParameterType(string text)
     {
@@ -82,7 +80,6 @@ public class DialogueMarkup : ScriptableObject
             if(Enum.TryParse(text, out DialogueExpressionID expressionResult))
                 {
                   lastStoredParameter = text;
-                  //Debug.Log("Recognized parameter as expression");
                   return true;  
                 }
                 break;
