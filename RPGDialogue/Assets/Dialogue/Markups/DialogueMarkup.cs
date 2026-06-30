@@ -35,7 +35,7 @@ public class DialogueMarkup : ScriptableObject
         closeFormatTagEnd = ">";
 
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
-        closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
+        //closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
     }
     virtual public bool RecognizeParameterAsParameterType(string text)
     {
@@ -160,54 +160,52 @@ public class DialogueMarkup : ScriptableObject
     virtual public string RemoveFormatTags(string text)
     {   
         string excludedMarkupText = "";
-
         if(!RecognizeMarkup(text))
             return text;
-
         excludedMarkupText = RemoveOpenFormatTag(text);
         excludedMarkupText = RemoveCloseFormatTag(excludedMarkupText);
-
         return excludedMarkupText;
     }
 
     virtual public string RemoveOpenFormatTag(string text)
     {
+        Debug.Log($"Incoming text:{text}");
         string excludedMarkupText = "";
         char[] textArray = text.ToCharArray();
         bool isReadingTag = false;
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(i + openFormatTagStart.Length - 1 <= textArray.Length) //Skip over beginning of tag
+            if(i + 1 < textArray.Length && textArray[i] == '<') //Skip over beginning of tag
             {
-                string tryTag = text.Substring(i, openFormatTagStart.Length);
-
-                if(tryTag == openFormatTagStart)
+                int indexOfEnd = text.IndexOf('>', i + 1);
+                if(indexOfEnd != -1 )
                 {
-                    isReadingTag = true;
-                    i += openFormatTagStart.Length - 1;
-                    continue;
+                    string tryTag = text.Substring(i + 1, indexOfEnd - 1 - i);
+                    Debug.Log($"getting parameter{tryTag}");
+
+                    if(RecognizeParameterAsParameterType(tryTag))
+                    {
+                        isReadingTag = true;
+                        continue;
+                    }
                 }
             }
 
 
-            if(i + openFormatTagEnd.Length <= textArray.Length) //Skip over ending of tag
+            if(textArray[i] == '>') //Skip over ending of tag
             {
-                string tryTag = text.Substring(i, openFormatTagEnd.Length);
-
-                if(tryTag == openFormatTagEnd)
-                {
-                    isReadingTag = false;
-                    i += openFormatTagEnd.Length - 1;
-                    continue;
-                }
+                isReadingTag = false;
+                continue;
             }
 
             if(!isReadingTag)
             {
                 excludedMarkupText += textArray[i];
             }
+            Debug.Log($"Exluded markup text:{excludedMarkupText}");
         }
+        Debug.Log($"Removed text:{excludedMarkupText}");
         return excludedMarkupText;
     }
 

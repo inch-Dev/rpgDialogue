@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: DS_Default
   m_EditorClassIdentifier: Assembly-CSharp::DialogueSpeed
   id: 1
-  charWaitFrames: 3
-  lineWaitFrames: 3
+  charWaitSeconds: 1
+  lineWaitSeconds: 2

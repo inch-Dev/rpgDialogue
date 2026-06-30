@@ -15,7 +15,6 @@ public class DialogueManager : MonoBehaviour
 
     public void ChangeSpeed(DialogueSpeedID ID)
     {
-        Debug.Log($"Changing speed to {ID}");
         foreach(DialogueSpeed ds in dialogueSpeeds)
         {
             if(ds.id == ID)
@@ -27,13 +26,13 @@ public class DialogueManager : MonoBehaviour
     public void ChangeSpeed(DialogueSpeed newSpeed)
     {
         curSpeed = newSpeed;
-        charWaitFrames = curSpeed.charWaitFrames;
-        lineWaitFrames = curSpeed.lineWaitFrames;
+        charWaitSeconds = curSpeed.charWaitSeconds;
+        lineWaitSeconds = curSpeed.lineWaitSeconds;
     }
 
     [SerializeField] List<DialogueSpeed> dialogueSpeeds;
-    [SerializeField] float charWaitFrames = 10;
-    [SerializeField] float lineWaitFrames = 5;
+    [SerializeField] float charWaitSeconds = 10;
+    [SerializeField] float lineWaitSeconds = 5;
 
 
     [SerializeField] List<DialogueMarkup> dialogueMarkups = new List<DialogueMarkup>();
@@ -71,7 +70,7 @@ public class DialogueManager : MonoBehaviour
     {
         if(Instance == null)
         Instance = this;
-        timeTillNextChar = charWaitFrames;
+        timeTillNextChar = charWaitSeconds;
 
         ChangeSpeed(DialogueSpeedID.DEFAULT);
     }
@@ -123,6 +122,7 @@ public class DialogueManager : MonoBehaviour
 
     string GetDisplayText(int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
     {
+        Debug.Log("Running text");
         string fullText = "";
         string visibleDisplayText = "";
 
@@ -222,7 +222,6 @@ public class DialogueManager : MonoBehaviour
 
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
-        float t = 0;
         int charIndex = 0;
         string curText = "";
         string[] dialogueLines = dialogue.dialogueLines;
@@ -231,24 +230,20 @@ public class DialogueManager : MonoBehaviour
         {
             curText = "";
             charIndex = 0;
-            t = 0;
+
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = RemoveMarkupText(dialogueLine);
-
+            Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
             lastDisplayedDialogueText = null; 
 
-            while(curText.Length < cleanedDialogue.Length)
+            while(charIndex <= cleanedDialogue.Length)
             {   
-                Debug.Log(charWaitFrames);
-                Debug.Log(1 / (charWaitFrames * (1.0f / Time.deltaTime)));
-                yield return new WaitForSeconds(1 / (charWaitFrames * (1.0f / Time.deltaTime)));
-                t++; 
-        
-                charIndex = Mathf.FloorToInt(t);
-                charIndex = Mathf.Clamp(charIndex, 0, dialogueLine.Length);
-                
+                float localCharWaitSeconds = charWaitSeconds;
+                float localLineWaitSeconds = lineWaitSeconds;
+
                 curText = dialogueLine.Substring(0, charIndex);
                 curText = GetDisplayText(charIndex, dialogueLine);
+                //Debug.Log("Calling to change text");
 
                 yield return new WaitForSeconds(curStartWaitTime); 
 
@@ -256,14 +251,15 @@ public class DialogueManager : MonoBehaviour
 
                 yield return new WaitForSeconds(curEndWaitTime);
 
-
-                //Reset all values to 0?
                 curStartWaitTime = 0;
                 curEndWaitTime = 0;
 
-                yield return null;
+                yield return new WaitForSeconds(localCharWaitSeconds);
+                charIndex++; 
+                //Debug.Log($"Char index is {charIndex}");
             }
-            yield return new WaitForSeconds(lineWaitFrames);
+            //Debug.Log($"Char index was {charIndex}, and cleaned dialogue is {cleanedDialogue.Length}");
+            yield return new WaitForSeconds(lineWaitSeconds);
         }
         
         readingDialogue = false;

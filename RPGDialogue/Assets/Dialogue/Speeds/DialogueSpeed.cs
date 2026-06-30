@@ -6,6 +6,6 @@ using UnityEngine;
 public class DialogueSpeed : ScriptableObject
 {
     public DialogueSpeedID id;
-    public int charWaitFrames;
-    public int lineWaitFrames;
+    public float charWaitSeconds;
+    public float lineWaitSeconds;
 }
