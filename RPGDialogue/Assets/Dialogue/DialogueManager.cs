@@ -122,7 +122,6 @@ public class DialogueManager : MonoBehaviour
 
     string GetDisplayText(int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
     {
-        Debug.Log("Running text");
         string fullText = "";
         string visibleDisplayText = "";
 
@@ -195,7 +194,8 @@ public class DialogueManager : MonoBehaviour
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].RemoveFormatTags(handledMarkupText);
+            Debug.Log(i);
+            handledMarkupText = dialogueMarkups[i].RemoveFormatTag(handledMarkupText);
         }
 
         return handledMarkupText;

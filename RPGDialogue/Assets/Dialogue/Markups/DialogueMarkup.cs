@@ -84,10 +84,14 @@ public class DialogueMarkup : ScriptableObject
                 }
                 break;
             case DialogueMarkupParameterType.SPEED:
-            if(Enum.TryParse(text, out DialogueSpeedID dialogueResult))
+                if(Enum.TryParse(text, out DialogueSpeedID speedResult))
                 {
                     lastStoredParameter = text;
                     return true;
+                }
+                else
+                {
+                    Debug.Log($"Couldn't find speed from {text}");
                 }
                 break;
 
@@ -157,7 +161,7 @@ public class DialogueMarkup : ScriptableObject
             return null;
     }
     
-    virtual public string RemoveFormatTags(string text)
+    virtual public string RemoveFormatTag(string text)
     {   
         string excludedMarkupText = "";
         if(!RecognizeMarkup(text))
@@ -169,7 +173,7 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string RemoveOpenFormatTag(string text)
     {
-        Debug.Log($"Incoming text:{text}");
+        //Debug.Log($"Incoming text:{text}");
         string excludedMarkupText = "";
         char[] textArray = text.ToCharArray();
         bool isReadingTag = false;
@@ -181,31 +185,36 @@ public class DialogueMarkup : ScriptableObject
                 int indexOfEnd = text.IndexOf('>', i + 1);
                 if(indexOfEnd != -1 )
                 {
-                    string tryTag = text.Substring(i + 1, indexOfEnd - 1 - i);
-                    Debug.Log($"getting parameter{tryTag}");
+                    string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);
+                    Debug.Log($"getting parameter:{tryTag} for type {parameterType}");
 
                     if(RecognizeParameterAsParameterType(tryTag))
                     {
+                        //Debug.Log($"Reading tag as:{parameterType}");
                         isReadingTag = true;
                         continue;
                     }
                 }
             }
 
-
-            if(textArray[i] == '>') //Skip over ending of tag
-            {
-                isReadingTag = false;
-                continue;
-            }
-
             if(!isReadingTag)
             {
                 excludedMarkupText += textArray[i];
             }
-            Debug.Log($"Exluded markup text:{excludedMarkupText}");
+
+
+            if(textArray[i] == '>') //Skip over ending of tag
+            {
+                if(isReadingTag)
+                {
+                    isReadingTag = false;
+                    continue;
+                }
+            }
+
+            
+            //Debug.Log($"Exluded markup text:{excludedMarkupText}");
         }
-        Debug.Log($"Removed text:{excludedMarkupText}");
         return excludedMarkupText;
     }
 
