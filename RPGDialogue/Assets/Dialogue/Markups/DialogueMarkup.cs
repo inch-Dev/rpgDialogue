@@ -166,11 +166,11 @@ public class DialogueMarkup : ScriptableObject
         string excludedMarkupText = "";
         if(!RecognizeMarkup(text))
             return text;
-        excludedMarkupText = RemoveOpenFormatTag(text);
+        excludedMarkupText = RemoveFormatTagText(text);
         return excludedMarkupText;
     }
 
-    virtual public string RemoveOpenFormatTag(string text)
+    virtual public string RemoveFormatTagText(string text)
     {
         //Debug.Log($"Incoming text:{text}");
         string excludedMarkupText = "";
@@ -185,13 +185,17 @@ public class DialogueMarkup : ScriptableObject
                 if(indexOfEnd != -1 )
                 {
                     string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);
-                    //Debug.Log($"getting parameter:{tryTag} for type {parameterType}");
+                    char tryChar = text.Substring(indexOfEnd - 1, 1).ToCharArray()[0];
 
-                    if(RecognizeParameterAsParameterType(tryTag))
+                    if(RecognizeParameterAsParameterType(tryTag) && tryChar == markupCharacter)
                     {
                         //Debug.Log($"Reading tag as:{parameterType}");
                         isReadingTag = true;
                         continue;
+                    }
+                    else
+                    {
+                        Debug.Log($"Failed to recognize {tryTag} as {parameterType} or {tryChar} as {markupCharacter}");
                     }
                 }
             }

@@ -131,7 +131,10 @@ public class DialogueManager : MonoBehaviour
         for(int i = 0; i < dialogueString.Length; i++)
         {
             if(textArray[i] == '<')
+            {
+                //Need to check if there is a valid tag
                 isReadingTag = true;
+            }
 
             if(isReadingTag)
                 fullText += textArray[i];
@@ -144,12 +147,15 @@ public class DialogueManager : MonoBehaviour
                 }
                 else
                 {
-                    fullText = AppendEndingMarkupText(fullText, textArray, i);
+                    //fullText = AppendEndingMarkupText(fullText, textArray, i);
                     break;
                 }
             }
             if(textArray[i] == '>')
+            {
+                //Check for valid tag
                 isReadingTag = false;
+            }
         }
 
         //If new line of dialogue clear comparison text
@@ -176,9 +182,7 @@ public class DialogueManager : MonoBehaviour
         }
 
         lastDisplayedDialogueText = fullText;
-        return RemoveMarkupText(fullText);
-
-       
+        return RemoveMarkupText(fullText);      
     }
 
     void HandleMarkupLogic(string newText)
