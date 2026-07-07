@@ -167,7 +167,6 @@ public class DialogueMarkup : ScriptableObject
         if(!RecognizeMarkup(text))
             return text;
         excludedMarkupText = RemoveOpenFormatTag(text);
-        excludedMarkupText = RemoveCloseFormatTag(excludedMarkupText);
         return excludedMarkupText;
     }
 
@@ -186,7 +185,7 @@ public class DialogueMarkup : ScriptableObject
                 if(indexOfEnd != -1 )
                 {
                     string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);
-                    Debug.Log($"getting parameter:{tryTag} for type {parameterType}");
+                    //Debug.Log($"getting parameter:{tryTag} for type {parameterType}");
 
                     if(RecognizeParameterAsParameterType(tryTag))
                     {
@@ -214,47 +213,6 @@ public class DialogueMarkup : ScriptableObject
 
             
             //Debug.Log($"Exluded markup text:{excludedMarkupText}");
-        }
-        return excludedMarkupText;
-    }
-
-    virtual public string RemoveCloseFormatTag(string text)
-    {
-        string excludedMarkupText = "";
-        char[] textArray = text.ToCharArray();
-        bool isReadingTag = false;
-
-        for(int i = 0; i < textArray.Length; i++)
-        {
-            if(i + closeFormatTagStart.Length - 1 < textArray.Length) //Skip over beginning of tag
-            {
-                string tryTag = text.Substring(i, closeFormatTagStart.Length);
-
-                if(tryTag == closeFormatTagStart)
-                {
-                    isReadingTag = true;
-                    i += closeFormatTagStart.Length - 1;
-                    continue;
-                }
-            }
-
-
-            if(i + closeFormatTagEnd.Length <= textArray.Length) //Skip over end of tag
-            {
-                string tryTag = text.Substring(i, closeFormatTagEnd.Length);
-
-                if(tryTag == closeFormatTagEnd)
-                {
-                    isReadingTag = false;
-                    i += closeFormatTagEnd.Length - 1;
-                    continue;
-                }
-            }
-
-            if(!isReadingTag)
-            {
-                excludedMarkupText += textArray[i];
-            }
         }
         return excludedMarkupText;
     }
