@@ -28,6 +28,10 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] List<String> validParameters;
     protected string lastStoredParameter;
 
+
+    //Rename tags?????
+
+
     void OnValidate()
     {
         //Reset values
@@ -37,7 +41,7 @@ public class DialogueMarkup : ScriptableObject
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
         //closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
     }
-    virtual public bool RecognizeParameterAsParameterType(string text)
+    virtual public bool ValidateParameter(string text)
     {
         switch(parameterType)
         {
@@ -101,12 +105,85 @@ public class DialogueMarkup : ScriptableObject
         }
         return false;
     }
+    
+    virtual public bool ValidateTag(string text)
+    {
+        if(text.Length <= 0)
+        return false;
+
+        if(ValidateOpenTag(text) || ValidateCloseTag(text))
+            return true;
+        return false;
+    }
+    virtual public bool ValidateOpenTag(string text)
+    {
+        Debug.Log($"Validating from {text}");
+        char[] textArray = text.ToCharArray();
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(textArray[i].ToString() == openFormatTagStart && i + 1 < textArray.Length)
+            {
+                
+                int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
+                if(indexOfEnd != -1)
+                {
+                    Debug.Log($"Index of end {indexOfEnd}");
+                    Debug.Log($"Char at {indexOfEnd} is {textArray[indexOfEnd]}");
+                    string tryTag = text.Substring(i + 1, indexOfEnd - i);
+                    Debug.Log($"Tag is {tryTag}");
+                    string tryParam = tryTag.Substring(0, tryTag.Length - 1);
+                    char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
+                    Debug.Log($"{tryParam} is param and {tryChar} is char");
+                    if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+                    {
+                        Debug.Log($"Found {tryParam} and {tryChar}");
+                        return true;
+                    }
+                }
+            }
+        }
+         return false;
+    }
+
+    virtual public bool ValidateCloseTag(string text)
+    {
+        char[] textArray = text.ToCharArray();
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(i + 1 < textArray.Length)
+            {
+                if(text.Substring(i, closeFormatTagStart.Length) == closeFormatTagStart && i + 1 < textArray.Length)
+                {
+                    int indexOfEnd = text.IndexOf(closeFormatTagEnd, i + 1);
+                    if(indexOfEnd != -1)
+                    {
+                        string tryTag = text.Substring(i + 1, indexOfEnd- i);
+                        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
+                        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
+
+                        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+                        {
+                            Debug.Log($"Found {tryParam} and {tryChar}");
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+         return false;
+    }
+
     virtual public string GetValidParameterText(string text)
     {
         string parameterText = "";
 
+        //Check for markup character
+
         if(!hasParameter)
+        {   
+            Debug.Log("This markup has no parameter!");
             return null;
+        }
 
         //Isolate string format tags and parameter
         bool shoudlAddToMarkupText = false;
@@ -155,7 +232,7 @@ public class DialogueMarkup : ScriptableObject
                 return null;
         }
 
-        if(RecognizeParameterAsParameterType(parameterText))
+        if(ValidateParameter(parameterText))
             return parameterText;
         else
             return null;
@@ -164,7 +241,7 @@ public class DialogueMarkup : ScriptableObject
     virtual public string RemoveFormatTag(string text)
     {   
         string excludedMarkupText = "";
-        if(!RecognizeMarkup(text))
+        if(!ValidateTag(text))
             return text;
         excludedMarkupText = RemoveFormatTagText(text);
         return excludedMarkupText;
@@ -187,7 +264,7 @@ public class DialogueMarkup : ScriptableObject
                     string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);
                     char tryChar = text.Substring(indexOfEnd - 1, 1).ToCharArray()[0];
 
-                    if(RecognizeParameterAsParameterType(tryTag) && tryChar == markupCharacter)
+                    if(ValidateParameter(tryTag) && tryChar == markupCharacter)
                     {
                         //Debug.Log($"Reading tag as:{parameterType}");
                         isReadingTag = true;
@@ -222,30 +299,18 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
     {
-        if(RecognizeOpenFormatTag(text))
+        if(ValidateOpenTag(text))
         {
             //Debug.Log("Recognize markup");
             HandleOpenMarkupLogic(dialogueManager,text);
             return true;
         }
-        else if(RecognizeCloseFormatTag(text))
+        else if(ValidateCloseTag(text))
         {
             HandleCloseMarkupLogic(dialogueManager, text);
             return true;
         }
         return false;
-    }
-
-    virtual public bool RecognizeMarkup(string text)
-    {
-        bool isMarkup = false;
-        if(RecognizeOpenFormatTag(text))
-        isMarkup = true;
-        if(RecognizeCloseFormatTag(text))
-        isMarkup = true;
-
-        //Debug.Log($"Is markup:{isMarkup}");
-        return isMarkup;
     }
 
     virtual public bool RecognizeOpenFormatTag(string text)
