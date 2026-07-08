@@ -199,7 +199,7 @@ public class DialogueManager : MonoBehaviour
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
             //Debug.Log(i);
-            handledMarkupText = dialogueMarkups[i].RemoveFormatTag(handledMarkupText);
+            handledMarkupText = dialogueMarkups[i].RemoveMarkupText(handledMarkupText);
         }
 
         return handledMarkupText;
