@@ -167,10 +167,10 @@ public class DialogueMarkup : ScriptableObject
         if(startIndex + 1 >= textArray.Length)
             return false;
 
-        if(text.Substring(startIndex, closeFormatTagStart.Length) != openFormatTagStart)
+        if(text.Substring(startIndex, closeFormatTagStart.Length) != closeFormatTagStart)
             return false;
 
-        int indexOfEnd = text.IndexOf(openFormatTagEnd, startIndex + 1);
+        int indexOfEnd = text.IndexOf(closeFormatTagEnd, startIndex + 1);
 
         if(indexOfEnd == -1)
             return false;
@@ -254,38 +254,29 @@ public class DialogueMarkup : ScriptableObject
         string excludedMarkupText = "";
         if(!ValidateMarkup(text))
             return text;
-        excludedMarkupText = RemoveFormatTagText(text);
+        excludedMarkupText = RemoveOpenMarkup(text);
         return excludedMarkupText;
     }
 
     virtual public string RemoveOpenMarkup(string text)
     {
         string removedText = "";
-        bool isReadingTag = false;
         char[] textArray = text.ToCharArray();
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(textArray[i].ToString() == openFormatTagStart && i + 1 <  textArray.Length)
+            if(ValidateOpenMarkup(text, i))
             {
                 int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
 
                 if(indexOfEnd != -1)
                 {
-                    
+                    int lengthOfTag = indexOfEnd - i + 1;
+                    i += lengthOfTag;
+                    continue;
                 }
-                isReadingTag = true;
             }
-
-            if(!isReadingTag)
-            {
                 removedText += textArray[i];
-            }
-
-            if(textArray[i].ToString() == openFormatTagEnd)
-            {
-                isReadingTag = false;
-            }
         }
         return removedText;
     }
@@ -298,20 +289,17 @@ public class DialogueMarkup : ScriptableObject
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(textArray[i].ToString() == openFormatTagStart)
+            if(ValidateOpenMarkup(text, i))
             {
-                isReadingTag = true;
+                int indexOfEnd = text.IndexOf(closeFormatTagEnd, i + 1);
+                if(indexOfEnd != -1)
+                {
+                    int lengthOfTag = indexOfEnd - i + 1;
+                    i += lengthOfTag;
+                    continue;
+                }
             }
-
-            if(!isReadingTag)
-            {
                 removedText += textArray[i];
-            }
-
-            if(textArray[i].ToString() == openFormatTagEnd)
-            {
-                isReadingTag = false;
-            }
         }
         return removedText;
     }
