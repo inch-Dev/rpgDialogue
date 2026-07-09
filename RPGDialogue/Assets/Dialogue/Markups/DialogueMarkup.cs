@@ -154,25 +154,8 @@ public class DialogueMarkup : ScriptableObject
         char[] textArray = text.ToCharArray();
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(i + 1 < textArray.Length)
-            {
-                if(text.Substring(i, closeFormatTagStart.Length) == closeFormatTagStart && i + 1 < textArray.Length)
-                {
-                    int indexOfEnd = text.IndexOf(closeFormatTagEnd, i + 1);
-                    if(indexOfEnd != -1)
-                    {
-                        string tryTag = text.Substring(i + 1, indexOfEnd- i);
-                        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
-                        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
-
-                        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
-                        {
-                            Debug.Log($"Found {tryParam} and {tryChar}");
-                            return true;
-                        }
-                    }
-                }
-            }
+            if(ValidateCloseMarkup(text, i))
+                return true;
         }
          return false;
     }
