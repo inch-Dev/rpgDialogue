@@ -118,28 +118,35 @@ public class DialogueMarkup : ScriptableObject
         char[] textArray = text.ToCharArray();
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(textArray[i].ToString() == openFormatTagStart && i + 1 < textArray.Length)
-            {
-                
-                int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
-                if(indexOfEnd != -1)
-                {
-                    Debug.Log($"Index of end {indexOfEnd}");
-                    Debug.Log($"Char at {indexOfEnd} is {textArray[indexOfEnd]}");
-                    string tryTag = text.Substring(i + 1, indexOfEnd - i);
-                    Debug.Log($"Tag is {tryTag}");
-                    string tryParam = tryTag.Substring(0, tryTag.Length - 1);
-                    char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
-                    Debug.Log($"{tryParam} is param and {tryChar} is char");
-                    if(ValidateParameter(tryParam) && tryChar == markupCharacter)
-                    {
-                        Debug.Log($"Found {tryParam} and {tryChar}");
-                        return true;
-                    }
-                }
-            }
+            if(ValidateOpenMarkup(text, i))
+                return true;
         }
          return false;
+    }
+
+    virtual public bool ValidateOpenMarkup(string text, int startIndex)
+    {
+        char[] textArray = text.ToCharArray();
+
+        if(startIndex + 1 >= textArray.Length)
+            return false;
+
+        if(textArray[startIndex].ToString() != openFormatTagStart)
+            return false;
+
+        int indexOfEnd = text.IndexOf(openFormatTagEnd, startIndex + 1);
+
+        if(indexOfEnd == -1)
+            return false;
+
+        string tryTag = text.Substring(startIndex + 1, indexOfEnd - startIndex);
+        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
+
+        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+            return true;
+
+        return false;
     }
 
     virtual public bool ValidateCloseMarkup(string text)
@@ -170,6 +177,30 @@ public class DialogueMarkup : ScriptableObject
          return false;
     }
 
+    virtual public bool ValidateCloseMarkup(string text, int startIndex)
+    {
+        char[] textArray = text.ToCharArray();
+
+        if(startIndex + 1 >= textArray.Length)
+            return false;
+
+        if(text.Substring(startIndex, closeFormatTagStart.Length) != openFormatTagStart)
+            return false;
+
+        int indexOfEnd = text.IndexOf(openFormatTagEnd, startIndex + 1);
+
+        if(indexOfEnd == -1)
+            return false;
+
+        string tryTag = text.Substring(startIndex + 1, indexOfEnd - startIndex);
+        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
+
+        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+            return true;
+
+        return false;
+    }
     virtual public string GetValidParameterText(string text)
     {
         string parameterText = "";
@@ -245,6 +276,38 @@ public class DialogueMarkup : ScriptableObject
     }
 
     virtual public string RemoveOpenMarkup(string text)
+    {
+        string removedText = "";
+        bool isReadingTag = false;
+        char[] textArray = text.ToCharArray();
+
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(textArray[i].ToString() == openFormatTagStart && i + 1 <  textArray.Length)
+            {
+                int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
+
+                if(indexOfEnd != -1)
+                {
+                    
+                }
+                isReadingTag = true;
+            }
+
+            if(!isReadingTag)
+            {
+                removedText += textArray[i];
+            }
+
+            if(textArray[i].ToString() == openFormatTagEnd)
+            {
+                isReadingTag = false;
+            }
+        }
+        return removedText;
+    }
+
+    virtual public string RemoveCloseMarkup(string text)
     {
         string removedText = "";
         bool isReadingTag = false;
