@@ -92,7 +92,7 @@ public class DialogueMarkup : ScriptableObject
                 }
                 else
                 {
-                    Debug.Log($"Couldn't find speed from {text}");
+                    
                 }
                 break;
 
@@ -114,7 +114,6 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateOpenMarkup(string text)
     {
-        Debug.Log($"Validating from {text}");
         char[] textArray = text.ToCharArray();
         for(int i = 0; i < textArray.Length; i++)
         {
@@ -140,6 +139,7 @@ public class DialogueMarkup : ScriptableObject
             return false;
 
         string tryTag = text.Substring(startIndex + 1, indexOfEnd - startIndex);
+        //Debug.Log($"Open try tag {tryTag}");
         string tryParam = tryTag.Substring(0, tryTag.Length - 1);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
 
@@ -164,7 +164,7 @@ public class DialogueMarkup : ScriptableObject
     {
         char[] textArray = text.ToCharArray();
 
-        if(startIndex + 1 >= textArray.Length)
+        if(startIndex + closeFormatTagStart.Length >= textArray.Length)
             return false;
 
         if(text.Substring(startIndex, closeFormatTagStart.Length) != closeFormatTagStart)
@@ -175,13 +175,15 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex + 1, indexOfEnd - startIndex);
+        string tryTag = text.Substring(startIndex + closeFormatTagStart.Length, indexOfEnd - (startIndex + closeFormatTagStart.Length));
+        //Debug.Log($"Closing tag is {tryTag}");
         string tryParam = tryTag.Substring(0, tryTag.Length - 1);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
 
         if(ValidateParameter(tryParam) && tryChar == markupCharacter)
             return true;
 
+        //Debug.Log($"Could not validate {tryParam} as {parameterType} or {tryChar} as {markupCharacter}");
         return false;
     }
     virtual public string GetValidParameterText(string text)
@@ -255,6 +257,7 @@ public class DialogueMarkup : ScriptableObject
         if(!ValidateMarkup(text))
             return text;
         excludedMarkupText = RemoveOpenMarkup(text);
+        excludedMarkupText = RemoveCloseMarkup(excludedMarkupText);
         return excludedMarkupText;
     }
 
@@ -278,18 +281,18 @@ public class DialogueMarkup : ScriptableObject
             }
                 removedText += textArray[i];
         }
+        Debug.Log($"Removed open markup text {removedText}");
         return removedText;
     }
 
     virtual public string RemoveCloseMarkup(string text)
     {
         string removedText = "";
-        bool isReadingTag = false;
         char[] textArray = text.ToCharArray();
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(ValidateOpenMarkup(text, i))
+            if(ValidateCloseMarkup(text, i))
             {
                 int indexOfEnd = text.IndexOf(closeFormatTagEnd, i + 1);
                 if(indexOfEnd != -1)
@@ -301,6 +304,7 @@ public class DialogueMarkup : ScriptableObject
             }
                 removedText += textArray[i];
         }
+        Debug.Log($"Removed close makrup text {removedText}");
         return removedText;
     }
 
