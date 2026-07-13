@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DM_Wait
   markupCharacter: 119
   hasParameter: 1
-  parameterType: 3
+  parameterType: 2
   hasSpecificParameters: 0
   validParameters: []

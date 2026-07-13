@@ -147,7 +147,7 @@ public class DialogueManager : MonoBehaviour
                 }
                 else
                 {
-                    //fullText = AppendEndingMarkupText(fullText, textArray, i);
+                    fullText = AppendMarkupText(fullText, textArray, i);
                     break;
                 }
             }
@@ -185,6 +185,12 @@ public class DialogueManager : MonoBehaviour
         return RemoveMarkupText(fullText);      
     }
 
+    string DisplayText(int curIndex, string dialogueText)
+    {
+        string displayText = "";
+        return displayText;
+    }
+    
     void HandleMarkupLogic(string newText)
     {
         for(int i = 0; i < dialogueMarkups.Count; i++)
@@ -204,13 +210,14 @@ public class DialogueManager : MonoBehaviour
 
         return handledMarkupText;
     }
-    string AppendEndingMarkupText(string fullText, char[] textArray, int startIndex)
+    string AppendMarkupText(string fullText, char[] textArray, int startIndex)
     {
         bool isReadingTag = false; 
         string appendText = fullText;
 
         for(int i = startIndex; i < textArray.Length; i++)
         {
+            
             if(textArray[i] == '<')
                 isReadingTag = true;
             if(isReadingTag)
@@ -221,6 +228,12 @@ public class DialogueManager : MonoBehaviour
                 isReadingTag = false;
         }
 
+
+        /*foreach(DialogueMarkup dm in dialogueMarkups)
+        {
+            //if(dm.ValidateMarkup(textArray, i))
+        }*/
+        Debug.Log($"Appended text:{appendText}");
         return appendText;
     } 
 

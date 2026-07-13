@@ -38,6 +38,8 @@ public class DialogueMarkup : ScriptableObject
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
         //closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
     }
+    
+    #region VALIDATE INSTANCE
     virtual public bool ValidateParameter(string text)
     {
         switch(parameterType)
@@ -45,6 +47,7 @@ public class DialogueMarkup : ScriptableObject
             case DialogueMarkupParameterType.INT:
             if(int.TryParse(text, out int intResult))
                 {
+                    Debug.Log($"Cast {text} as INT");
                     lastStoredParameter = text;
                     return true;
                 }
@@ -52,6 +55,7 @@ public class DialogueMarkup : ScriptableObject
             case DialogueMarkupParameterType.FLOAT:
             if(float.TryParse(text, out float floatResult))
                 {
+                    Debug.Log($"Cast {text} as FLOAT");
                     lastStoredParameter = text;
                     return true;
                 }
@@ -90,19 +94,15 @@ public class DialogueMarkup : ScriptableObject
                     lastStoredParameter = text;
                     return true;
                 }
-                else
-                {
-                    
-                }
                 break;
 
             case DialogueMarkupParameterType.STRING:
                 lastStoredParameter = text;
                 return true;
         }
+        //Debug.Log($"FAILED TO VALIDATE PARAMETER {text} as {parameterType}");
         return false;
     }
-    
     virtual public bool ValidateMarkup(string text)
     {
         if(text.Length <= 0)
@@ -110,6 +110,7 @@ public class DialogueMarkup : ScriptableObject
 
         if(ValidateOpenMarkup(text) || ValidateCloseMarkup(text))
             return true;
+        // /Debug.Log($"FAILED TO VALIDATE MARKUP");
         return false;
     }
     virtual public bool ValidateOpenMarkup(string text)
@@ -122,7 +123,6 @@ public class DialogueMarkup : ScriptableObject
         }
          return false;
     }
-
     virtual public bool ValidateOpenMarkup(string text, int startIndex)
     {
         char[] textArray = text.ToCharArray();
@@ -148,7 +148,6 @@ public class DialogueMarkup : ScriptableObject
 
         return false;
     }
-
     virtual public bool ValidateCloseMarkup(string text)
     {
         char[] textArray = text.ToCharArray();
@@ -159,7 +158,6 @@ public class DialogueMarkup : ScriptableObject
         }
          return false;
     }
-
     virtual public bool ValidateCloseMarkup(string text, int startIndex)
     {
         char[] textArray = text.ToCharArray();
@@ -250,7 +248,9 @@ public class DialogueMarkup : ScriptableObject
         else
             return null;
     }
-    
+    #endregion
+   
+    #region REMOVE TEXT
     virtual public string RemoveMarkupText(string text)
     {   
         string excludedMarkupText = "";
@@ -281,7 +281,6 @@ public class DialogueMarkup : ScriptableObject
             }
                 removedText += textArray[i];
         }
-        Debug.Log($"Removed open markup text {removedText}");
         return removedText;
     }
 
@@ -304,7 +303,7 @@ public class DialogueMarkup : ScriptableObject
             }
                 removedText += textArray[i];
         }
-        Debug.Log($"Removed close makrup text {removedText}");
+        //Debug.Log($"Removed close makrup text {removedText}");
         return removedText;
     }
 
@@ -359,6 +358,8 @@ public class DialogueMarkup : ScriptableObject
         }
         return excludedMarkupText;
     }
+    
+    #endregion
     virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
     {
         if(ValidateOpenMarkup(text))
