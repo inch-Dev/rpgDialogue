@@ -23,7 +23,7 @@ public class DialogueMarkup : ScriptableObject
     protected string closeFormatTagEnd = ">";
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
-    [EnumFlags][SerializeField] protected DialogueMarkupParameterType parameterType;
+    [SerializeField] protected DialogueMarkupParameterType parameterType;
     [SerializeField] protected bool hasSpecificParameters;
     [ShowIf("hasSpecificParameters")]
     [SerializeField] List<String> validParameters;
@@ -42,66 +42,66 @@ public class DialogueMarkup : ScriptableObject
     #region VALIDATE INSTANCE
     virtual public bool ValidateParameter(string text)
     {
+        bool isValid = false;
         switch(parameterType)
         {
             case DialogueMarkupParameterType.INT:
             if(int.TryParse(text, out int intResult))
                 {
-                    Debug.Log($"Cast {text} as INT");
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
             case DialogueMarkupParameterType.FLOAT:
             if(float.TryParse(text, out float floatResult))
                 {
-                    Debug.Log($"Cast {text} as FLOAT");
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
             case DialogueMarkupParameterType.BOOL:
             if(bool.TryParse(text, out bool boolResult))
                 {
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
             case DialogueMarkupParameterType.CHAR:
             if(char.TryParse(text, out char charResult))
                 {
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
             case DialogueMarkupParameterType.DOUBLE:
             if(double.TryParse(text, out double doubleResult))
                 {
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
             case DialogueMarkupParameterType.EXPRESSION:
             if(Enum.TryParse(text, out DialogueExpressionID expressionResult))
                 {
                   lastStoredParameter = text;
-                  return true;  
+                  isValid = true;  
                 }
                 break;
             case DialogueMarkupParameterType.SPEED:
                 if(Enum.TryParse(text, out DialogueSpeedID speedResult))
                 {
                     lastStoredParameter = text;
-                    return true;
+                    isValid = true;
                 }
                 break;
 
             case DialogueMarkupParameterType.STRING:
                 lastStoredParameter = text;
-                return true;
+                isValid = true;
+                break;
         }
         //Debug.Log($"FAILED TO VALIDATE PARAMETER {text} as {parameterType}");
-        return false;
+        return isValid;
     }
     virtual public bool ValidateMarkup(string text)
     {
