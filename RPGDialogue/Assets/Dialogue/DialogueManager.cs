@@ -204,7 +204,6 @@ public class DialogueManager : MonoBehaviour
         string handledMarkupText = newText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            //Debug.Log(i);
             handledMarkupText = dialogueMarkups[i].RemoveMarkupText(handledMarkupText);
         }
 
@@ -228,12 +227,6 @@ public class DialogueManager : MonoBehaviour
                 isReadingTag = false;
         }
 
-
-        /*foreach(DialogueMarkup dm in dialogueMarkups)
-        {
-            //if(dm.ValidateMarkup(textArray, i))
-        }*/
-        Debug.Log($"Appended text:{appendText}");
         return appendText;
     } 
 
