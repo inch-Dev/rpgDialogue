@@ -5,9 +5,9 @@ public class DM_Speed : DialogueMarkup
 {
     public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        if(hasParameter && GetValidParameterText(text) != null)
+        if(hasParameter && GetParameterText(text) != null)
             { 
-                lastStoredParameter = GetValidParameterText(text);
+                lastStoredParameter = GetParameterText(text);
 
                 //Run logic with parameter based on enum type
 

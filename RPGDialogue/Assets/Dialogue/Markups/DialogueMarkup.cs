@@ -11,6 +11,8 @@ using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using UnityEngine.UI;
+using UnityEngine.Rendering;
+using JetBrains.Annotations;
 
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
@@ -38,6 +40,112 @@ public class DialogueMarkup : ScriptableObject
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
         //closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
     }
+    
+    #region GETTERS
+    virtual public string GetParameterText(string text)
+    {
+        string parameterText = "";
+
+        //Check for markup character
+
+        if(!hasParameter)
+        {   
+            Debug.Log("This markup has no parameter!");
+            return null;
+        }
+
+        //Isolate string format tags and parameter
+        bool shoudlAddToMarkupText = false;
+
+        //Identify first char of format tag start and format tag end
+        char formatTagStartFirstChar = openFormatTagStart.ToCharArray()[0];
+        char formatTagEndFirstChar = openFormatTagEnd.ToCharArray()[0];
+
+        char[] textArray = text.ToCharArray();
+
+        //Get parameter text
+        for(int i = 0; i < textArray.Length; i++)
+        {
+            if(textArray[i] == formatTagEndFirstChar)
+            {
+                break;
+            }
+            if(textArray[i] == formatTagStartFirstChar)
+            {
+                shoudlAddToMarkupText = true;
+
+                //Skip over format tag start char
+                i += openFormatTagStart.Length - 1;
+                continue;
+            }
+            if(shoudlAddToMarkupText)
+            {
+                parameterText += textArray[i];
+            }
+                    
+        }
+        
+        //If it is a valid parameter
+        if(hasSpecificParameters)
+        {
+            bool matchesValidParameter = false;
+            for(int i = 0; i < validParameters.Count; i++)
+            {
+                if(validParameters[i] == parameterText)
+                {
+                    matchesValidParameter = true;
+                }
+            }
+
+            if(!matchesValidParameter)
+                return null;
+        }
+
+        if(ValidateParameter(parameterText))
+            return parameterText;
+        else
+            return null;
+    }
+    
+    virtual public string GetMarkupText(string text, int index)
+    {
+        string markupText = "";
+        if(!ValidateMarkup(text, index))
+            return null;
+
+        if (ValidateOpenMarkup(text, index) || ValidateCloseMarkup(text, index))
+        {
+            int indexOfEnd = text.IndexOf(openFormatTagEnd, index + 1);
+                if(indexOfEnd != -1)
+                {
+                    markupText = text.Substring(index, indexOfEnd - index);
+                    return markupText;
+                }
+        }
+        return null;
+    }
+
+    virtual public string GetMarkupText(string text)
+    {
+        string markupText = "";
+        char[] textArray = text.ToCharArray();
+
+        if(!ValidateMarkup(text))
+            return null;
+        
+        for(int i = 0; i < text.Length; i++)
+        {
+            if(GetMarkupText(text, i) != null)
+            {
+                markupText = GetMarkupText(text, i);
+                return markupText;
+            }
+        }
+        Debug.Log($"Found markup {markupText}");
+        return null;
+    }
+    #endregion
+    
     
     #region VALIDATE INSTANCE
     virtual public bool ValidateParameter(string text)
@@ -113,6 +221,16 @@ public class DialogueMarkup : ScriptableObject
         // /Debug.Log($"FAILED TO VALIDATE MARKUP");
         return false;
     }
+    virtual public bool ValidateMarkup(string text, int index)
+    {
+        if(text.Length <= 0)
+        return false;
+
+        if(ValidateOpenMarkup(text, index) || ValidateCloseMarkup(text, index))
+        return true;
+
+        return false;   
+    }
     virtual public bool ValidateOpenMarkup(string text)
     {
         char[] textArray = text.ToCharArray();
@@ -184,70 +302,7 @@ public class DialogueMarkup : ScriptableObject
         //Debug.Log($"Could not validate {tryParam} as {parameterType} or {tryChar} as {markupCharacter}");
         return false;
     }
-    virtual public string GetValidParameterText(string text)
-    {
-        string parameterText = "";
-
-        //Check for markup character
-
-        if(!hasParameter)
-        {   
-            Debug.Log("This markup has no parameter!");
-            return null;
-        }
-
-        //Isolate string format tags and parameter
-        bool shoudlAddToMarkupText = false;
-
-        //Identify first char of format tag start and format tag end
-        char formatTagStartFirstChar = openFormatTagStart.ToCharArray()[0];
-        char formatTagEndFirstChar = openFormatTagEnd.ToCharArray()[0];
-
-        char[] textArray = text.ToCharArray();
-
-        //Get parameter text
-        for(int i = 0; i < textArray.Length; i++)
-        {
-            if(textArray[i] == formatTagEndFirstChar)
-            {
-                break;
-            }
-            if(textArray[i] == formatTagStartFirstChar)
-            {
-                shoudlAddToMarkupText = true;
-
-                //Skip over format tag start char
-                i += openFormatTagStart.Length - 1;
-                continue;
-            }
-            if(shoudlAddToMarkupText)
-            {
-                parameterText += textArray[i];
-            }
-                    
-        }
-        
-        //If it is a valid parameter
-        if(hasSpecificParameters)
-        {
-            bool matchesValidParameter = false;
-            for(int i = 0; i < validParameters.Count; i++)
-            {
-                if(validParameters[i] == parameterText)
-                {
-                    matchesValidParameter = true;
-                }
-            }
-
-            if(!matchesValidParameter)
-                return null;
-        }
-
-        if(ValidateParameter(parameterText))
-            return parameterText;
-        else
-            return null;
-    }
+   
     #endregion
    
     #region REMOVE TEXT
@@ -423,9 +478,9 @@ public class DialogueMarkup : ScriptableObject
     virtual public void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
         Debug.Log("Opening logic");
-            if(hasParameter && GetValidParameterText(text) != null)
+            if(hasParameter && GetParameterText(text) != null)
             { 
-                lastStoredParameter = GetValidParameterText(text);
+                lastStoredParameter = GetParameterText(text);
 
                 //Run logic with parameter based on enum type
 

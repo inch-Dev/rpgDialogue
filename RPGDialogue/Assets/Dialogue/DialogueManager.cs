@@ -120,34 +120,50 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    string GetDisplayText(int index, string dialogueString) //Clean everything in brackets until the entire tag is included //Need index to cutoff
+    string IndexText(int index, string rawText) 
     {
-        string fullText = "";
-        string visibleDisplayText = "";
+        //Get all text needed to process till certain index
+                                                                                                                      
+        string indexedText = "";
+        string visibleText = "";
 
-        char[] textArray = dialogueString.ToCharArray();
+        char[] textArray = rawText.ToCharArray();
         bool isReadingTag = false;
 
-        for(int i = 0; i < dialogueString.Length; i++)
+        for(int i = 0; i < rawText.Length; i++)
         {
+            if(textArray[i] == ' ')
+            {
+                
+            }
+            foreach(DialogueMarkup dm in dialogueMarkups)
+            {
+                if(dm.ValidateMarkup(rawText, i))
+                {
+                    //Recognized markup
+                    //Get length of markup
+                    dm.GetMarkupText(rawText, i);
+                    Debug.Log($"Found markup text {dm.GetMarkupText(rawText, i)}");
+                }
+            }
             if(textArray[i] == '<')
             {
-                //Need to check if there is a valid tag
+                //Run recognition for each tag and add to index accordingly
                 isReadingTag = true;
             }
 
             if(isReadingTag)
-                fullText += textArray[i];
+                indexedText += textArray[i];
             else
             {
-                if(visibleDisplayText.Length <= index)
+                if(visibleText.Length <= index)
                 {
-                    visibleDisplayText += textArray[i];
-                    fullText += textArray[i];
+                    visibleText += textArray[i];
+                    indexedText += textArray[i];
                 }
                 else
                 {
-                    fullText = AppendMarkupText(fullText, textArray, i);
+                    indexedText = AppendMarkups(indexedText, textArray, i);
                     break;
                 }
             }
@@ -159,17 +175,17 @@ public class DialogueManager : MonoBehaviour
         }
 
         //If new line of dialogue clear comparison text
-        if(dialogueString != lastDialogueSource)
+        if(rawText != lastDialogueSource)
         {
-            lastDialogueSource = dialogueString;
+            lastDialogueSource = rawText;
             lastDisplayedDialogueText = "";
         }
 
         //Get text added to display string per call
         string newAddedText;
-        if(fullText.Length > lastDisplayedDialogueText.Length)
+        if(indexedText.Length > lastDisplayedDialogueText.Length)
         {
-            newAddedText = fullText.Substring(lastDisplayedDialogueText.Length);
+            newAddedText = indexedText.Substring(lastDisplayedDialogueText.Length);
         }
         else
         {
@@ -181,14 +197,31 @@ public class DialogueManager : MonoBehaviour
             HandleMarkupLogic(newAddedText);
         }
 
-        lastDisplayedDialogueText = fullText;
-        return RemoveMarkupText(fullText);      
+        lastDisplayedDialogueText = indexedText;
+        return RemoveMarkupText(indexedText);      
     }
 
-    string DisplayText(int curIndex, string dialogueText)
+//MOVE TO UI
+    void DisplayText(int curIndex, string dialogueText) //Display text values to index
     {
-        string displayText = "";
-        return displayText;
+
+        int visibleTextCount = 0;
+        for(int i = 0; i < dialogueText.Length; i++)
+        {
+            if(visibleTextCount < curIndex)
+            {
+
+                //Check to recognize 
+                //Toggle on visibility
+
+
+            }
+
+            else
+            {
+                //Toggle off visibility
+            }
+        }
     }
     
     void HandleMarkupLogic(string newText)
@@ -209,7 +242,7 @@ public class DialogueManager : MonoBehaviour
 
         return handledMarkupText;
     }
-    string AppendMarkupText(string fullText, char[] textArray, int startIndex)
+    string AppendMarkups(string fullText, char[] textArray, int startIndex)
     {
         bool isReadingTag = false; 
         string appendText = fullText;
@@ -252,7 +285,7 @@ public class DialogueManager : MonoBehaviour
                 float localLineWaitSeconds = lineWaitSeconds;
 
                 curText = dialogueLine.Substring(0, charIndex);
-                curText = GetDisplayText(charIndex, dialogueLine);
+                curText = IndexText(charIndex, dialogueLine);
                 //Debug.Log("Calling to change text");
 
                 yield return new WaitForSeconds(curStartWaitTime); 
