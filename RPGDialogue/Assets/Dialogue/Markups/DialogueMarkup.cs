@@ -118,7 +118,7 @@ public class DialogueMarkup : ScriptableObject
             int indexOfEnd = text.IndexOf(openFormatTagEnd, index + 1);
                 if(indexOfEnd != -1)
                 {
-                    markupText = text.Substring(index, indexOfEnd - index);
+                    markupText = text.Substring(index, indexOfEnd - index + 2);
                     return markupText;
                 }
         }
