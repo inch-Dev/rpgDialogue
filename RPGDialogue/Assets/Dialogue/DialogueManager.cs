@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 using Unity.VisualScripting;
+using UnityEditor.U2D.Animation;
 public class DialogueManager : MonoBehaviour
 {
     [HideInInspector] public static DialogueManager Instance;
@@ -122,57 +123,40 @@ public class DialogueManager : MonoBehaviour
 
     string IndexText(int index, string rawText) 
     {
+        Debug.Log($"Raw text:{rawText}");
         //Get all text needed to process till certain index
                                                                                                                       
-        string indexedText = "";
-        string visibleText = "";
-
+         string indexedRawText = "";
+        int visibleCharCount = 0;
         char[] textArray = rawText.ToCharArray();
-        bool isReadingTag = false;
 
-        for(int i = 0; i < rawText.Length; i++)
+        for(int i = 0; visibleCharCount < index; i++)
         {
-            if(textArray[i] == ' ')
-            {
-                
-            }
+            //If markup recognized 
             foreach(DialogueMarkup dm in dialogueMarkups)
             {
                 if(dm.ValidateMarkup(rawText, i))
                 {
-                    //Recognized markup
-                    //Get length of markup
-                    dm.GetMarkupText(rawText, i);
-                    Debug.Log($"Found markup text {dm.GetMarkupText(rawText, i)}");
+                    string markupText = dm.GetMarkupText(rawText, i);
+                    indexedRawText += markupText;
+                    i += markupText.Length;
+                    Debug.Log($"Found markup of {dm}. Moving to index {i}");
+                    continue;
                 }
-            }
-            if(textArray[i] == '<')
-            {
-                //Run recognition for each tag and add to index accordingly
-                isReadingTag = true;
             }
 
-            if(isReadingTag)
-                indexedText += textArray[i];
-            else
+            if(textArray[i] == ' ')
             {
-                if(visibleText.Length <= index)
-                {
-                    visibleText += textArray[i];
-                    indexedText += textArray[i];
-                }
-                else
-                {
-                    indexedText = AppendMarkups(indexedText, textArray, i);
-                    break;
-                }
+                indexedRawText += textArray[i].ToString();
             }
-            if(textArray[i] == '>')
+
+            else if(visibleCharCount < index)
             {
-                //Check for valid tag
-                isReadingTag = false;
+                indexedRawText += textArray[i].ToString();
+                visibleCharCount++;
             }
         }
+    
 
         //If new line of dialogue clear comparison text
         if(rawText != lastDialogueSource)
@@ -183,9 +167,9 @@ public class DialogueManager : MonoBehaviour
 
         //Get text added to display string per call
         string newAddedText;
-        if(indexedText.Length > lastDisplayedDialogueText.Length)
+        if(indexedRawText.Length > lastDisplayedDialogueText.Length)
         {
-            newAddedText = indexedText.Substring(lastDisplayedDialogueText.Length);
+            newAddedText = indexedRawText.Substring(lastDisplayedDialogueText.Length);
         }
         else
         {
@@ -197,31 +181,94 @@ public class DialogueManager : MonoBehaviour
             HandleMarkupLogic(newAddedText);
         }
 
-        lastDisplayedDialogueText = indexedText;
-        return RemoveMarkupText(indexedText);      
+        lastDisplayedDialogueText = indexedRawText;
+        Debug.Log($"Indexed Raw Text:{indexedRawText}, index:{index}");
+        return RemoveMarkupText(indexedRawText);
+        
     }
 
-//MOVE TO UI
-    void DisplayText(int curIndex, string dialogueText) //Display text values to index
+    string IndexRawText(int index, string rawText)
     {
+        //Get raw text and index to run logic
+    
+        string indexedRawText = "";
+        int visibleCharacterCount = 0;
+        char[] textArray = rawText.ToCharArray();
 
-        int visibleTextCount = 0;
-        for(int i = 0; i < dialogueText.Length; i++)
+        for(int i = 0; visibleCharacterCount < index; i++)
         {
-            if(visibleTextCount < curIndex)
+            //If markup recognized 
+            foreach(DialogueMarkup dm in dialogueMarkups)
             {
+                if(dm.ValidateMarkup(rawText, i))
+                {
+                    string markupText = dm.GetMarkupText(rawText, i);
+                    indexedRawText += markupText;
+                    i += markupText.Length;
+                    continue;
+                }
 
-                //Check to recognize 
-                //Toggle on visibility
+                else if(textArray[i] == ' ')
+                {
+                    indexedRawText += textArray[i].ToString();
+                }
+
+                else if(visibleCharacterCount < index)
+                {
+                    indexedRawText += textArray[i].ToString();
+                    visibleCharacterCount++;
+                }
 
 
+            }
+        }
+        //Append any remaining markups if possible
+
+        //Pass on to run logic for markups
+        return indexedRawText;
+    }
+
+    string IndexDisplayText(int index, string rawText) //Display text values to index
+    {
+        int charIndex = index;
+        if(index >= rawText.Length)
+            charIndex = rawText.Length;
+
+        string indexedDisplayText = "";
+        char[] textArray = rawText.ToCharArray();
+        int visibleCharCount = 0;
+        
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            foreach(DialogueMarkup dm in dialogueMarkups)
+            {
+                if(dm.ValidateMarkup(rawText, i))
+                {
+                    Debug.Log("Recognized markup");
+                    string markupText = dm.GetMarkupText(rawText, i);
+                    i += markupText.Length;
+                    continue;
+                }
+            }
+
+            if(textArray[i] == ' ')
+            {
+                indexedDisplayText += textArray[i].ToString();
             }
 
             else
             {
-                //Toggle off visibility
+                indexedDisplayText += textArray[i].ToString();
+                visibleCharCount++;
+            }
+            
+            if(visibleCharCount >= index)
+            {
+                break;
             }
         }
+
+        return indexedDisplayText;
     }
     
     void HandleMarkupLogic(string newText)
@@ -275,7 +322,7 @@ public class DialogueManager : MonoBehaviour
             charIndex = 0;
 
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = RemoveMarkupText(dialogueLine);
+            string cleanedDialogue = IndexDisplayText(dialogueLine.Length, dialogueLine);
             Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
             lastDisplayedDialogueText = null; 
 
@@ -285,7 +332,7 @@ public class DialogueManager : MonoBehaviour
                 float localLineWaitSeconds = lineWaitSeconds;
 
                 curText = dialogueLine.Substring(0, charIndex);
-                curText = IndexText(charIndex, dialogueLine);
+                curText = IndexRawText(charIndex, dialogueLine);
                 //Debug.Log("Calling to change text");
 
                 yield return new WaitForSeconds(curStartWaitTime); 

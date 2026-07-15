@@ -227,7 +227,10 @@ public class DialogueMarkup : ScriptableObject
         return false;
 
         if(ValidateOpenMarkup(text, index) || ValidateCloseMarkup(text, index))
-        return true;
+        {
+            Debug.Log("Valid markup");
+            return true;
+        }
 
         return false;   
     }
@@ -256,10 +259,10 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex + 1, indexOfEnd - startIndex);
-        //Debug.Log($"Open try tag {tryTag}");
-        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
-        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
+        string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
+        string tryParam = tryTag.Substring(0, tryTag.Length);
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
+        Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
         if(ValidateParameter(tryParam) && tryChar == markupCharacter)
             return true;
@@ -291,7 +294,7 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex + closeFormatTagStart.Length, indexOfEnd - (startIndex + closeFormatTagStart.Length));
+        string tryTag = text.Substring(startIndex + closeFormatTagStart.Length, indexOfEnd - (startIndex + 3));
         //Debug.Log($"Closing tag is {tryTag}");
         string tryParam = tryTag.Substring(0, tryTag.Length - 1);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
