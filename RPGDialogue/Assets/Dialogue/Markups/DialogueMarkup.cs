@@ -113,7 +113,7 @@ public class DialogueMarkup : ScriptableObject
         if(!ValidateMarkup(text, index))
             return null;
 
-        if (ValidateOpenMarkup(text, index) || ValidateCloseMarkup(text, index))
+        if(ValidateOpenMarkup(text, index))
         {
             int indexOfEnd = text.IndexOf(openFormatTagEnd, index + 1);
                 if(indexOfEnd != -1)
@@ -121,6 +121,16 @@ public class DialogueMarkup : ScriptableObject
                     markupText = text.Substring(index, indexOfEnd - index + 2);
                     return markupText;
                 }
+        }
+        else if(ValidateCloseMarkup(text, index))
+        {
+            int indexOfEnd = text.IndexOf(closeFormatTagEnd, index + 1);
+            if(indexOfEnd != -1)
+            {
+                markupText = text.Substring(index, indexOfEnd - index);
+                Debug.Log($"Returning {markupText}");
+                return markupText;
+            }
         }
         return null;
     }
@@ -260,9 +270,9 @@ public class DialogueMarkup : ScriptableObject
             return false;
 
         string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
-        string tryParam = tryTag.Substring(0, tryTag.Length);
+        string tryParam = tryTag.Substring(startIndex + 1, tryTag.Length - 3);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
-        Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
+        //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
         if(ValidateParameter(tryParam) && tryChar == markupCharacter)
             return true;
@@ -294,11 +304,10 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex + closeFormatTagStart.Length, indexOfEnd - (startIndex + 3));
-        //Debug.Log($"Closing tag is {tryTag}");
-        string tryParam = tryTag.Substring(0, tryTag.Length - 1);
-        char tryChar = tryTag.ToCharArray()[tryTag.Length - 1];
-
+        string tryTag = text.Substring(startIndex, (indexOfEnd - startIndex) + closeFormatTagEnd.Length);
+        string tryParam = tryTag.Substring(closeFormatTagStart.Length, tryTag.Length - 4);
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
+        Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
         if(ValidateParameter(tryParam) && tryChar == markupCharacter)
             return true;
 
