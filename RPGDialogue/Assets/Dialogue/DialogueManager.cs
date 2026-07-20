@@ -283,7 +283,7 @@ public class DialogueManager : MonoBehaviour
 
         while(visibleCharCount < index)
         {
-            if (i < textArray.Length)
+            if (i >= textArray.Length)
             {
                 return indexedText;
             }
@@ -293,7 +293,7 @@ public class DialogueManager : MonoBehaviour
                 if(dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-                    Debug.Log($"Recognized markup {dm}");
+                    Debug.Log($"Recognized markup {dm} from {i}");
                     i += dm.GetMarkupText(rawText, i).Length;
                 }
                 if (recognizedMarkup)
@@ -379,7 +379,7 @@ public class DialogueManager : MonoBehaviour
                 float localLineWaitSeconds = lineWaitSeconds;
 
                 curText = dialogueLine.Substring(0, charIndex);
-                curText = IndexRawText(charIndex, dialogueLine);
+                curText = DraftIndex(charIndex, dialogueLine); //TEST IF THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!
                 //Debug.Log("Calling to change text");
 
                 yield return new WaitForSeconds(curStartWaitTime); 

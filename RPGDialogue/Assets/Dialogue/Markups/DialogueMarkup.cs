@@ -128,7 +128,7 @@ public class DialogueMarkup : ScriptableObject
             if(indexOfEnd != -1)
             {
                 markupText = text.Substring(index, (indexOfEnd - index) + 1);
-                Debug.Log($"Returning {markupText}");
+                //Debug.Log($"Returning {markupText}");
                 return markupText;
             }
         }
@@ -151,7 +151,7 @@ public class DialogueMarkup : ScriptableObject
                 return markupText;
             }
         }
-        Debug.Log($"Found markup {markupText}");
+        //Debug.Log($"Found markup {markupText}");
         return null;
     }
     #endregion
@@ -236,6 +236,9 @@ public class DialogueMarkup : ScriptableObject
         if(text.Length <= 0)
         return false;
 
+        if (index >= text.Length)
+            return false;
+
         if(ValidateOpenMarkup(text, index))
         {
             Debug.Log("Found valid open markup");
@@ -262,9 +265,15 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateOpenMarkup(string text, int startIndex)
     {
+        Debug.Log($"Length:{text.Length} Start index:{startIndex}");
         char[] textArray = text.ToCharArray();
 
-        if(startIndex + 1 >= textArray.Length)
+        if (startIndex >= textArray.Length)
+            return false;
+        if(startIndex + 1>= textArray.Length)
+            return false;
+
+        if(startIndex + 2 >= textArray.Length)
             return false;
 
         if(textArray[startIndex].ToString() != openFormatTagStart)
@@ -279,7 +288,7 @@ public class DialogueMarkup : ScriptableObject
             return false;
 
         string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
-        string tryParam = tryTag.Substring(startIndex + 1, tryTag.Length - 3);
+        string tryParam = tryTag.Substring(startIndex + 1, tryTag.Length - 3); //Start  index cant be bigger than length of string
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
         //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
@@ -301,6 +310,9 @@ public class DialogueMarkup : ScriptableObject
     virtual public bool ValidateCloseMarkup(string text, int startIndex)
     {
         char[] textArray = text.ToCharArray();
+
+        if (startIndex >= text.Length)
+            return false;
 
         if(startIndex + closeFormatTagStart.Length >= textArray.Length)
             return false;
