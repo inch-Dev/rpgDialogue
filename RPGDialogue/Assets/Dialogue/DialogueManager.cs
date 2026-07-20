@@ -244,9 +244,11 @@ public class DialogueManager : MonoBehaviour
             {
                 if(dm.ValidateMarkup(rawText, i))
                 {
-                    Debug.Log("Recognized markup");
+                    Debug.Log($"Recognized {dm}");
                     string markupText = dm.GetMarkupText(rawText, i);
+                    int debugI = i;
                     i += markupText.Length;
+                    Debug.Log($"Moving {markupText.Length} spaces from {debugI}...Index now at {i}");
                     continue;
                 }
             }
@@ -269,6 +271,51 @@ public class DialogueManager : MonoBehaviour
         }
 
         return indexedDisplayText;
+    }
+
+    string DraftIndex(int index, string rawText)
+    {
+        string indexedText = "";
+        char[] textArray = rawText.ToCharArray();
+        bool recognizedMarkup = false;
+        int i = 0;
+        int visibleCharCount = 0;
+
+        while(visibleCharCount < index)
+        {
+            if (i < textArray.Length)
+            {
+                return indexedText;
+            }
+            recognizedMarkup = false;
+            foreach(DialogueMarkup dm in dialogueMarkups)
+            {
+                if(dm.ValidateMarkup(rawText, i))
+                {
+                    recognizedMarkup = true;
+                    Debug.Log($"Recognized markup {dm}");
+                    i += dm.GetMarkupText(rawText, i).Length;
+                }
+                if (recognizedMarkup)
+                    break;
+            }
+            if (recognizedMarkup)
+                continue;
+
+            if(textArray[i] == ' ')
+            {
+                indexedText += textArray[i].ToString();
+            }
+
+            else
+            {
+                indexedText += textArray[i].ToString();
+                visibleCharCount++;
+            }
+
+            i++;
+        }
+        return indexedText;
     }
     
     void HandleMarkupLogic(string newText)
@@ -322,7 +369,7 @@ public class DialogueManager : MonoBehaviour
             charIndex = 0;
 
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = IndexDisplayText(dialogueLine.Length, dialogueLine);
+            string cleanedDialogue = DraftIndex(dialogueLine.Length, dialogueLine);
             Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
             lastDisplayedDialogueText = null; 
 

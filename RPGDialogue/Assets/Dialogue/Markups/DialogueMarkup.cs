@@ -127,7 +127,7 @@ public class DialogueMarkup : ScriptableObject
             int indexOfEnd = text.IndexOf(closeFormatTagEnd, index + 1);
             if(indexOfEnd != -1)
             {
-                markupText = text.Substring(index, indexOfEnd - index);
+                markupText = text.Substring(index, (indexOfEnd - index) + 1);
                 Debug.Log($"Returning {markupText}");
                 return markupText;
             }
@@ -236,9 +236,15 @@ public class DialogueMarkup : ScriptableObject
         if(text.Length <= 0)
         return false;
 
-        if(ValidateOpenMarkup(text, index) || ValidateCloseMarkup(text, index))
+        if(ValidateOpenMarkup(text, index))
         {
-            Debug.Log("Valid markup");
+            Debug.Log("Found valid open markup");
+            return true;
+        }
+
+        else if(ValidateCloseMarkup(text, index))
+        {
+            Debug.Log($"Found valid close markup");
             return true;
         }
 
@@ -262,6 +268,9 @@ public class DialogueMarkup : ScriptableObject
             return false;
 
         if(textArray[startIndex].ToString() != openFormatTagStart)
+            return false;
+
+        if (text.Substring(startIndex, closeFormatTagStart.Length) == closeFormatTagStart)
             return false;
 
         int indexOfEnd = text.IndexOf(openFormatTagEnd, startIndex + 1);
@@ -308,8 +317,20 @@ public class DialogueMarkup : ScriptableObject
         string tryParam = tryTag.Substring(closeFormatTagStart.Length, tryTag.Length - 4);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
         Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
-        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+
+        if (ValidateParameter(tryParam) && (tryChar == markupCharacter))
+        {
+            //Debug.Log("Valid closed markup");
             return true;
+        }
+
+        else if (!ValidateParameter(tryParam))
+        {
+            //Debug.Log($"Could not validate parameter as {parameterType}:{tryParam}");
+        }
+
+        //else if (tryChar != markupCharacter)
+            //Debug.Log($"Could not validate markup char as {markupCharacter}:{tryChar}");
 
         //Debug.Log($"Could not validate {tryParam} as {parameterType} or {tryChar} as {markupCharacter}");
         return false;
