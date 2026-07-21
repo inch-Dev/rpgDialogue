@@ -241,13 +241,13 @@ public class DialogueMarkup : ScriptableObject
 
         if(ValidateOpenMarkup(text, index))
         {
-            Debug.Log("Found valid open markup");
+            //Debug.Log("Found valid open markup");
             return true;
         }
 
         else if(ValidateCloseMarkup(text, index))
         {
-            Debug.Log($"Found valid close markup");
+            //Debug.Log($"Found valid close markup");
             return true;
         }
 
@@ -265,7 +265,6 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateOpenMarkup(string text, int startIndex)
     {
-        Debug.Log($"Validating from {text}, Length:{text.Length}");
         char[] textArray = text.ToCharArray();
 
         if (startIndex >= textArray.Length)
@@ -287,10 +286,9 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-		Debug.Log($"Length:{text.Length} Start index:{startIndex}");
+		//Debug.Log($"Length:{text.Length} Start index:{startIndex}");
 		string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
         string tryParam = tryTag.Substring(openFormatTagStart.Length, tryTag.Length - 3); //Start  index cant be bigger than length of string
-        Debug.Log("Made substrings for open markup");
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
         //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
@@ -311,7 +309,6 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateCloseMarkup(string text, int startIndex)
     {
-        Debug.Log($"Length of close text:{text.Length}, Start index:{startIndex}");
         char[] textArray = text.ToCharArray();
 
         if (startIndex >= text.Length)

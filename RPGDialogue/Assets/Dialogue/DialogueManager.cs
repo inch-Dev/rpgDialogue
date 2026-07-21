@@ -8,6 +8,8 @@ using System;
 using UnityEngine.UI;
 using Unity.VisualScripting;
 using UnityEditor.U2D.Animation;
+using TMPro;
+
 public class DialogueManager : MonoBehaviour
 {
     [HideInInspector] public static DialogueManager Instance;
@@ -278,6 +280,7 @@ public class DialogueManager : MonoBehaviour
         string indexedText = "";
         char[] textArray = rawText.ToCharArray();
         bool recognizedMarkup = false;
+        bool isRichText = false;
         int i = 0;
         int visibleCharCount = 0;
 
@@ -317,8 +320,70 @@ public class DialogueManager : MonoBehaviour
         }
         return indexedText;
     }
-    
-    void HandleMarkupLogic(string newText)
+
+	string LogicDraftIndex(int index, string rawText)
+	{
+		string indexedText = "";
+		char[] textArray = rawText.ToCharArray();
+		bool recognizedMarkup = false;
+		bool isRichText = false;
+		int i = 0;
+		int visibleCharCount = 0;
+
+		while (visibleCharCount < index)
+		{
+			if (i >= textArray.Length)
+			{
+				return indexedText;
+			}
+			recognizedMarkup = false;
+            isRichText = false;
+            
+            foreach (DialogueMarkup dm in dialogueMarkups)
+            {
+                if (dm.ValidateMarkup(rawText, i))
+                {
+                    recognizedMarkup = true;
+                    Debug.Log($"Recognized markup {dm} from {i}");
+                    i += dm.GetMarkupText(rawText, i).Length;
+                    //Run logic
+                }
+                else if (textArray[i] == '<')
+                {
+                    if (i + 1 < textArray.Length)
+                    {
+                        int indexOfEnd = rawText.IndexOf('>', i + 1);
+                        string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
+                        
+						Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+                        i += richText.Length;
+                        isRichText = true;
+					}
+
+                }
+                if (recognizedMarkup || isRichText)
+					break;
+			}
+			if (recognizedMarkup || isRichText)
+				continue;
+
+			if (textArray[i] == ' ')
+			{
+				indexedText += textArray[i].ToString();
+			}
+
+			else
+			{
+				indexedText += textArray[i].ToString();
+				visibleCharCount++;
+			}
+
+			i++;
+		}
+		return indexedText;
+	}
+
+	void HandleMarkupLogic(string newText)
     {
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
@@ -369,7 +434,7 @@ public class DialogueManager : MonoBehaviour
             charIndex = 0;
 
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = DraftIndex(dialogueLine.Length, dialogueLine);
+            string cleanedDialogue = LogicDraftIndex(dialogueLine.Length, dialogueLine);
             Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
             lastDisplayedDialogueText = null; 
 
@@ -379,8 +444,7 @@ public class DialogueManager : MonoBehaviour
                 float localLineWaitSeconds = lineWaitSeconds;
 
                 curText = dialogueLine.Substring(0, charIndex);
-                curText = DraftIndex(charIndex, dialogueLine); //TEST IF THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!
-                //Debug.Log("Calling to change text");
+                curText = LogicDraftIndex(charIndex, dialogueLine); //TEST IF THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!
 
                 yield return new WaitForSeconds(curStartWaitTime); 
 
@@ -393,9 +457,7 @@ public class DialogueManager : MonoBehaviour
 
                 yield return new WaitForSeconds(localCharWaitSeconds);
                 charIndex++; 
-                //Debug.Log($"Char index is {charIndex}");
             }
-            //Debug.Log($"Char index was {charIndex}, and cleaned dialogue is {cleanedDialogue.Length}");
             yield return new WaitForSeconds(lineWaitSeconds);
         }
         
