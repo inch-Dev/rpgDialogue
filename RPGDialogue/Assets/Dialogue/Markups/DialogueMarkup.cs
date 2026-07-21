@@ -265,7 +265,7 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateOpenMarkup(string text, int startIndex)
     {
-        Debug.Log($"Length:{text.Length} Start index:{startIndex}");
+        Debug.Log($"Validating from {text}, Length:{text.Length}");
         char[] textArray = text.ToCharArray();
 
         if (startIndex >= textArray.Length)
@@ -287,8 +287,10 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
-        string tryParam = tryTag.Substring(startIndex + 1, tryTag.Length - 3); //Start  index cant be bigger than length of string
+		Debug.Log($"Length:{text.Length} Start index:{startIndex}");
+		string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
+        string tryParam = tryTag.Substring(openFormatTagStart.Length, tryTag.Length - 3); //Start  index cant be bigger than length of string
+        Debug.Log("Made substrings for open markup");
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
         //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
@@ -309,6 +311,7 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public bool ValidateCloseMarkup(string text, int startIndex)
     {
+        Debug.Log($"Length of close text:{text.Length}, Start index:{startIndex}");
         char[] textArray = text.ToCharArray();
 
         if (startIndex >= text.Length)
@@ -328,7 +331,7 @@ public class DialogueMarkup : ScriptableObject
         string tryTag = text.Substring(startIndex, (indexOfEnd - startIndex) + closeFormatTagEnd.Length);
         string tryParam = tryTag.Substring(closeFormatTagStart.Length, tryTag.Length - 4);
         char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
-        Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
+        //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
         if (ValidateParameter(tryParam) && (tryChar == markupCharacter))
         {
