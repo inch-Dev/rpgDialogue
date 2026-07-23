@@ -19,10 +19,10 @@ public class DialogueMarkup : ScriptableObject
 {
     [SerializeField] Dictionary<string, dynamic> parameterDictionary;
     [SerializeField] protected char markupCharacter;
-    protected string openFormatTagStart = "<";
-    protected string openFormatTagEnd = ">";
-    protected string closeFormatTagStart = "</";
-    protected string closeFormatTagEnd = ">";
+    protected string openFormatTagStart = "{";
+    protected string openFormatTagEnd = "}";
+    protected string closeFormatTagStart = "{/";
+    protected string closeFormatTagEnd = "}";
     [SerializeField] protected bool hasParameter;
     [ShowIf("hasParameter")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
@@ -34,11 +34,14 @@ public class DialogueMarkup : ScriptableObject
     void OnValidate()
     {
         //Reset values
-        openFormatTagEnd = ">";
-        closeFormatTagEnd = ">";
+
+        openFormatTagStart = "{";
+        closeFormatTagStart = "{/";
+        openFormatTagEnd = "}";
+        closeFormatTagEnd = "}";
 
         openFormatTagEnd = markupCharacter.ToString() + openFormatTagEnd;
-        //closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
+        closeFormatTagEnd = markupCharacter.ToString() + closeFormatTagEnd;
     }
     
     #region GETTERS
@@ -285,15 +288,17 @@ public class DialogueMarkup : ScriptableObject
 
         if(indexOfEnd == -1)
             return false;
-
+        //Debug.Log($"Open{openFormatTagStart},Close:{openFormatTagEnd}");
 		//Debug.Log($"Length:{text.Length} Start index:{startIndex}");
 		string tryTag = text.Substring(startIndex, ((indexOfEnd - startIndex) + openFormatTagEnd.Length));
-        string tryParam = tryTag.Substring(openFormatTagStart.Length, tryTag.Length - 3); //Start  index cant be bigger than length of string
-        char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
+        string tryParam = tryTag.Substring(openFormatTagStart.Length, tryTag.Length - openFormatTagEnd.Length - markupCharacter.ToString().Length); //Start  index cant be bigger than length of string
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - (openFormatTagEnd.Length)];
         //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
-        if(ValidateParameter(tryParam) && tryChar == markupCharacter)
+        if (ValidateParameter(tryParam) && tryChar == markupCharacter)
+        {
             return true;
+        }
 
         return false;
     }
@@ -325,26 +330,15 @@ public class DialogueMarkup : ScriptableObject
         if(indexOfEnd == -1)
             return false;
 
-        string tryTag = text.Substring(startIndex, (indexOfEnd - startIndex) + closeFormatTagEnd.Length);
-        string tryParam = tryTag.Substring(closeFormatTagStart.Length, tryTag.Length - 4);
-        char tryChar = tryTag.ToCharArray()[tryTag.Length - 2];
+        string tryTag = text.Substring(startIndex, (indexOfEnd - startIndex) + closeFormatTagStart.Length);
+        string tryParam = tryTag.Substring(closeFormatTagStart.Length, tryTag.Length - closeFormatTagEnd.Length - 1 - markupCharacter.ToString().Length);
+        char tryChar = tryTag.ToCharArray()[tryTag.Length - (closeFormatTagEnd.Length)];
         //Debug.Log($"Try tag:{tryTag},tryParam:{tryParam},tryChar:{tryChar}");
 
         if (ValidateParameter(tryParam) && (tryChar == markupCharacter))
         {
-            //Debug.Log("Valid closed markup");
             return true;
         }
-
-        else if (!ValidateParameter(tryParam))
-        {
-            //Debug.Log($"Could not validate parameter as {parameterType}:{tryParam}");
-        }
-
-        //else if (tryChar != markupCharacter)
-            //Debug.Log($"Could not validate markup char as {markupCharacter}:{tryChar}");
-
-        //Debug.Log($"Could not validate {tryParam} as {parameterType} or {tryChar} as {markupCharacter}");
         return false;
     }
    
@@ -417,9 +411,9 @@ public class DialogueMarkup : ScriptableObject
 
         for(int i = 0; i < textArray.Length; i++)
         {
-            if(i + 1 < textArray.Length && textArray[i] == '<') //Skip over beginning of tag
+            if(i + 1 < textArray.Length && textArray[i].ToString() == openFormatTagStart) //Skip over beginning of tag
             {
-                int indexOfEnd = text.IndexOf('>', i + 1);
+                int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
                 if(indexOfEnd != -1 )
                 {
                     string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);

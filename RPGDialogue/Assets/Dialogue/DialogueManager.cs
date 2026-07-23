@@ -44,8 +44,8 @@ public class DialogueManager : MonoBehaviour
     float timeTillNextChar;
     bool readingDialogue = false;
     
-    string lastDialogueSource = "";
-    string lastDisplayedDialogueText = "";
+    string lastRawText = "";
+    string lastIndexedLogicText = "";
     
     
     [Header("Editable By Markups")]
@@ -161,17 +161,17 @@ public class DialogueManager : MonoBehaviour
     
 
         //If new line of dialogue clear comparison text
-        if(rawText != lastDialogueSource)
+        if(rawText != lastRawText)
         {
-            lastDialogueSource = rawText;
-            lastDisplayedDialogueText = "";
+            lastRawText = rawText;
+            lastIndexedLogicText = "";
         }
 
         //Get text added to display string per call
         string newAddedText;
-        if(indexedRawText.Length > lastDisplayedDialogueText.Length)
+        if(indexedRawText.Length > lastIndexedLogicText.Length)
         {
-            newAddedText = indexedRawText.Substring(lastDisplayedDialogueText.Length);
+            newAddedText = indexedRawText.Substring(lastIndexedLogicText.Length);
         }
         else
         {
@@ -183,96 +183,10 @@ public class DialogueManager : MonoBehaviour
             HandleMarkupLogic(newAddedText);
         }
 
-        lastDisplayedDialogueText = indexedRawText;
+        lastIndexedLogicText = indexedRawText;
         Debug.Log($"Indexed Raw Text:{indexedRawText}, index:{index}");
         return RemoveMarkupText(indexedRawText);
         
-    }
-
-    string IndexRawText(int index, string rawText)
-    {
-        //Get raw text and index to run logic
-    
-        string indexedRawText = "";
-        int visibleCharacterCount = 0;
-        char[] textArray = rawText.ToCharArray();
-
-        for(int i = 0; visibleCharacterCount < index; i++)
-        {
-            //If markup recognized 
-            foreach(DialogueMarkup dm in dialogueMarkups)
-            {
-                if(dm.ValidateMarkup(rawText, i))
-                {
-                    string markupText = dm.GetMarkupText(rawText, i);
-                    indexedRawText += markupText;
-                    i += markupText.Length;
-                    continue;
-                }
-
-                else if(textArray[i] == ' ')
-                {
-                    indexedRawText += textArray[i].ToString();
-                }
-
-                else if(visibleCharacterCount < index)
-                {
-                    indexedRawText += textArray[i].ToString();
-                    visibleCharacterCount++;
-                }
-
-
-            }
-        }
-        //Append any remaining markups if possible
-
-        //Pass on to run logic for markups
-        return indexedRawText;
-    }
-
-    string IndexDisplayText(int index, string rawText) //Display text values to index
-    {
-        int charIndex = index;
-        if(index >= rawText.Length)
-            charIndex = rawText.Length;
-
-        string indexedDisplayText = "";
-        char[] textArray = rawText.ToCharArray();
-        int visibleCharCount = 0;
-        
-        for(int i = 0; i < rawText.Length; i++)
-        {
-            foreach(DialogueMarkup dm in dialogueMarkups)
-            {
-                if(dm.ValidateMarkup(rawText, i))
-                {
-                    Debug.Log($"Recognized {dm}");
-                    string markupText = dm.GetMarkupText(rawText, i);
-                    int debugI = i;
-                    i += markupText.Length;
-                    Debug.Log($"Moving {markupText.Length} spaces from {debugI}...Index now at {i}");
-                    continue;
-                }
-            }
-
-            if(textArray[i] == ' ')
-            {
-                indexedDisplayText += textArray[i].ToString();
-            }
-
-            else
-            {
-                indexedDisplayText += textArray[i].ToString();
-                visibleCharCount++;
-            }
-            
-            if(visibleCharCount >= index)
-            {
-                break;
-            }
-        }
-
-        return indexedDisplayText;
     }
 
     string DisplayDraftIndex(int index, string rawText)
@@ -323,7 +237,13 @@ public class DialogueManager : MonoBehaviour
 
 	string LogicDraftIndex(int index, string rawText)
 	{
+        //Substring of raw text with number of visible characters up to length of index
 		string indexedText = "";
+
+        //Text that has been added since last call
+        string deltaText = "";
+
+
 		char[] textArray = rawText.ToCharArray();
 		bool recognizedMarkup = false;
 		bool isRichText = false;
@@ -346,6 +266,7 @@ public class DialogueManager : MonoBehaviour
                 {
                     recognizedMarkup = true;
                     Debug.Log($"Recognized markup {dm} from {i}");
+
                     i += dm.GetMarkupText(rawText, i).Length;
                     indexedText += dm.GetMarkupText(rawText, i);
                 }
@@ -382,7 +303,10 @@ public class DialogueManager : MonoBehaviour
 			i++;
 		}
 
-        //Append remaining markups
+        if(rawText == lastRawText)
+        {
+
+        }
         Debug.Log($"Indexed:{indexedText}");
 		return indexedText;
 	}
@@ -440,7 +364,7 @@ public class DialogueManager : MonoBehaviour
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
             Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
-            lastDisplayedDialogueText = null; 
+            lastIndexedLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)
             {   
