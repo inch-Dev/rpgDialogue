@@ -44,7 +44,7 @@ public class DialogueManager : MonoBehaviour
     float timeTillNextChar;
     bool readingDialogue = false;
     
-    string lastRawText = "";
+    string lastRawTextSource = "";
     string lastIndexedLogicText = "";
     
     
@@ -161,9 +161,9 @@ public class DialogueManager : MonoBehaviour
     
 
         //If new line of dialogue clear comparison text
-        if(rawText != lastRawText)
+        if(rawText != lastRawTextSource)
         {
-            lastRawText = rawText;
+            lastRawTextSource = rawText;
             lastIndexedLogicText = "";
         }
 
@@ -265,10 +265,10 @@ public class DialogueManager : MonoBehaviour
                 if (dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-                    Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i)}");
+					//Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i)}");
 
-                    i += dm.GetMarkupText(rawText, i).Length;
-                    indexedText += dm.GetMarkupText(rawText, i);
+					indexedText += dm.GetMarkupText(rawText, i);
+					i += dm.GetMarkupText(rawText, i).Length;
                 }
                 else if (textArray[i] == '<')
                 {
@@ -277,7 +277,7 @@ public class DialogueManager : MonoBehaviour
                         int indexOfEnd = rawText.IndexOf('>', i + 1);
                         string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
                         
-						Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+						//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
                         i += richText.Length;
                         indexedText += richText;
                         isRichText = true;
@@ -304,11 +304,17 @@ public class DialogueManager : MonoBehaviour
 			i++;
 		}
 
-        if(rawText == lastRawText)
+        //If same line of dialogue compare changes in text
+        if(lastIndexedLogicText != null && lastRawTextSource == rawText)
         {
-
+            int deltaLength = indexedText.Length - lastIndexedLogicText.Length;
+            //Debug.Log($"Delta length:{deltaLength}");
+            deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength);
+            Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
         }
-        //Debug.Log($"Indexed:{indexedText}");
+
+        lastRawTextSource = rawText;
+        lastIndexedLogicText = indexedText;
 		return indexedText;
 	}
 
@@ -364,7 +370,7 @@ public class DialogueManager : MonoBehaviour
 
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
-            Debug.Log($"Cleaned dialogue: {cleanedDialogue}");
+            Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
             lastIndexedLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)

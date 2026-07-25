@@ -131,7 +131,7 @@ public class DialogueMarkup : ScriptableObject
             if(indexOfEnd != -1)
             {
                 markupText = text.Substring(index,(indexOfEnd - index) + 2);
-                Debug.Log($"Returning {markupText}");
+                //Debug.Log($"Returning {markupText}");
                 return markupText;
             }
         }
