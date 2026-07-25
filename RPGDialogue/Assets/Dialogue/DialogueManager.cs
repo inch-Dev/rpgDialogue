@@ -198,7 +198,7 @@ public class DialogueManager : MonoBehaviour
         int i = 0;
         int visibleCharCount = 0;
 
-        while(visibleCharCount < index + 1)
+        while(visibleCharCount <= index + 1)
         {
             if (i >= textArray.Length)
             {
@@ -250,7 +250,7 @@ public class DialogueManager : MonoBehaviour
 		int i = 0;
 		int visibleCharCount = 0;
 
-		while (visibleCharCount < index + 1)
+		while (visibleCharCount <= index + 1)
 		{
 			if (i >= textArray.Length)
 			{
@@ -300,7 +300,7 @@ public class DialogueManager : MonoBehaviour
 				indexedText += textArray[i].ToString();
 				visibleCharCount++;
 			}
-
+            Debug.Log($"Indexed text:{indexedText}");
 			i++;
 		}
 
