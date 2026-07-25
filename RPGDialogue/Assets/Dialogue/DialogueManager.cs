@@ -277,8 +277,9 @@ public class DialogueManager : MonoBehaviour
                         int indexOfEnd = rawText.IndexOf('>', i + 1);
                         string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
                         
-						//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+						Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
                         i += richText.Length;
+                        indexedText += richText;
                         isRichText = true;
 					}
 
