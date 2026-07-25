@@ -265,7 +265,7 @@ public class DialogueManager : MonoBehaviour
                 if (dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-                    Debug.Log($"Recognized markup {dm} from {i}");
+                    Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i)}");
 
                     i += dm.GetMarkupText(rawText, i).Length;
                     indexedText += dm.GetMarkupText(rawText, i);
@@ -277,7 +277,7 @@ public class DialogueManager : MonoBehaviour
                         int indexOfEnd = rawText.IndexOf('>', i + 1);
                         string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
                         
-						Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+						//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
                         i += richText.Length;
                         isRichText = true;
 					}
@@ -307,7 +307,7 @@ public class DialogueManager : MonoBehaviour
         {
 
         }
-        Debug.Log($"Indexed:{indexedText}");
+        //Debug.Log($"Indexed:{indexedText}");
 		return indexedText;
 	}
 

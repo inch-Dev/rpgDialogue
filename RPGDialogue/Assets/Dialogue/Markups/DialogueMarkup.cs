@@ -130,8 +130,8 @@ public class DialogueMarkup : ScriptableObject
             int indexOfEnd = text.IndexOf(closeFormatTagEnd, index + 1);
             if(indexOfEnd != -1)
             {
-                markupText = text.Substring(index, (indexOfEnd - index) + 1);
-                //Debug.Log($"Returning {markupText}");
+                markupText = text.Substring(index,(indexOfEnd - index) + 2);
+                Debug.Log($"Returning {markupText}");
                 return markupText;
             }
         }
@@ -397,7 +397,7 @@ public class DialogueMarkup : ScriptableObject
             }
                 removedText += textArray[i];
         }
-        //Debug.Log($"Removed close makrup text {removedText}");
+        Debug.Log($"Removed close makrup text {removedText}");
         return removedText;
     }
 
