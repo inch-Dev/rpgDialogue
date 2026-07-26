@@ -235,40 +235,41 @@ public class DialogueManager : MonoBehaviour
         return indexedText;
     }
 
-	string LogicDraftIndex(int index, string rawText)
-	{
+    string LogicDraftIndex(int index, string rawText)
+    {
         //Substring of raw text with number of visible characters up to length of index
-		string indexedText = "";
+        string indexedText = "";
 
         //Text that has been added since last call
         string deltaText = "";
 
 
-		char[] textArray = rawText.ToCharArray();
-		bool recognizedMarkup = false;
-		bool isRichText = false;
-		int i = 0;
-		int visibleCharCount = 0;
+        char[] textArray = rawText.ToCharArray();
+        bool recognizedMarkup = false;
+        bool isRichText = false;
+        int i = 0;
+        int visibleCharCount = 0;
 
-		while (visibleCharCount <= index + 1)
-		{
-			if (i >= textArray.Length)
-			{
-				return indexedText;
-			}
+        while (visibleCharCount <= index + 1)
+        {
+            if (i >= textArray.Length)
+            {
+                break;
+            }
 
-			recognizedMarkup = false;
+            recognizedMarkup = false;
             isRichText = false;
-            
+
             foreach (DialogueMarkup dm in dialogueMarkups)
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-					//Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i)}");
+                    Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i).Length}, Length:{rawText.Length}");
 
-					indexedText += dm.GetMarkupText(rawText, i);
-					i += dm.GetMarkupText(rawText, i).Length;
+                    indexedText += dm.GetMarkupText(rawText, i);
+                    i += dm.GetMarkupText(rawText, i).Length;
+                    Debug.Log($"Added to index...{indexedText}");
                 }
                 else if (textArray[i] == '<')
                 {
@@ -276,19 +277,20 @@ public class DialogueManager : MonoBehaviour
                     {
                         int indexOfEnd = rawText.IndexOf('>', i + 1);
                         string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
-                        
-						//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+
+                        //Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
                         i += richText.Length;
                         indexedText += richText;
                         isRichText = true;
-					}
+                    }
 
                 }
                 if (recognizedMarkup || isRichText)
-					break;
-			}
-			if (recognizedMarkup || isRichText)
-				continue;
+                    break;
+            }
+
+            if (recognizedMarkup || isRichText)
+                continue;
 
 			if (textArray[i] == ' ')
 			{
@@ -300,10 +302,11 @@ public class DialogueManager : MonoBehaviour
 				indexedText += textArray[i].ToString();
 				visibleCharCount++;
 			}
-            Debug.Log($"Indexed text:{indexedText}");
+
 			i++;
 		}
 
+        //Debug.Log($"Last source:{lastRawTextSource}");
         //If same line of dialogue compare changes in text
         if(lastIndexedLogicText != null && lastRawTextSource == rawText)
         {
@@ -378,8 +381,8 @@ public class DialogueManager : MonoBehaviour
                 float localCharWaitSeconds = charWaitSeconds;
                 float localLineWaitSeconds = lineWaitSeconds;
 
-                curText = dialogueLine.Substring(0, charIndex);
-                curText = LogicDraftIndex(charIndex, dialogueLine); //TEST IF THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!
+                curText = LogicDraftIndex(charIndex, dialogueLine);
+                //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(curStartWaitTime); 
 
