@@ -65,7 +65,7 @@ public class DialogueManager : MonoBehaviour
     DialogueSpeaker curSpeaker;
 
     #region EVENTS
-    public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText);
+    public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index);
     public static event UpdateDialogue updateDialogue;
 
     #endregion
@@ -107,7 +107,7 @@ public class DialogueManager : MonoBehaviour
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkupText(totalText));
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkupText(totalText), totalText.Length);
         }
     }
 
@@ -119,7 +119,7 @@ public class DialogueManager : MonoBehaviour
         else
         {
             //Eventually need function that reads for markup text 
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, dialogueLine);
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, dialogueLine, dialogueLine.Length);
         }
     }
 
@@ -286,7 +286,7 @@ public class DialogueManager : MonoBehaviour
 
                     indexedText += dm.GetMarkupText(rawText, i);
                     i += dm.GetMarkupText(rawText, i).Length;
-                    Debug.Log($"Added to index...{indexedText}");
+                    //Debug.Log($"Added to index...{indexedText}");
                 }
                 else if (textArray[i] == '<')
                 {
@@ -333,6 +333,11 @@ public class DialogueManager : MonoBehaviour
             //Debug.Log($"Delta length:{deltaLength}");
             deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength);
             Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
+        }
+        else if(lastRawTextSource != rawText)
+        {
+            deltaText = indexedText;
+            Debug.Log($"New dialogue line...delta text:{deltaText}");
         }
 
         lastRawTextSource = rawText;
@@ -402,12 +407,11 @@ public class DialogueManager : MonoBehaviour
                 float localLineWaitSeconds = lineWaitSeconds;
 
                 curLogicText = LogicDraftIndex(charIndex, dialogueLine);
-                curDisplayText = DisplayDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(curStartWaitTime); 
 
-                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curDisplayText);
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, cleanedDialogue, charIndex);
 
                 yield return new WaitForSeconds(curEndWaitTime);
 

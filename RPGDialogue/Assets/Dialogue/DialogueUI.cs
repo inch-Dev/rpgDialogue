@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using Unity.Mathematics;
+using UnityEditor.U2D.Animation;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
@@ -30,18 +31,18 @@ public class DialogueUI : MonoBehaviour
     }
 
     #endregion
-    void UpdateDialogue(string speakerName, DialogueExpression expression, string curText)
+    void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index)
     {
         UpdateSpeakerName(speakerName);
         UpdateSpeakerExpression(expression);
 
         if(expression == null)
         {
-            UpdateAltTextbox(curText);
+            UpdateAltTextbox(curText, index);
         }
         else
         {
-            UpdateTextbox(curText);
+            UpdateTextbox(curText, index);
         }
 
     }
@@ -73,19 +74,28 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    void UpdateAltTextbox(String dialogueText)
+    void UpdateAltTextbox(String dialogueText, int index)
     {
         textBox.SetActive(false);
         altTextBox.SetActive(true);
 
-        altDialogueTF.text = dialogueText;
+        IndexTextVisbility(altTextBox.GetComponent<TMP_Text>(), dialogueText, index);
+
     }
 
-    void UpdateTextbox(String dialogueText)
+    void UpdateTextbox(String dialogueText, int index)
     {
         altTextBox.SetActive(false);
         textBox.SetActive(true);
 
-        dialogueTF.text = dialogueText;
+        IndexTextVisbility(textBox.GetComponent<TMP_Text>(), dialogueText, index);
+    }
+
+    void IndexTextVisbility(TMP_Text textBox, string rawText, int index)
+    {
+       char[] textArray = rawText.ToCharArray();
+
+        textBox.text = rawText;
+        textBox.maxVisibleCharacters = index;
     }
 }
