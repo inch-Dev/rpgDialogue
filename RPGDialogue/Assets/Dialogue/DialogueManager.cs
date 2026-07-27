@@ -332,12 +332,12 @@ public class DialogueManager : MonoBehaviour
             int deltaLength = indexedText.Length - lastIndexedLogicText.Length;
             //Debug.Log($"Delta length:{deltaLength}");
             deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength);
-            Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
+            //Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
         }
         else if(lastRawTextSource != rawText)
         {
             deltaText = indexedText;
-            Debug.Log($"New dialogue line...delta text:{deltaText}");
+            //Debug.Log($"New dialogue line...delta text:{deltaText}");
         }
 
         lastRawTextSource = rawText;
@@ -388,7 +388,6 @@ public class DialogueManager : MonoBehaviour
     {
         int charIndex = 0;
         string curLogicText = "";
-        string curDisplayText = "";
         string[] dialogueLines = dialogue.dialogueLines;
 
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
