@@ -204,7 +204,9 @@ public class DialogueManager : MonoBehaviour
             {
                 return indexedText;
             }
+
             recognizedMarkup = false;
+            isRichText = false;
             foreach(DialogueMarkup dm in dialogueMarkups)
             {
                 if(dm.ValidateMarkup(rawText, i))
@@ -213,10 +215,25 @@ public class DialogueManager : MonoBehaviour
                     Debug.Log($"Recognized markup {dm} from {i}");
                     i += dm.GetMarkupText(rawText, i).Length;
                 }
-                if (recognizedMarkup)
+                else if(textArray[i] == '<')
+                {
+					if (i + 1 < textArray.Length)
+					{
+						int indexOfEnd = rawText.IndexOf('>', i + 1);
+						if (indexOfEnd != -1)
+						{
+							string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
+							//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+							i += richText.Length;
+							indexedText += richText;
+							isRichText = true;
+						}
+					}
+				}
+                if (recognizedMarkup || isRichText)
                     break;
             }
-            if (recognizedMarkup)
+            if (recognizedMarkup || isRichText)
                 continue;
 
             if(textArray[i] == ' ')
@@ -276,15 +293,17 @@ public class DialogueManager : MonoBehaviour
                     if (i + 1 < textArray.Length)
                     {
                         int indexOfEnd = rawText.IndexOf('>', i + 1);
-                        string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
-
-                        //Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
-                        i += richText.Length;
-                        indexedText += richText;
-                        isRichText = true;
+                        if (indexOfEnd != -1)
+                        {
+                            string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
+                            //Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+                            i += richText.Length;
+                            indexedText += richText;
+                            isRichText = true;
+                        }
                     }
-
                 }
+
                 if (recognizedMarkup || isRichText)
                     break;
             }
@@ -363,12 +382,13 @@ public class DialogueManager : MonoBehaviour
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
         int charIndex = 0;
-        string curText = "";
+        string curLogicText = "";
+        string curDisplayText = "";
         string[] dialogueLines = dialogue.dialogueLines;
 
         for(int i = 0; i < dialogue.dialogueLines.Length; i++)
         {
-            curText = "";
+            curLogicText = "";
             charIndex = 0;
 
             string dialogueLine = dialogueLines[i];
@@ -381,12 +401,13 @@ public class DialogueManager : MonoBehaviour
                 float localCharWaitSeconds = charWaitSeconds;
                 float localLineWaitSeconds = lineWaitSeconds;
 
-                curText = LogicDraftIndex(charIndex, dialogueLine);
+                curLogicText = LogicDraftIndex(charIndex, dialogueLine);
+                curDisplayText = DisplayDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(curStartWaitTime); 
 
-                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curText);
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, curDisplayText);
 
                 yield return new WaitForSeconds(curEndWaitTime);
 
