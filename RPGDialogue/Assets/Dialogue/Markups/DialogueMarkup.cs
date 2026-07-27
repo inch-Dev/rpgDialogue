@@ -545,6 +545,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public void HandleCloseMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        Debug.Log("Closing makrup");
+        Debug.Log("Closing markup");
     }
 }

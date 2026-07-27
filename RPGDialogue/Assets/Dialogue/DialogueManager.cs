@@ -198,7 +198,7 @@ public class DialogueManager : MonoBehaviour
         int i = 0;
         int visibleCharCount = 0;
 
-        while(visibleCharCount <= index + 1)
+        while(visibleCharCount <= index)
         {
             if (i >= textArray.Length)
             {
@@ -212,7 +212,7 @@ public class DialogueManager : MonoBehaviour
                 if(dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-                    Debug.Log($"Recognized markup {dm} from {i}");
+                    //Debug.Log($"Recognized markup {dm} from {i}");
                     i += dm.GetMarkupText(rawText, i).Length;
                 }
                 else if(textArray[i] == '<')
@@ -267,7 +267,7 @@ public class DialogueManager : MonoBehaviour
         int i = 0;
         int visibleCharCount = 0;
 
-        while (visibleCharCount <= index + 1)
+        while (visibleCharCount <= index)
         {
             if (i >= textArray.Length)
             {
@@ -282,7 +282,7 @@ public class DialogueManager : MonoBehaviour
                 if (dm.ValidateMarkup(rawText, i))
                 {
                     recognizedMarkup = true;
-                    Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i).Length}, Length:{rawText.Length}");
+                    //Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i).Length}, Length:{rawText.Length}");
 
                     indexedText += dm.GetMarkupText(rawText, i);
                     i += dm.GetMarkupText(rawText, i).Length;
@@ -342,6 +342,10 @@ public class DialogueManager : MonoBehaviour
 
         lastRawTextSource = rawText;
         lastIndexedLogicText = indexedText;
+
+        Debug.Log($"Char index for visible chars:{index}, Indexed text:{indexedText}, Delta text:{deltaText}");
+        HandleMarkupLogic(deltaText);
+
 		return indexedText;
 	}
 
@@ -397,7 +401,7 @@ public class DialogueManager : MonoBehaviour
 
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
-            Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
+            //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
             lastIndexedLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)
@@ -408,8 +412,7 @@ public class DialogueManager : MonoBehaviour
                 curLogicText = LogicDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
-                yield return new WaitForSeconds(curStartWaitTime); 
-
+                yield return new WaitForSeconds(curStartWaitTime);
                 updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, cleanedDialogue, charIndex);
 
                 yield return new WaitForSeconds(curEndWaitTime);
