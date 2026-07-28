@@ -45,9 +45,11 @@ public class DialogueManager : MonoBehaviour
     float timeTillNextChar;
     bool readingDialogue = false;
     
-    string lastRawTextSource = "";
-    string lastIndexedLogicText = "";
-    
+    string curRawTextSource = "";
+    string curLogicText = "";
+    string curDisplayText = "";
+    string curLogicDeltaText = "";
+    string curDisplayDeltaText = "";
     
     [Header("Editable By Markups")]
     public float curStartWaitTime = 0;
@@ -64,6 +66,7 @@ public class DialogueManager : MonoBehaviour
             curExpression = curSpeaker.getExpressionOf(id);
     }
     DialogueSpeaker curSpeaker;
+
 
     #region EVENTS
     public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index);
@@ -108,7 +111,7 @@ public class DialogueManager : MonoBehaviour
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkupText(totalText), totalText.Length);
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkups(totalText), totalText.Length);
         }
     }
 
@@ -162,17 +165,17 @@ public class DialogueManager : MonoBehaviour
     
 
         //If new line of dialogue clear comparison text
-        if(rawText != lastRawTextSource)
+        if(rawText != curRawTextSource)
         {
-            lastRawTextSource = rawText;
-            lastIndexedLogicText = "";
+            curRawTextSource = rawText;
+            curLogicText = "";
         }
 
         //Get text added to display string per call
         string newAddedText;
-        if(indexedRawText.Length > lastIndexedLogicText.Length)
+        if(indexedRawText.Length > curLogicText.Length)
         {
-            newAddedText = indexedRawText.Substring(lastIndexedLogicText.Length);
+            newAddedText = indexedRawText.Substring(curLogicText.Length);
         }
         else
         {
@@ -181,18 +184,19 @@ public class DialogueManager : MonoBehaviour
 
         if(newAddedText != null && newAddedText != "")
         {   //Debug.Log($"New text displayed is {newAddedText}");
-            HandleMarkupLogic(newAddedText);
+            HandleMarkups(newAddedText);
         }
 
-        lastIndexedLogicText = indexedRawText;
+        curLogicText = indexedRawText;
         Debug.Log($"Indexed Raw Text:{indexedRawText}, index:{index}");
-        return RemoveMarkupText(indexedRawText);
+        return RemoveMarkups(indexedRawText);
         
     }
 
     string DisplayDraftIndex(int index, string rawText)
     {
         string indexedText = "";
+        string deltaText = "";
         char[] textArray = rawText.ToCharArray();
         bool recognizedMarkup = false;
         bool isRichText = false;
@@ -247,10 +251,23 @@ public class DialogueManager : MonoBehaviour
                 indexedText += textArray[i].ToString();
                 visibleCharCount++;
             }
-
             i++;
         }
-        return indexedText;
+
+        if(curDisplayText  != null && curRawTextSource == rawText)
+        {
+            int deltaLength = curDisplayText.Length - indexedText.Length;
+            deltaText = rawText.Substring(indexedText.Length - deltaLength, deltaLength);
+        }
+        else if(curRawTextSource != rawText)
+        {
+            curDisplayDeltaText = indexedText;
+        }
+
+        curDisplayText = indexedText;
+		curDisplayDeltaText = deltaText;
+
+		return indexedText;
     }
 
     string LogicDraftIndex(int index, string rawText)
@@ -326,45 +343,47 @@ public class DialogueManager : MonoBehaviour
 			i++;
 		}
 
-        Debug.Log($"Indexed text:{indexedText}, Length:{indexedText.Length}");
+        //Debug.Log($"Indexed text:{indexedText}, Length:{indexedText.Length}");
         indexedText = AppendMarkups(rawText, indexedText.Length);
-        Debug.Log($"Text after append:{indexedText}");
+        //Debug.Log($"Text after append:{indexedText}");
         
 
-        //If same line of dialogue compare changes in text
-        if(lastIndexedLogicText != null && lastRawTextSource == rawText)
+        //Setting change in deltaLogicText
+        if(curLogicText != null && curRawTextSource == rawText)
         {
             //Debug.Log($"Last indexed logic text:{lastIndexedLogicText}, length:{lastIndexedLogicText.Length}");
-            int deltaLength = indexedText.Length - lastIndexedLogicText.Length;
+            int deltaLength = indexedText.Length - curLogicText.Length;
             //Debug.Log($"Indexed test length:{indexedText.Length}, Indexed text:{indexedText}, Delta length:{deltaLength}");
             deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength); //INDEXING ERROR
         }
-        else if(lastRawTextSource != rawText)
+        else if(curRawTextSource != rawText)
         {
             deltaText = indexedText;
             //Debug.Log($"New dialogue line...delta text:{deltaText}");
         }
 
-        lastRawTextSource = rawText;
-        lastIndexedLogicText = indexedText;
+        curRawTextSource = rawText;
+        curLogicText = indexedText;
+        curLogicDeltaText = deltaText;
 
         //Debug.Log($"Char index for visible chars:{index}, Indexed text:{indexedText}, Delta text:{deltaText}");
-        HandleMarkupLogic(deltaText);
+        HandleMarkups(deltaText);
 
 		return indexedText;
 	}
 
-	void HandleMarkupLogic(string newText)
+	void HandleMarkups(string delaText)
     {
+        //Debug.Log($"Logic text:{delaText}");
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            dialogueMarkups[i].HandleMarkup(this, newText);
+            dialogueMarkups[i].HandleMarkup(this, delaText);
         }
     }
 
-    string RemoveMarkupText(string newText)
+    string RemoveMarkups(string rawText)
     {
-        string handledMarkupText = newText;
+        string handledMarkupText = rawText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
             handledMarkupText = dialogueMarkups[i].RemoveMarkupText(handledMarkupText);
@@ -439,7 +458,7 @@ public class DialogueManager : MonoBehaviour
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
             //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
-            lastIndexedLogicText = null; 
+            this.curLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)
             {   
@@ -459,6 +478,11 @@ public class DialogueManager : MonoBehaviour
 
                 yield return new WaitForSeconds(localCharWaitSeconds);
                 charIndex++; 
+
+                if(curLogicText == dialogueLine)
+                {
+                    Debug.Log($"Logic text equals dialogueLine...all logic ran? after {charIndex}");
+                }
             }
             yield return new WaitForSeconds(lineWaitSeconds);
         }

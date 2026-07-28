@@ -344,6 +344,7 @@ public class DialogueMarkup : ScriptableObject
    
     #endregion
    
+    
     #region REMOVE TEXT
     virtual public string RemoveMarkupText(string text)
     {   
