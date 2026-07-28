@@ -326,17 +326,18 @@ public class DialogueManager : MonoBehaviour
 			i++;
 		}
 
+        Debug.Log($"Indexed text:{indexedText}, Length:{indexedText.Length}");
         indexedText = AppendMarkups(rawText, indexedText.Length);
-        //Debug.Log($"Appended text:{indexedText}");
+        Debug.Log($"Text after append:{indexedText}");
+        
 
-        //Debug.Log($"Last source:{lastRawTextSource}");
         //If same line of dialogue compare changes in text
         if(lastIndexedLogicText != null && lastRawTextSource == rawText)
         {
+            //Debug.Log($"Last indexed logic text:{lastIndexedLogicText}, length:{lastIndexedLogicText.Length}");
             int deltaLength = indexedText.Length - lastIndexedLogicText.Length;
-            //Debug.Log($"Delta length:{deltaLength}");
-            deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength); //INDEXING ERROR HERE
-            //Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
+            //Debug.Log($"Indexed test length:{indexedText.Length}, Indexed text:{indexedText}, Delta length:{deltaLength}");
+            deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength); //INDEXING ERROR
         }
         else if(lastRawTextSource != rawText)
         {
@@ -347,7 +348,7 @@ public class DialogueManager : MonoBehaviour
         lastRawTextSource = rawText;
         lastIndexedLogicText = indexedText;
 
-        Debug.Log($"Char index for visible chars:{index}, Indexed text:{indexedText}, Delta text:{deltaText}");
+        //Debug.Log($"Char index for visible chars:{index}, Indexed text:{indexedText}, Delta text:{deltaText}");
         HandleMarkupLogic(deltaText);
 
 		return indexedText;
@@ -382,7 +383,9 @@ public class DialogueManager : MonoBehaviour
         bool isRichText = false;
 
         for(int i = startIndex; i < textArray.Length; i++)
-        { 
+        {
+            isMarkup = false;
+            isRichText = false;
             foreach (DialogueMarkup dm in dialogueMarkups)
             {
                 if (dm.ValidateMarkup(rawText, i))
@@ -393,10 +396,11 @@ public class DialogueManager : MonoBehaviour
                 }
                 else if (textArray[i] == '<' && i + 1 < rawText.Length)
                 {
-                    int indexOfEnd = rawText.IndexOf('<', i + 1);
+                    int indexOfEnd = rawText.IndexOf('>', i + 1);
                     if (indexOfEnd != -1)
                     {
-                        string richText = rawText.Substring(i, indexOfEnd - i);
+                        string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
+                        Debug.Log($"Found rich text of Length:{richText.Length} at {i}...moving to index {i + richText.Length}");
                         appendText += richText;
                         i += richText.Length;
                         isRichText = true;
@@ -414,9 +418,10 @@ public class DialogueManager : MonoBehaviour
             }
             else
             {
-                break;
+                return appendText;
             }
         }
+        //Debug.Log($"Ending append text{appendText}");
 
         return appendText;
     }

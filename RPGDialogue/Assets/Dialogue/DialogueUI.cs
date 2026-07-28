@@ -94,7 +94,7 @@ public class DialogueUI : MonoBehaviour
     void IndexTextVisbility(TMP_Text textBox, string rawText, int index)
     {
 
-        Debug.Log($"Raw text for visibility:{rawText}");
+        //Debug.Log($"Raw text for visibility:{rawText}");
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
@@ -120,7 +120,7 @@ public class DialogueUI : MonoBehaviour
 
         visibleChars = textBox.maxVisibleCharacters;
 
-		    Debug.Log($"Visible characters:{index},{rawText.Substring(0, visibleChars)}");
+		    //Debug.Log($"Visible characters:{index},{rawText.Substring(0, visibleChars)}");
 
 	}
 }
