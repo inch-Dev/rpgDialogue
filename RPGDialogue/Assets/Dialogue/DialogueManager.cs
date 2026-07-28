@@ -9,6 +9,7 @@ using UnityEngine.UI;
 using Unity.VisualScripting;
 using UnityEditor.U2D.Animation;
 using TMPro;
+using JetBrains.Annotations;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -325,13 +326,16 @@ public class DialogueManager : MonoBehaviour
 			i++;
 		}
 
+        indexedText = AppendMarkups(rawText, indexedText.Length);
+        //Debug.Log($"Appended text:{indexedText}");
+
         //Debug.Log($"Last source:{lastRawTextSource}");
         //If same line of dialogue compare changes in text
         if(lastIndexedLogicText != null && lastRawTextSource == rawText)
         {
             int deltaLength = indexedText.Length - lastIndexedLogicText.Length;
             //Debug.Log($"Delta length:{deltaLength}");
-            deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength);
+            deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength); //INDEXING ERROR HERE
             //Debug.Log($"Indexed text:{indexedText},Delta length:{deltaLength}, Delta text:{deltaText}");
         }
         else if(lastRawTextSource != rawText)
@@ -367,27 +371,55 @@ public class DialogueManager : MonoBehaviour
 
         return handledMarkupText;
     }
-    string AppendMarkups(string fullText, char[] textArray, int startIndex)
+
+    string AppendMarkups(string rawText, int startIndex)
     {
-        bool isReadingTag = false; 
-        string appendText = fullText;
+        char[] textArray = rawText.ToCharArray();
+        string appendText = rawText.Substring(0, startIndex);
+        //Debug.Log($"Starting apending text...{appendText}");
+
+        bool isMarkup = false;
+        bool isRichText = false;
 
         for(int i = startIndex; i < textArray.Length; i++)
-        {
-            
-            if(textArray[i] == '<')
-                isReadingTag = true;
-            if(isReadingTag)
-                appendText += textArray[i];
+        { 
+            foreach (DialogueMarkup dm in dialogueMarkups)
+            {
+                if (dm.ValidateMarkup(rawText, i))
+                {
+                    appendText += dm.GetMarkupText(rawText, i);
+                    i += dm.GetMarkupText(rawText, i).Length;
+                    isMarkup = true;
+                }
+                else if (textArray[i] == '<' && i + 1 < rawText.Length)
+                {
+                    int indexOfEnd = rawText.IndexOf('<', i + 1);
+                    if (indexOfEnd != -1)
+                    {
+                        string richText = rawText.Substring(i, indexOfEnd - i);
+                        appendText += richText;
+                        i += richText.Length;
+                        isRichText = true;
+                    }
+                }
+                if (isMarkup || isRichText)
+                    break;
+            }
+            if (isMarkup || isRichText)
+                continue;
+
+            if(textArray[i] == ' ')
+            {
+                appendText += textArray[i].ToString();
+            }
             else
+            {
                 break;
-            if(textArray[i] == '>')
-                isReadingTag = false;
+            }
         }
 
         return appendText;
-    } 
-
+    }
     IEnumerator TypewriterReadDialogue(Dialogue dialogue) 
     {
         int charIndex = 0;

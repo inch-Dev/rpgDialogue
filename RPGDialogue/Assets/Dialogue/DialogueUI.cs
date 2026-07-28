@@ -93,27 +93,34 @@ public class DialogueUI : MonoBehaviour
 
     void IndexTextVisbility(TMP_Text textBox, string rawText, int index)
     {
-        
 
+        Debug.Log($"Raw text for visibility:{rawText}");
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
-
         int spaceCount = 0;
+        int visibleChars = 0;
 
         for(int i = 0; i < rawText.Length; i++)
         {
+            if (visibleChars >= index + 1)
+                break;
             
             if(textArray[i] == ' ')
             {
-                spaceCount++;
+                textBox.maxVisibleCharacters++;
+            }
+
+            else
+            {
+                textBox.maxVisibleCharacters++;
+                visibleChars++;
             }
         }
 
-        textBox.maxVisibleCharacters = index + spaceCount;
+        visibleChars = textBox.maxVisibleCharacters;
 
-        if(index + spaceCount < rawText.Length)
-		    Debug.Log($"Visible characters:{index},{rawText.Substring(0, index + spaceCount)}");
+		    Debug.Log($"Visible characters:{index},{rawText.Substring(0, visibleChars)}");
 
 	}
 }
