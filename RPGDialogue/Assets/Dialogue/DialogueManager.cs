@@ -542,6 +542,7 @@ public class DialogueManager : MonoBehaviour
                 if(curLogicText == dialogueLine)
                 {
                     Debug.Log($"Logic text equals dialogueLine...all logic ran? after {charIndex}");
+                    break;
                 }
             }
             yield return new WaitForSeconds(lineWaitSeconds);

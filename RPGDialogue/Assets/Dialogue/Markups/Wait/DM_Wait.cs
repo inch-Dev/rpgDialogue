@@ -12,7 +12,7 @@ public class DM_Wait : DialogueMarkup
     public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
         Debug.Log($"Running wait logic from text:{text}");
-            if(hasParameter && GetParameterText(text) != null)
+            if(hasParameters && GetParameterText(text) != null)
             { 
                 lastStoredParameter = GetParameterText(text);
 

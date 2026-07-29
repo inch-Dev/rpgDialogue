@@ -5,7 +5,7 @@ public class DM_Speed : DialogueMarkup
 {
     public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
-        if(hasParameter && GetParameterText(text) != null)
+        if(hasParameters && GetParameterText(text) != null)
             { 
                 lastStoredParameter = GetParameterText(text);
 

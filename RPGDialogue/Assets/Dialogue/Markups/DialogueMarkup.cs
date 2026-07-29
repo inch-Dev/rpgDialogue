@@ -23,12 +23,12 @@ public class DialogueMarkup : ScriptableObject
     protected string openFormatTagEnd = "}";
     protected string closeFormatTagStart = "{/";
     protected string closeFormatTagEnd = "}";
-    [SerializeField] protected bool hasParameter;
-    [ShowIf("hasParameter")]
+    [SerializeField] protected bool hasParameters;
+    [ShowIf("hasParameters")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
-    [SerializeField] protected bool hasSpecificParameters;
-    [ShowIf("hasSpecificParameters")]
-    [SerializeField] List<String> validParameters;
+    [ShowIf("hasParameters")]
+    [SerializeField] protected DialogueMarkupParameterSequence[] parameterSequences;
+
     protected string lastStoredParameter;
 
     void OnValidate()
@@ -51,7 +51,7 @@ public class DialogueMarkup : ScriptableObject
 
         //Check for markup character
 
-        if(!hasParameter)
+        if(!hasParameters)
         {   
             Debug.Log("This markup has no parameter!");
             return null;
@@ -88,21 +88,6 @@ public class DialogueMarkup : ScriptableObject
                     
         }
         
-        //If it is a valid parameter
-        if(hasSpecificParameters)
-        {
-            bool matchesValidParameter = false;
-            for(int i = 0; i < validParameters.Count; i++)
-            {
-                if(validParameters[i] == parameterText)
-                {
-                    matchesValidParameter = true;
-                }
-            }
-
-            if(!matchesValidParameter)
-                return null;
-        }
 
         if(ValidateParameter(parameterText))
             return parameterText;
@@ -453,9 +438,11 @@ public class DialogueMarkup : ScriptableObject
         }
         return excludedMarkupText;
     }
-    
-    #endregion
-    virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
+
+	#endregion
+
+	#region LOGIC
+	virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
     {
         if(ValidateOpenMarkup(text))
         {
@@ -518,7 +505,7 @@ public class DialogueMarkup : ScriptableObject
     virtual public void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
     {
         Debug.Log("Opening logic");
-            if(hasParameter && GetParameterText(text) != null)
+            if(hasParameters && GetParameterText(text) != null)
             { 
                 lastStoredParameter = GetParameterText(text);
 
@@ -548,4 +535,5 @@ public class DialogueMarkup : ScriptableObject
     {
         //Debug.Log("Closing markup");
     }
+    #endregion
 }

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: DM_Speed
   m_EditorClassIdentifier: Assembly-CSharp::DM_Speed
   markupCharacter: 115
-  hasParameter: 1
+  hasParameters: 1
   parameterType: 128
-  hasSpecificParameters: 0
-  validParameters: []
+  parameterSequences: []
