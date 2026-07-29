@@ -123,4 +123,8 @@ public class DialogueUI : MonoBehaviour
 		    //Debug.Log($"Visible characters:{index},{rawText.Substring(0, visibleChars)}");
 
 	}
+
+	#region TEXT EFFECTS
+
+    #endregion
 }

@@ -81,6 +81,66 @@ public class DialogueManager : MonoBehaviour
 
         ChangeSpeed(DialogueSpeedID.DEFAULT);
     }
+    
+    public Vector2 getDisplayIndexRange(string target)
+    {
+        Vector2 indexRange = Vector2.zero;
+        char[] displayArray = curDisplayText.ToCharArray();
+        char[] targetArray = target.ToCharArray();
+
+        if (target.Length > curDisplayText.Length)
+            return indexRange;
+
+        //Iterate through display text until start of target string
+        for(int i = 0; i < curDisplayText.Length; i++)
+        {
+            if (i + target.Length >= curDisplayText.Length)
+                break;
+            if(displayArray[i] == targetArray[0])
+            {
+                int indexOfEnd = curDisplayText.IndexOf(targetArray[targetArray.Length - 1]);
+                if(indexOfEnd != -1)
+                {
+                    string targetText = curDisplayText.Substring(i, indexOfEnd - 1 - i);
+                    if(targetText == target)
+                    {
+                        indexRange = new Vector2(i, indexOfEnd);
+                    }
+                }
+            }
+        }
+        return indexRange;
+    }
+
+    public Vector2 getLogicIndexRange(string target)
+    {
+        Vector2 indexRange = Vector2.zero;
+        char[] logicArray = curLogicText.ToCharArray();
+        char[] targetArray = target.ToCharArray();
+
+		if (target.Length > curLogicText.Length)
+			return indexRange;
+
+		//Iterate through display text until start of target string
+		for (int i = 0; i < curLogicText.Length; i++)
+	    { 
+			if (i + target.Length >= curLogicText.Length)
+				break;
+			if (logicArray[i] == targetArray[0])
+			{
+				int indexOfEnd = curLogicText.IndexOf(targetArray[targetArray.Length - 1]);
+				if (indexOfEnd != -1)
+				{
+					string targetText = curLogicText.Substring(i, indexOfEnd - 1 - i);
+					if (targetText == target)
+					{
+						indexRange = new Vector2(i, indexOfEnd);
+					}
+				}
+			}
+		}
+		return indexRange;
+	}
     public void ReadDialogue(Dialogue dialogue)
     {
         if(readingDialogue)
