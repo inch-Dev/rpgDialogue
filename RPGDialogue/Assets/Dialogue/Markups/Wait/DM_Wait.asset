@@ -15,4 +15,8 @@ MonoBehaviour:
   markupCharacter: 119
   hasParameters: 1
   parameterType: 2
-  parameterSequences: []
+  parameterSequences:
+  - name: 
+    parameters: 
+  - name: 
+    parameters: 

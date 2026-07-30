@@ -98,7 +98,6 @@ public class DialogueUI : MonoBehaviour
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
-        int spaceCount = 0;
         int visibleChars = 0;
 
         for(int i = 0; i < rawText.Length; i++)
