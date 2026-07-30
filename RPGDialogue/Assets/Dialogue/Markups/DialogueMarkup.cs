@@ -45,6 +45,71 @@ public class DialogueMarkup : ScriptableObject
     }
     
     #region GETTERS
+
+    //Iterate multiple times till matching parameter sequence
+    virtual public string getParameterText(string markupText)
+    {
+        string parameter = null;
+
+        if(!hasParameters)
+        {
+            return null;
+        }
+
+        string tryParameter = "";
+
+        char tagStart;
+        char tagEnd;
+
+        int tagStartLength;
+        int tagEndLength;
+
+        //Validate Instance
+        if(ValidateOpenMarkup(markupText))
+        {
+            tagStart = openFormatTagStart.ToCharArray()[0];
+            tagEnd = openFormatTagEnd.ToCharArray()[0];
+
+            tagStartLength = openFormatTagStart.Length;
+            tagEndLength = openFormatTagEnd.Length;
+        }
+
+        else if(ValidateCloseMarkup(markupText))
+        {
+            tagStart = closeFormatTagStart.ToCharArray()[0];
+            tagEnd = closeFormatTagEnd.ToCharArray()[0];
+
+            tagStartLength = closeFormatTagStart.Length;
+            tagEndLength = closeFormatTagEnd.Length;
+        }
+
+        else
+        {
+            return null;
+        }
+
+        char[] textArray = markupText.ToCharArray();
+
+        //Find parameter
+        for (int i = 0; i < markupText.Length; i++)
+        {
+            if(textArray[i] == tagStart && i + 1 < markupText.Length)
+            {
+                int indexOfEnd = markupText.IndexOf(tagEnd, i + 1);
+
+                if(indexOfEnd != -1)
+                {
+                    tryParameter = markupText.Substring(i + tagStartLength, indexOfEnd - 1 - i);
+                    break;
+                }
+            }
+        }
+
+        if(ValidateParameter(tryParameter))
+        parameter = tryParameter;
+
+        return parameter;
+    }
     virtual public string GetParameterText(string text)
     {
         string parameterText = "";
@@ -142,11 +207,46 @@ public class DialogueMarkup : ScriptableObject
         //Debug.Log($"Found markup {markupText}");
         return null;
     }
-    #endregion
-    
-    
-    #region VALIDATE INSTANCE
-    virtual public bool ValidateParameter(string text)
+	#endregion
+
+
+
+	#region VALIDATE INSTANCES
+
+	virtual public bool ValidateParameter<T>(string parameterText)
+	{
+		if ((T)Convert.ChangeType(parameterText, typeof(T)) != null)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+
+	virtual public bool ValidateParameters(string[] parameterText)
+	{
+        //Compare parameter sequences to parameter text recieved
+		foreach (DialogueMarkupParameterSequence sequence in parameterSequences)
+		{
+            if (sequence.parameters.Length != parameterText.Length)
+                continue;
+
+            bool parameterMatch = false;
+
+			for (int i = 0; i < sequence.parameters.Length; i++)
+			{
+				
+			}
+
+            if (parameterMatch)
+                break;
+		}
+
+		return false;
+	}
+
+	virtual public bool ValidateParameter(string text)
     {
         bool isValid = false;
         switch(parameterType)

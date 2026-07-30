@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public struct DialogueMarkupParameterSequence 
 {
-	[SerializeField] string name;
-	[SerializeField] DialogueMarkupParameterType[] parameters;
+	[SerializeField] public string name;
+	[SerializeField] public DialogueMarkupParameterType[] parameters;
 
 }
