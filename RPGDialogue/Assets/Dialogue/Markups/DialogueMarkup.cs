@@ -17,7 +17,7 @@ using JetBrains.Annotations;
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
 {
-    [SerializeField] Dictionary<string, dynamic> parameterDictionary;
+    [SerializeField] public string keyName;
     [SerializeField] protected char markupCharacter;
     protected string openFormatTagStart = "{";
     protected string openFormatTagEnd = "}";
@@ -28,7 +28,7 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] protected DialogueMarkupParameterType parameterType;
     [ShowIf("hasParameters")]
     [SerializeField] protected DialogueMarkupParameterSequence[] parameterSequences;
-
+    [SerializeField] List<MarkupData> markupDatas;
     protected string lastStoredParameter;
 
     void OnValidate()
@@ -47,7 +47,7 @@ public class DialogueMarkup : ScriptableObject
     #region GETTERS
 
     //Iterate multiple times till matching parameter sequence
-    virtual public string getParameterText(string markupText)
+    virtual public string getParameterText(string markupText, int parameterIndex)
     {
         string parameter = null;
 
@@ -105,6 +105,9 @@ public class DialogueMarkup : ScriptableObject
             }
         }
 
+
+        //Match data types to parameters gotten
+
         if(ValidateParameter(tryParameter))
         parameter = tryParameter;
 
@@ -112,6 +115,16 @@ public class DialogueMarkup : ScriptableObject
     }
     virtual public string GetParameterText(string text)
     {
+        foreach(MarkupData data in markupDatas)
+        {
+           Debug.Log($"Markups on {this}...{data.GetParameters().Length}");
+        }
+
+
+
+
+
+
         string parameterText = "";
 
         //Check for markup character
