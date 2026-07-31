@@ -47,7 +47,7 @@ public class DialogueMarkup : ScriptableObject
     #region GETTERS
 
     //Iterate multiple times till matching parameter sequence
-    virtual public string getParameterText(string markupText, int parameterIndex)
+    virtual public string getParameterText(string markupText)
     {
         string parameter = null;
 
