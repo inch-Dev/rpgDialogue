@@ -18,7 +18,6 @@ public class DialogueMarkup : ScriptableObject
     [ShowIf("hasParameters")]
     [SerializeField] protected DialogueMarkupParameterType parameterType;
     [ShowIf("hasParameters")]
-    [SerializeField] protected DialogueMarkupParameterSequence[] parameterSequences;
     [SerializeField] List<MarkupData> markupDatas;
     protected string lastStoredParameter;
 
