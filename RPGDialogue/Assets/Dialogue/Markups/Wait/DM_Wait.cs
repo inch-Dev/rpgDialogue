@@ -9,44 +9,44 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DM_Wait", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DM_Wait", order = 2)]
 public class DM_Wait : DialogueMarkup
 {
-    public override void HandleOpenMarkupLogic(DialogueManager dialogueManager, string text)
+    public override void OpenLogic(DialogueManager dialogueManager, string text)
     {
-        Debug.Log($"Running wait logic from text:{text}");
-            if(hasParameters && GetParameterText(text) != null)
-            { 
-                lastStoredParameter = GetParameterText(text);
+        //Debug.Log($"Running wait logic from text:{text}");
+        //    if(hasParameters && GetParameterText(text) != null)
+        //    { 
+        //        lastStoredParameter = GetParameterText(text);
 
 
-                //Run logic with parameter based on enum type
+        //        //Run logic with parameter based on enum type
 
-                switch(parameterType)
-                {
-                    case DialogueMarkupParameterType.INT:
-                    break;
-                    case DialogueMarkupParameterType.FLOAT:
-                    if(RecognizeMarkupAtBeginning(text))
-                    {
-                        dialogueManager.curStartWaitTime = float.Parse(lastStoredParameter);
-                        Debug.Log($"Setting start wait time to {lastStoredParameter}");
-                    }
-                    else if(RecognizeMarkupAtEnd(text))
-                    {
-                        dialogueManager.curEndWaitTime = float.Parse(lastStoredParameter);
-                        Debug.Log($"Setting end wait time to {lastStoredParameter}");
-                    }
-                    break;
-                    case DialogueMarkupParameterType.BOOL:
-                    break;
-                    case DialogueMarkupParameterType.CHAR:
-                    break;
-                    case DialogueMarkupParameterType.STRING:
-                    break;
-                    case DialogueMarkupParameterType.DOUBLE:
-                    break;
-                }
-            }
+        //        switch(parameterType)
+        //        {
+        //            case DialogueMarkupParameterType.INT:
+        //            break;
+        //            case DialogueMarkupParameterType.FLOAT:
+        //            if(RecognizeMarkupAtBeginning(text))
+        //            {
+        //                dialogueManager.curStartWaitTime = float.Parse(lastStoredParameter);
+        //                Debug.Log($"Setting start wait time to {lastStoredParameter}");
+        //            }
+        //            else if(RecognizeMarkupAtEnd(text))
+        //            {
+        //                dialogueManager.curEndWaitTime = float.Parse(lastStoredParameter);
+        //                Debug.Log($"Setting end wait time to {lastStoredParameter}");
+        //            }
+        //            break;
+        //            case DialogueMarkupParameterType.BOOL:
+        //            break;
+        //            case DialogueMarkupParameterType.CHAR:
+        //            break;
+        //            case DialogueMarkupParameterType.STRING:
+        //            break;
+        //            case DialogueMarkupParameterType.DOUBLE:
+        //            break;
+        //        }
+        //    }
 
-        lastStoredParameter = "";
+        //lastStoredParameter = "";
     }
 
 }

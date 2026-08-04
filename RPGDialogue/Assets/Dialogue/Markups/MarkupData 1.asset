@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5c7895799dde3745bf6080d5af9d014, type: 3}
   m_Name: MarkupData 1
   m_EditorClassIdentifier: Assembly-CSharp::WaitMarkupData
-  keyName: 
+  keyName: Small
   time: 1.2

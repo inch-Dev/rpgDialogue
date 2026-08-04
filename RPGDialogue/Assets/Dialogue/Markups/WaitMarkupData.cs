@@ -5,4 +5,10 @@ using UnityEngine;
 public class WaitMarkupData : MarkupData
 {
     [SerializeField] float time;
+
+	public override void OpenLogic()
+	{
+		Debug.Log("Found wait markupData");
+	}
+
 }

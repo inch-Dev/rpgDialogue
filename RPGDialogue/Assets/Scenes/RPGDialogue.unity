@@ -727,16 +727,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: dialogueMarkups.Array.size
-      value: 3
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: 'dialogueMarkups.Array.data[0]'
       value: 
-      objectReference: {fileID: 11400000, guid: 89b97e8569bf2a34d8ff47c59a440ca6, type: 2}
+      objectReference: {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: 'dialogueMarkups.Array.data[1]'
       value: 
-      objectReference: {fileID: 11400000, guid: 990dacf2ca960f9488092c56bd4da923, type: 2}
+      objectReference: {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: 'dialogueMarkups.Array.data[2]'
       value: 

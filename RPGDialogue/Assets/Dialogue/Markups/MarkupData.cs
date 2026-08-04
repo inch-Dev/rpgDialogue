@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MarkupData", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup/MarkupData", order = 1)]
 public class MarkupData : ScriptableObject
 {
-    [SerializeField] string keyName;
+    [SerializeField] public string keyName;
 
 
     //Get all variables (parameters) in this markupData that is not its keyName

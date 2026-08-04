@@ -82,7 +82,7 @@ public class DialogueManager : MonoBehaviour
         ChangeSpeed(DialogueSpeedID.DEFAULT);
     }
     
-    public Vector2 getDisplayIndexRange(string target)
+    public Vector2 GetDisplayIndexRange(string target)
     {
         Vector2 indexRange = Vector2.zero;
         char[] displayArray = curDisplayText.ToCharArray();
@@ -112,7 +112,7 @@ public class DialogueManager : MonoBehaviour
         return indexRange;
     }
 
-    public Vector2 getLogicIndexRange(string target)
+    public Vector2 GetLogicIndexRange(string target)
     {
         Vector2 indexRange = Vector2.zero;
         char[] logicArray = curLogicText.ToCharArray();
@@ -274,27 +274,28 @@ public class DialogueManager : MonoBehaviour
             isRichText = false;
             foreach(DialogueMarkup dm in dialogueMarkups)
             {
-                if(dm.ValidateMarkup(rawText, i))
+                if (dm.ValidateMarkup(rawText, i))
                 {
+                    Debug.Log("Found markup!");
                     recognizedMarkup = true;
                     //Debug.Log($"Recognized markup {dm} from {i}");
                     i += dm.GetMarkupString(rawText, i).Length;
                 }
-                else if(textArray[i] == '<')
+                else if (textArray[i] == '<')
                 {
-					if (i + 1 < textArray.Length)
-					{
-						int indexOfEnd = rawText.IndexOf('>', i + 1);
-						if (indexOfEnd != -1)
-						{
-							string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
-							//Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
-							i += richText.Length;
-							indexedText += richText;
-							isRichText = true;
-						}
-					}
-				}
+                    if (i + 1 < textArray.Length)
+                    {
+                        int indexOfEnd = rawText.IndexOf('>', i + 1);
+                        if (indexOfEnd != -1)
+                        {
+                            string richText = rawText.Substring(i, (indexOfEnd - i) + 1);
+                            //Debug.Log($"Found richText:{richText}, Length:{richText.Length}");
+                            i += richText.Length;
+                            indexedText += richText;
+                            isRichText = true;
+                        }
+                    }
+                }
                 if (recognizedMarkup || isRichText)
                     break;
             }
@@ -437,7 +438,7 @@ public class DialogueManager : MonoBehaviour
         //Debug.Log($"Logic text:{delaText}");
         for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            dialogueMarkups[i].HandleMarkup(this, delaText);
+            dialogueMarkups[i].HandleLogic(this, delaText);
         }
     }
 
@@ -517,7 +518,7 @@ public class DialogueManager : MonoBehaviour
 
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
-            //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
+            Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
             this.curLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)
