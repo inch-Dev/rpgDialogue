@@ -203,7 +203,7 @@ public class DialogueManager : MonoBehaviour
             {
                 if(dm.ValidateMarkup(rawText, i))
                 {
-                    string markupText = dm.GetMarkupText(rawText, i);
+                    string markupText = dm.GetMarkupString(rawText, i);
                     indexedRawText += markupText;
                     i += markupText.Length;
                     Debug.Log($"Found markup of {dm}. Moving to index {i}");
@@ -278,7 +278,7 @@ public class DialogueManager : MonoBehaviour
                 {
                     recognizedMarkup = true;
                     //Debug.Log($"Recognized markup {dm} from {i}");
-                    i += dm.GetMarkupText(rawText, i).Length;
+                    i += dm.GetMarkupString(rawText, i).Length;
                 }
                 else if(textArray[i] == '<')
                 {
@@ -362,8 +362,8 @@ public class DialogueManager : MonoBehaviour
                     recognizedMarkup = true;
                     //Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i).Length}, Length:{rawText.Length}");
 
-                    indexedText += dm.GetMarkupText(rawText, i);
-                    i += dm.GetMarkupText(rawText, i).Length;
+                    indexedText += dm.GetMarkupString(rawText, i);
+                    i += dm.GetMarkupString(rawText, i).Length;
                     //Debug.Log($"Added to index...{indexedText}");
                 }
                 else if (textArray[i] == '<')
@@ -469,8 +469,8 @@ public class DialogueManager : MonoBehaviour
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
-                    appendText += dm.GetMarkupText(rawText, i);
-                    i += dm.GetMarkupText(rawText, i).Length;
+                    appendText += dm.GetMarkupString(rawText, i);
+                    i += dm.GetMarkupString(rawText, i).Length;
                     isMarkup = true;
                 }
                 else if (textArray[i] == '<' && i + 1 < rawText.Length)

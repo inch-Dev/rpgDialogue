@@ -20,7 +20,7 @@ public class MarkupData : ScriptableObject
 
         return fields;
     }
-    public virtual void HandleOpenLogic(){ }
+    public virtual void OpenLogic(){ }
 
-    public virtual void HandleCloseLogic(){ }
+    public virtual void CloseLogic(){ }
 }

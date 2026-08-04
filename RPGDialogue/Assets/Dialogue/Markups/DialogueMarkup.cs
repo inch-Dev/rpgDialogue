@@ -1,18 +1,9 @@
 using System;
-using System.ComponentModel;
-using System.Data.Common;
 using NaughtyAttributes;
-using NUnit.Compatibility;
-using NUnit.Framework;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
-using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
-using System.Runtime.ExceptionServices;
-using UnityEngine.UI;
-using UnityEngine.Rendering;
-using JetBrains.Annotations;
+using System.Reflection;
+using UnityEngine.Localization.PropertyVariants.TrackedProperties;
 
 [CreateAssetMenu(fileName = "Dialogue", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
@@ -47,72 +38,69 @@ public class DialogueMarkup : ScriptableObject
     #region GETTERS
 
     //Iterate multiple times till matching parameter sequence
-    virtual public string getParameterText(string markupText)
+    virtual public string[] GetParameterStrings(string markupText)
     {
-        string parameter = null;
+        List<string> parameters = new List<string>();
 
-        if(!hasParameters)
-        {
-            return null;
-        }
+		if (!hasParameters)
+		{
+			return null;
+		}
 
-        string tryParameter = "";
+		string curParameter = "";
 
-        char tagStart;
-        char tagEnd;
+		char tagStart;
+		char tagEnd;
 
-        int tagStartLength;
-        int tagEndLength;
+		int tagStartLength;
+		int tagEndLength;
 
-        //Validate Instance
-        if(ValidateOpenMarkup(markupText))
-        {
-            tagStart = openFormatTagStart.ToCharArray()[0];
-            tagEnd = openFormatTagEnd.ToCharArray()[0];
+		//Validate Instance
+		if (ValidateOpenMarkup(markupText))
+		{
+			tagStart = openFormatTagStart.ToCharArray()[0];
+			tagEnd = openFormatTagEnd.ToCharArray()[0];
 
-            tagStartLength = openFormatTagStart.Length;
-            tagEndLength = openFormatTagEnd.Length;
-        }
+			tagStartLength = openFormatTagStart.Length;
+			tagEndLength = openFormatTagEnd.Length;
+		}
 
-        else if(ValidateCloseMarkup(markupText))
-        {
-            tagStart = closeFormatTagStart.ToCharArray()[0];
-            tagEnd = closeFormatTagEnd.ToCharArray()[0];
+		else if (ValidateCloseMarkup(markupText))
+		{
+			tagStart = closeFormatTagStart.ToCharArray()[0];
+			tagEnd = closeFormatTagEnd.ToCharArray()[0];
 
-            tagStartLength = closeFormatTagStart.Length;
-            tagEndLength = closeFormatTagEnd.Length;
-        }
+			tagStartLength = closeFormatTagStart.Length;
+			tagEndLength = closeFormatTagEnd.Length;
+		}
 
-        else
-        {
-            return null;
-        }
+		else
+		{
+			return null;
+		}
 
-        char[] textArray = markupText.ToCharArray();
+		char[] textArray = markupText.ToCharArray();
 
-        //Find parameter
-        for (int i = 0; i < markupText.Length; i++)
-        {
-            if(textArray[i] == tagStart && i + 1 < markupText.Length)
+		//Find all parameters
+		for (int i = tagStartLength; i < markupText.Length - tagStartLength - tagEndLength - markupCharacter.ToString().Length; i++)
+		{
+			if (textArray[i] != ',')
             {
-                int indexOfEnd = markupText.IndexOf(tagEnd, i + 1);
-
-                if(indexOfEnd != -1)
-                {
-                    tryParameter = markupText.Substring(i + tagStartLength, indexOfEnd - 1 - i);
-                    break;
-                }
+                curParameter += textArray[i].ToString();
             }
-        }
+            else
+            {
+                parameters.Add(curParameter);
+                curParameter = "";
+            }
+			
+		}
 
-
-        //Match data types to parameters gotten
-
-        if(ValidateParameter(tryParameter))
-        parameter = tryParameter;
-
-        return parameter;
-    }
+        if (ValidateParameters(parameters.ToArray()))
+            return parameters.ToArray();
+        else
+            return null;
+	}
     virtual public string GetParameterText(string text)
     {
         foreach(MarkupData data in markupDatas)
@@ -173,7 +161,7 @@ public class DialogueMarkup : ScriptableObject
             return null;
     }
     
-    virtual public string GetMarkupText(string text, int index)
+    virtual public string GetMarkupString(string text, int index)
     {
         string markupText = "";
         if(!ValidateMarkup(text, index))
@@ -200,8 +188,7 @@ public class DialogueMarkup : ScriptableObject
         }
         return null;
     }
-
-    virtual public string GetMarkupText(string text)
+    virtual public string GetMarkupString(string text)
     {
         string markupText = "";
         char[] textArray = text.ToCharArray();
@@ -211,9 +198,9 @@ public class DialogueMarkup : ScriptableObject
         
         for(int i = 0; i < text.Length; i++)
         {
-            if(GetMarkupText(text, i) != null)
+            if(GetMarkupString(text, i) != null)
             {
-                markupText = GetMarkupText(text, i);
+                markupText = GetMarkupString(text, i);
                 return markupText;
             }
         }
@@ -226,30 +213,84 @@ public class DialogueMarkup : ScriptableObject
 
 	#region VALIDATE INSTANCES
 
-	virtual public bool ValidateParameter<T>(string parameterText)
-	{
-		if ((T)Convert.ChangeType(parameterText, typeof(T)) != null)
-		{
-			return true;
-		}
+	#region VALIDATE PARAMETERS
+	//Dictionary for types and their functions to call generic method
+	static readonly Dictionary<Type, MethodInfo> validParameterCalls = new();
+    virtual public bool CallValidateParameter(string parameterString, Type parameterType)
+    {
+        if (!validParameterCalls.TryGetValue(parameterType, out MethodInfo callMethod))
+        {
+            MethodInfo newMethod = GetType().GetMethod(nameof(ValidateParameter), BindingFlags.Public | BindingFlags.Instance);
 
-		return false;
+
+            callMethod = newMethod.MakeGenericMethod(parameterType);
+            validParameterCalls[parameterType] = callMethod;
+        }
+        return (bool)callMethod.Invoke(this, new object[] { parameterString });
+    }
+    virtual public bool ValidateParameter<T>(string parameterString)
+    {
+        Type t = typeof(T);
+
+
+        //Error handling for different types
+
+        //Enums
+        if (t.IsEnum)
+        {
+            return Enum.TryParse(t, parameterString, true, out _);
+        }
+
+        if (t == typeof(string))
+        {
+            return true;
+        }
+
+        MethodInfo tryParse = t.GetMethod("TryParse", new[] { typeof(string), t.MakeByRefType() });
+
+        //Types with try parse
+        if(tryParse != null)
+        {
+            object[] args = { parameterString, null };
+            bool success = (bool)tryParse.Invoke(null, args);
+        }
+
+        //Others without
+		try
+        {
+            Convert.ChangeType(parameterString, t);
+            return true;
+        }
+
+        catch
+        {
+            return false;
+        }
+
 	}
-
-
-	virtual public bool ValidateParameters(string[] parameterText)
+	virtual public bool ValidateParameters(string[] parameterStrings)
 	{
         //Compare parameter sequences to parameter text recieved
-		foreach (DialogueMarkupParameterSequence sequence in parameterSequences)
+		foreach (MarkupData markupData in markupDatas)
 		{
-            if (sequence.parameters.Length != parameterText.Length)
+            FieldInfo[] parameters = markupData.GetParameters();
+            if (parameters.Length != parameterStrings.Length)
                 continue;
 
             bool parameterMatch = false;
 
-			for (int i = 0; i < sequence.parameters.Length; i++)
+            //Match parameters in markupData to parameter strings
+			for (int i = 0; i < parameters.Length; i++)
 			{
-				
+                //Get parameter type at index
+                Type parameterType = parameters[i].FieldType;
+
+                //Cast string parameter to data type of parameter at index
+                if(!CallValidateParameter(parameterStrings[i],parameterType))
+                {
+                    parameterMatch = false;
+                    break;
+                }
 			}
 
             if (parameterMatch)
@@ -258,7 +299,6 @@ public class DialogueMarkup : ScriptableObject
 
 		return false;
 	}
-
 	virtual public bool ValidateParameter(string text)
     {
         bool isValid = false;
@@ -322,7 +362,10 @@ public class DialogueMarkup : ScriptableObject
         //Debug.Log($"FAILED TO VALIDATE PARAMETER {text} as {parameterType}");
         return isValid;
     }
-    virtual public bool ValidateMarkup(string text)
+	#endregion
+
+	#region VALIDATE MARKUP
+	virtual public bool ValidateMarkup(string text)
     {
         if(text.Length <= 0)
         return false;
@@ -439,8 +482,9 @@ public class DialogueMarkup : ScriptableObject
         }
         return false;
     }
+   #endregion
    
-    #endregion
+   #endregion
    
     
     #region REMOVE TEXT
@@ -555,6 +599,7 @@ public class DialogueMarkup : ScriptableObject
 	#endregion
 
 	#region LOGIC
+    //Move this to markupData
 	virtual public bool HandleMarkup(DialogueManager dialogueManager, string text)
     {
         if(ValidateOpenMarkup(text))
