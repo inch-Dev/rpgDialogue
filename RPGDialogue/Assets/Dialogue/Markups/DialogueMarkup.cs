@@ -298,10 +298,13 @@ public class DialogueMarkup : ScriptableObject
     {
         //Check all formats for first valid instance
 
-        foreach(DialogueMarkupFormat format in  formats)
+        foreach(DialogueMarkupFormat format in formats)
         {
-            if(GetMarkupString(rawText, startIndex, format) != null)
-                return GetMarkupString(rawText, startIndex, format);
+            string markupString = GetMarkupString(rawText, startIndex, format);
+            if (markupString != null)
+            {
+                return markupString;
+            }
         }
 
         return null;
@@ -309,6 +312,7 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string GetMarkupString(string rawText, int startIndex, DialogueMarkupFormat format)
     {
+        
 		for (int i = startIndex; i < rawText.Length; i++)
 		{
 			if (i + format.tagStart.Length < rawText.Length)
@@ -318,15 +322,16 @@ public class DialogueMarkup : ScriptableObject
                 {
 					//Debug.Log($"Looking at {rawText.Substring(i, format.tagStart.Length)}, Format start:{format.tagStart}");
 					int endIndex = rawText.IndexOf(format.tagEnd.ToCharArray()[format.tagEnd.Length - 1], i + 1);
-                    Debug.Log($"Looking for...{format.tagEnd.ToCharArray()[format.tagEnd.Length - 1]}");
+                    //Debug.Log($"Looking for...{format.tagEnd.ToCharArray()[format.tagEnd.Length - 1]}");
                     if (endIndex != -1)
                     {
                         string tryMarkup = rawText.Substring(i, endIndex + 1 - i);
-                        Debug.Log($"Found {tryMarkup}");
+                        //Debug.Log($"Found {tryMarkup}");
                         if (ValidateFormat(tryMarkup, format) && ValidateKeyName(tryMarkup, format) && ValidateMarkupData(tryMarkup, format))
                         {
-                            Debug.Log("Valid form");
-                            return tryMarkup;
+							Debug.Log($"FOUND {tryMarkup} AT Raw text:{rawText}, startIndex:{startIndex}, format:{format.type}");
+							return tryMarkup;
+
                         }
                     }
                 }
@@ -374,7 +379,7 @@ public class DialogueMarkup : ScriptableObject
     {
         foreach(MarkupData markupData in markupDatas)
         {
-            Debug.Log("Getting markup data from markupDatas");
+            //Debug.Log("Getting markup data from markupDatas");
             if (ValidateMarkupData(markupText, markupData, format))
                 return true;
         }
@@ -383,8 +388,6 @@ public class DialogueMarkup : ScriptableObject
     
     virtual public bool ValidateMarkupData(string markupText, MarkupData markupData, DialogueMarkupFormat format)
     {
-        //IN HERE
-        Debug.Log("Trying to validate markup data");
         string markupKeyName = "";
         bool postEquals = false;
 
@@ -395,12 +398,12 @@ public class DialogueMarkup : ScriptableObject
             if (postEquals && textArray[i] != ' ')
             {
                 markupKeyName += textArray[i];
-                Debug.Log("MarkupKey:{markupKeyName}");
+                //Debug.Log("MarkupKey:{markupKeyName}");
             }
 
             if (markupKeyName == markupData.keyName)
             {
-				Debug.Log("MarkupData validated");
+				//Debug.Log("MarkupData validated");
 				return true;
             }
             
@@ -618,7 +621,7 @@ public class DialogueMarkup : ScriptableObject
 
         for (int i = 0; i < rawText.Length; i++)
         {
-            Debug.Log($"Raw text:{rawText}, MarkupString:{GetMarkupString(rawText, i)}");
+            //Debug.Log($"Raw text:{rawText}, MarkupString:{GetMarkupString(rawText, i)}");
             if (ValidateMarkup(GetMarkupString(rawText, i)))
                 return true;
         }
