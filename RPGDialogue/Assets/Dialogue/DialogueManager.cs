@@ -276,9 +276,9 @@ public class DialogueManager : MonoBehaviour
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
-                    Debug.Log($"Found markup! at {i}, with starting char:{textArray[i]}");
+                    //Debug.Log($"Found markup! at {i}, with starting char:{textArray[i]}");
                     recognizedMarkup = true;
-                    Debug.Log($"Getting string.... at {i} {dm.GetMarkupString(rawText, i)}");
+                    //Debug.Log($"Getting string.... at {i} {dm.GetMarkupString(rawText, i)}");
                     i += dm.GetMarkupString(rawText, i).Length;
                 }
                 else if (textArray[i] == '<')

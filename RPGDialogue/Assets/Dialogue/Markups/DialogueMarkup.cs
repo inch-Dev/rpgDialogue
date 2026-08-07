@@ -337,7 +337,7 @@ public class DialogueMarkup : ScriptableObject
                         //Debug.Log($"Found {tryMarkup}");
                         if (ValidateFormat(tryMarkup, format) && ValidateKeyName(tryMarkup, format) && ValidateMarkupData(tryMarkup, format))
                         {
-							Debug.Log($"FOUND {tryMarkup} AT Raw text:{rawText}, startIndex:{startIndex}, format:{format.type}");
+							//Debug.Log($"FOUND {tryMarkup} AT Raw text:{rawText}, startIndex:{startIndex}, format:{format.type}");
 							return tryMarkup;
 
                         }
@@ -581,6 +581,13 @@ public class DialogueMarkup : ScriptableObject
 	#endregion
 
 	#region VALIDATE MARKUP
+
+
+    /// <summary>
+    /// Validates the markup string
+    /// </summary>
+    /// <param name="markupText"></param>
+    /// <returns></returns>
 	virtual public bool ValidateMarkup(string markupText)
     {
 
@@ -621,7 +628,7 @@ public class DialogueMarkup : ScriptableObject
     }
 
     /// <summary>
-    /// Validates if there is a valid markup string in rawText up to index value
+    /// Validates if there is a valid markup string in rawText at starting index
     /// </summary>
     /// <param name="rawText"></param>
     /// <param name="index"></param>
