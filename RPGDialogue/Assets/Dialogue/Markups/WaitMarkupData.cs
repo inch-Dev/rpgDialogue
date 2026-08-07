@@ -8,7 +8,7 @@ public class WaitMarkupData : MarkupData
 
 	public override void OpenLogic()
 	{
-		Debug.Log("Found wait markupData");
+		Debug.Log($"Found wait markupData...{DialogueManager.Instance.curExpression}");
 	}
 
 }
