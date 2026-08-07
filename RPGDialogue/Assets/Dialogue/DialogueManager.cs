@@ -276,7 +276,7 @@ public class DialogueManager : MonoBehaviour
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
-                    Debug.Log($"Found markup! at {i}");
+                    Debug.Log($"Found markup! at {i}, with starting char:{textArray[i]}");
                     recognizedMarkup = true;
                     Debug.Log($"Getting string.... at {i} {dm.GetMarkupString(rawText, i)}");
                     i += dm.GetMarkupString(rawText, i).Length;
@@ -526,7 +526,7 @@ public class DialogueManager : MonoBehaviour
                 float localCharWaitSeconds = charWaitSeconds;
                 float localLineWaitSeconds = lineWaitSeconds;
 
-                curLogicText = LogicDraftIndex(charIndex, dialogueLine);
+                //curLogicText = LogicDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(curStartWaitTime);

@@ -284,6 +284,10 @@ public class DialogueMarkup : ScriptableObject
     //    return null;
     //}
 
+    
+    /// <summary>
+    /// Gets first valid markup string from rawText
+    /// </summary>
     virtual public string GetMarkupString(string rawText)
     {
        for(int i = 0; i < rawText.Length; i++)
@@ -294,6 +298,9 @@ public class DialogueMarkup : ScriptableObject
         return null;
     }
 
+    /// <summary>
+    /// Gets valid markup string from rawText at starting index
+    /// </summary>
     virtual public string GetMarkupString(string rawText, int startIndex)
     {
         //Check all formats for first valid instance
@@ -310,22 +317,23 @@ public class DialogueMarkup : ScriptableObject
         return null;
     }
 
+    /// <summary>
+    /// Gets valid markup string of MarkupFormat from rawText at starting index
+    /// </summary>
     virtual public string GetMarkupString(string rawText, int startIndex, DialogueMarkupFormat format)
     {
-        
-		for (int i = startIndex; i < rawText.Length; i++)
-		{
-			if (i + format.tagStart.Length < rawText.Length)
+ 
+			if (startIndex + format.tagStart.Length < rawText.Length)
 			{
 				
-				if (rawText.Substring(i, format.tagStart.Length) == format.tagStart)
+				if (rawText.Substring(startIndex, format.tagStart.Length) == format.tagStart)
                 {
 					//Debug.Log($"Looking at {rawText.Substring(i, format.tagStart.Length)}, Format start:{format.tagStart}");
-					int endIndex = rawText.IndexOf(format.tagEnd.ToCharArray()[format.tagEnd.Length - 1], i + 1);
+					int endIndex = rawText.IndexOf(format.tagEnd.ToCharArray()[format.tagEnd.Length - 1], startIndex + 1);
                     //Debug.Log($"Looking for...{format.tagEnd.ToCharArray()[format.tagEnd.Length - 1]}");
                     if (endIndex != -1)
                     {
-                        string tryMarkup = rawText.Substring(i, endIndex + 1 - i);
+                        string tryMarkup = rawText.Substring(startIndex, endIndex + 1 - startIndex);
                         //Debug.Log($"Found {tryMarkup}");
                         if (ValidateFormat(tryMarkup, format) && ValidateKeyName(tryMarkup, format) && ValidateMarkupData(tryMarkup, format))
                         {
@@ -336,8 +344,6 @@ public class DialogueMarkup : ScriptableObject
                     }
                 }
 			}
-
-		}
         return null;
 	}
 	#endregion
@@ -614,17 +620,19 @@ public class DialogueMarkup : ScriptableObject
         return false;
     }
 
-    virtual public bool ValidateMarkup(string rawText, int startIndex)
+    /// <summary>
+    /// Validates if there is a valid markup string in rawText up to index value
+    /// </summary>
+    /// <param name="rawText"></param>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    virtual public bool ValidateMarkup(string rawText, int index)
     {
         if (rawText == null || rawText.Length <= 0)
             return false;
 
-        for (int i = 0; i < rawText.Length; i++)
-        {
-            //Debug.Log($"Raw text:{rawText}, MarkupString:{GetMarkupString(rawText, i)}");
-            if (ValidateMarkup(GetMarkupString(rawText, i)))
+        if (ValidateMarkup(GetMarkupString(rawText, index)))
                 return true;
-        }
 
         return false;
     }
