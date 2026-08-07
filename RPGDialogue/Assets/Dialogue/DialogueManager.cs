@@ -518,7 +518,7 @@ public class DialogueManager : MonoBehaviour
 
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
-            Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
+            //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
             this.curLogicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)

@@ -79,24 +79,18 @@ public class DialogueMarkup : ScriptableObject
     /// <returns></returns>
     virtual public FormatType GetFormatType(string markup)
     {
-        FormatType formatType = FormatType.INVALID;
+        Debug.Log($"Getting markup text:{markup}");
+        FormatType theType = FormatType.INVALID;
 
-        char[] textArray = markup.ToCharArray();
-
-        if(textArray.Length > closeFormatTagEnd.Length + closeFormatTagStart.Length)
+        foreach(DialogueMarkupFormat format in formats)
         {
-            if (markup.Substring(0, closeFormatTagStart.Length) == closeFormatTagStart && markup.Substring(markup.Length - closeFormatTagEnd.Length, closeFormatTagEnd.Length) == closeFormatTagEnd)
-                formatType = FormatType.CLOSE;
+            if (ValidateFormat(markup, format))
+                return format.type;
         }
 
-        else if(textArray.Length > openFormatTagStart.Length + openFormatTagEnd.Length)
-        {
-			if (markup.Substring(0, openFormatTagStart.Length) == openFormatTagStart && markup.Substring(markup.Length - openFormatTagEnd.Length, openFormatTagEnd.Length) == openFormatTagEnd)
-				formatType = FormatType.OPEN;
-		}
-
-        return formatType;
+        return theType;
     }
+
 
     /// <summary>
     /// Get format of markup
@@ -1014,7 +1008,7 @@ public class DialogueMarkup : ScriptableObject
         {
             MarkupData theMarkupData = GetMarkupData(deltaLogicText);
 
-            switch (GetFormatType(deltaLogicText))
+            switch (GetFormatType(GetMarkup(deltaLogicText)))
             {
                 case FormatType.OPEN:
                     theMarkupData.OpenLogic();
@@ -1022,8 +1016,10 @@ public class DialogueMarkup : ScriptableObject
                 case FormatType.CLOSE:
                     theMarkupData.CloseLogic();
                     break;
+                default:
+                    Debug.Log($"Could not get format type from {GetFormatType(GetMarkup(deltaLogicText))}");
+                    break;
             }
-            Debug.Log("Logic handling!!!!!!!!!!!");
         }
 
         //Get markupData
