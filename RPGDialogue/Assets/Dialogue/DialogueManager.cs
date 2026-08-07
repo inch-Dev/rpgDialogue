@@ -203,7 +203,7 @@ public class DialogueManager : MonoBehaviour
             {
                 if(dm.ValidateMarkup(rawText, i))
                 {
-                    string markupText = dm.GetMarkupString(rawText, i);
+                    string markupText = dm.GetMarkup(rawText, i);
                     indexedRawText += markupText;
                     i += markupText.Length;
                     Debug.Log($"Found markup of {dm}. Moving to index {i}");
@@ -279,7 +279,7 @@ public class DialogueManager : MonoBehaviour
                     //Debug.Log($"Found markup! at {i}, with starting char:{textArray[i]}");
                     recognizedMarkup = true;
                     //Debug.Log($"Getting string.... at {i} {dm.GetMarkupString(rawText, i)}");
-                    i += dm.GetMarkupString(rawText, i).Length;
+                    i += dm.GetMarkup(rawText, i).Length;
                 }
                 else if (textArray[i] == '<')
                 {
@@ -363,8 +363,8 @@ public class DialogueManager : MonoBehaviour
                     recognizedMarkup = true;
                     //Debug.Log($"Recognized markup {dm} from {i}...Moving {dm.GetMarkupText(rawText, i).Length} to {i + dm.GetMarkupText(rawText, i).Length}, Length:{rawText.Length}");
 
-                    indexedText += dm.GetMarkupString(rawText, i);
-                    i += dm.GetMarkupString(rawText, i).Length;
+                    indexedText += dm.GetMarkup(rawText, i);
+                    i += dm.GetMarkup(rawText, i).Length;
                     //Debug.Log($"Added to index...{indexedText}");
                 }
                 else if (textArray[i] == '<')
@@ -447,7 +447,7 @@ public class DialogueManager : MonoBehaviour
         string handledMarkupText = rawText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].RemoveMarkupText(handledMarkupText);
+            handledMarkupText = dialogueMarkups[i].RemoveMarkupStrings(handledMarkupText);
         }
 
         return handledMarkupText;
@@ -470,8 +470,8 @@ public class DialogueManager : MonoBehaviour
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
-                    appendText += dm.GetMarkupString(rawText, i);
-                    i += dm.GetMarkupString(rawText, i).Length;
+                    appendText += dm.GetMarkup(rawText, i);
+                    i += dm.GetMarkup(rawText, i).Length;
                     isMarkup = true;
                 }
                 else if (textArray[i] == '<' && i + 1 < rawText.Length)
@@ -526,7 +526,7 @@ public class DialogueManager : MonoBehaviour
                 float localCharWaitSeconds = charWaitSeconds;
                 float localLineWaitSeconds = lineWaitSeconds;
 
-                //curLogicText = LogicDraftIndex(charIndex, dialogueLine);
+                curLogicText = LogicDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(curStartWaitTime);
