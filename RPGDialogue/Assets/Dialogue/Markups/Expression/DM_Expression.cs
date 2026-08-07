@@ -6,6 +6,7 @@ public class DM_Expression : DialogueMarkup
 {
     public override void OpenLogic(DialogueManager dialogueManager, string text)
     {
+        base.OpenLogic(dialogueManager, text);
         //    if(hasParameters && GetParameterText(text) != null)
         //    { 
         //        lastStoredParameter = GetParameterText(text);

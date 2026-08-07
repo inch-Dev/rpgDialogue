@@ -1002,13 +1002,27 @@ public class DialogueMarkup : ScriptableObject
 
 	#region LOGIC
     //Move this to markupData
-	virtual public bool HandleLogic(DialogueManager dialogueManager, string markup)
+	virtual public bool HandleLogic(DialogueManager dialogueManager, string deltaLogicText)
     {
         //Error handling
-        if (!ValidateMarkup(markup)) //Validate parameters in validate markup
+        if (!ValidateMarkup(GetMarkup(deltaLogicText)))
+        {
+            //Debug.Log($"Could not validate from:{deltaLogicText}");
             return false;
+        }
         else
         {
+            MarkupData theMarkupData = GetMarkupData(deltaLogicText);
+
+            switch (GetFormatType(deltaLogicText))
+            {
+                case FormatType.OPEN:
+                    theMarkupData.OpenLogic();
+                    break;
+                case FormatType.CLOSE:
+                    theMarkupData.CloseLogic();
+                    break;
+            }
             Debug.Log("Logic handling!!!!!!!!!!!");
         }
 

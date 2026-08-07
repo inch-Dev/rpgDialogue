@@ -11,6 +11,7 @@ public class DM_Wait : DialogueMarkup
 {
     public override void OpenLogic(DialogueManager dialogueManager, string text)
     {
+        base.OpenLogic(dialogueManager, text);
         //Debug.Log($"Running wait logic from text:{text}");
         //    if(hasParameters && GetParameterText(text) != null)
         //    { 
