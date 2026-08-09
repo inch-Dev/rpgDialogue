@@ -53,12 +53,12 @@ public class DialogueEditor : EditorWindow
         dataLabel.style.fontSize = 12;
         leftPane.Add(dataLabel);
 
-        var allMarkupDataGuids = AssetDatabase.FindAssets("t:MarkupData");
+        //var allMarkupDataGuids = AssetDatabase.FindAssets("t:MarkupData");
         var markupDatas = new List<MarkupData>();
-        foreach(var guid in allMarkupDataGuids)
-        {
-            markupDatas.Add(AssetDatabase.LoadAssetAtPath<MarkupData>(AssetDatabase.GUIDToAssetPath(guid)));
-        }
+        //foreach(var guid in allMarkupDataGuids)
+        //{
+        //    markupDatas.Add(AssetDatabase.LoadAssetAtPath<MarkupData>(AssetDatabase.GUIDToAssetPath(guid)));
+        //}
         var markupDataList = new ListView();
         markupDataList.makeItem = () => new Label();
         markupDataList.bindItem = (item, index) => { (item as Label).text = markupDatas[index].name; };
@@ -91,22 +91,9 @@ public class DialogueEditor : EditorWindow
         dialogueLabel.style.fontSize = 12;
         rightPane.Add(dialogueLabel);
 
-        List<string> dialogueLines  = new List<string>();
-        var dialogueLineList = new ListView() { itemsSource = dialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
-        dialogueLineList.makeItem = () =>
-        {
-            var textField = new TextField();
-            textField.RegisterValueChangedCallback(evt =>
-            {
-                if (textField.userData is int index && index >= 0 && index < dialogueLines.Count)
-                {
-                    dialogueLines[index] = evt.newValue;
-                }
-            });
-            return textField;
-        };
-
-        dialogueLineList.bindItem = (item, index) => { (item as TextField).userData = dialogueLineList[index]; };
+        List<string> allDialogueLines  = new List<string>();
+        var dialogueLineList = new ListView() { itemsSource = allDialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
+        
         rightPane.Add(dialogueLineList);
 
         Label optionsLabel = new Label("<b>Dialogue Options");
@@ -117,6 +104,7 @@ public class DialogueEditor : EditorWindow
         typewriterToggle.text = "Type Writer Effect";
         rightPane.Add(typewriterToggle);
 
+        
 		Toggle speakerToggle = new Toggle();
 		speakerToggle.text = "Speaker";
 		rightPane.Add(speakerToggle);
@@ -133,16 +121,15 @@ public class DialogueEditor : EditorWindow
         createButton.text = "Create Dialogue";
         rightPane.Add(createButton);
 
-		#endregion
+        #endregion
 
-		#region FUNCTIONS
+        #region FUNCTIONS
+
+       
 
 		markupList.itemsChosen += (selectedItems) =>
 		{
-			foreach(DialogueMarkup dialogueMarkup in selectedItems)
-            {
-				
-			}
+
 		};
 
 		markupList.selectionChanged += (selectedItems) =>
@@ -154,14 +141,84 @@ public class DialogueEditor : EditorWindow
 				markupDataList.selectedIndex = -1;
 
                 markupDatas.AddRange(dialogueMarkup.GetMarkupDatas());
-				//markupDataList = new ListView() { itemsSource = markupDatas };
-				//markupDataList.makeItem = () => new Label();
-				//markupDataList.bindItem = (item, index) => { (item as Label).text = markupDatas[index].name; };
 				markupDataList.RefreshItems();
 
 
 			}
 		};
+
+
+		List<string> dialogueLines = new List<string>();
+		dialogueLineList.makeItem = () =>
+		{
+			var textField = new TextField();
+			textField.RegisterValueChangedCallback(evt =>
+			{
+				if (textField.userData is int index && index >= 0 && index < allDialogueLines.Count)
+				{
+					allDialogueLines[index] = evt.newValue;
+                    
+				}
+			});
+			return textField;
+		};
+
+		dialogueLineList.bindItem = (item, index) =>
+		{
+			var field = (TextField)item;
+			field.userData = index;
+			field.SetValueWithoutNotify(allDialogueLines[index]);
+		};
+
+		bool hasSpeaker = false;
+		speakerToggle.RegisterCallback<ClickEvent>(evt =>
+		{
+			hasSpeaker = speakerToggle.value;
+			//Debug.Log($"Has speaker is {hasSpeaker}");
+		});
+
+        bool hasTypeWriterEffect = false;
+        typewriterToggle.RegisterCallback<ClickEvent>(evt =>
+        {
+            hasTypeWriterEffect = typewriterToggle.value;
+        });
+
+        DialogueSpeaker speaker = ScriptableObject.CreateInstance<DialogueSpeaker>();
+        speakerField.RegisterCallback<ChangeEvent<Object>>(evt =>
+        {
+            speaker = (DialogueSpeaker)evt.newValue;
+        });
+
+        DialogueExpression expression = ScriptableObject.CreateInstance<DialogueExpression>();
+        expressionField.RegisterCallback<ChangeEvent<Object>>(evt =>
+        {
+            expression = (DialogueExpression)evt.newValue;
+        });
+
+        createButton.RegisterCallback<ClickEvent>(evt =>
+        {
+            Debug.Log("Clicked create!");
+
+            Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
+            newDialogue.hasSpeaker = hasSpeaker;
+            newDialogue.speaker = speaker;
+            newDialogue.hasTypeWriterEffect = hasTypeWriterEffect;
+            newDialogue.startingExpression = expression;
+            newDialogue.dialogueLines = allDialogueLines.ToArray();
+
+            string path = "Assets/NewDialogue.asset";
+            path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+            AssetDatabase.CreateAsset(newDialogue, path);
+            AssetDatabase.SaveAssets();
+
+            EditorUtility.FocusProjectWindow();
+            Selection.activeObject = newDialogue;
+
+            Debug.Log("Created new dialogue!");
+            
+
+		});
 
 		#endregion
 

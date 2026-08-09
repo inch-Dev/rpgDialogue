@@ -9,4 +9,33 @@ public class Dialogue : ScriptableObject
     [ShowIf("hasSpeaker")] public DialogueExpression startingExpression;
     [SerializeField] public string[] dialogueLines;
     [SerializeField] public bool hasTypeWriterEffect = true;
+
+
+	public Dialogue(bool hasSpeaker, DialogueSpeaker speaker, DialogueExpression startingExpression, string[] dialogueLines, bool hasTypeWriterEffect)
+	{
+		this.hasSpeaker = hasSpeaker;
+		this.speaker = speaker;
+		this.startingExpression = startingExpression;
+		this.dialogueLines = dialogueLines;
+		this.hasTypeWriterEffect = hasTypeWriterEffect;
+	}
+
+
+	public Dialogue(DialogueSpeaker speaker, DialogueExpression startingExpression, string[] dialogueLines, bool hasTypeWriterEffect)
+	{
+		this.hasSpeaker = true;
+		this.speaker = speaker;
+		this.startingExpression = startingExpression;
+		this.dialogueLines = dialogueLines;
+		this.hasTypeWriterEffect |= hasTypeWriterEffect;
+	}
+
+	public Dialogue(string[] dialogueLines, bool hasTypeWriterEffect)
+	{
+		this.hasSpeaker = false;
+		this.speaker = null;
+		this.startingExpression = null;
+		this.dialogueLines = dialogueLines;
+		this.hasTypeWriterEffect = hasTypeWriterEffect;
+	}
 }
