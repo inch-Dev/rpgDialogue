@@ -447,7 +447,7 @@ public class DialogueManager : MonoBehaviour
         string handledMarkupText = rawText;
        for(int i = 0; i < dialogueMarkups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].RemoveMarkupStrings(handledMarkupText);
+            handledMarkupText = dialogueMarkups[i].RemoveMarkup(handledMarkupText);
         }
 
         return handledMarkupText;
