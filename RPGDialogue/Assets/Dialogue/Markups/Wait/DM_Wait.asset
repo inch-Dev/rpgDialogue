@@ -15,6 +15,5 @@ MonoBehaviour:
   keyName: Wait
   markupCharacter: 119
   hasParameters: 1
-  parameterType: 2
   markupDatas:
   - {fileID: 11400000, guid: 0163bdafbda2f1b4687bb8d110fb97ee, type: 2}

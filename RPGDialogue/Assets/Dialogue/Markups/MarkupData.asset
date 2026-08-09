@@ -13,15 +13,3 @@ MonoBehaviour:
   m_Name: MarkupData
   m_EditorClassIdentifier: Assembly-CSharp::MarkupData
   keyName: 
-  parameters:
-  - name: 
-    value:
-      rid: -2
-  - name: 
-    value:
-      rid: -2
-  references:
-    version: 2
-    RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }

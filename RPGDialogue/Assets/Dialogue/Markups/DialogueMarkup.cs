@@ -95,6 +95,9 @@ public class DialogueMarkup : ScriptableObject
         return theFormat;
     }
 
+
+    virtual public List<MarkupData> GetMarkupDatas(){ return markupDatas; }
+
     /// <summary>
     /// Get markupData in markup
     /// </summary>
@@ -190,16 +193,17 @@ public class DialogueMarkup : ScriptableObject
         }
         return null;
     }
-    #endregion
+	#endregion
 
-    #region VALIDATE INSTANCES
+	#region VALIDATE INSTANCES
 
-    /// <summary>
-    /// Validates key name in markup
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <returns></returns>
-    virtual public bool ValidateKeyName(string markup)
+	#region VALIDATE KEYNAME
+	/// <summary>
+	/// Validates key name in markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+	virtual public bool ValidateKeyName(string markup)
     {
         foreach (DialogueMarkupFormat format in formats)
         {
@@ -233,7 +237,9 @@ public class DialogueMarkup : ScriptableObject
 
         return false;
     }
+    #endregion
 
+    #region VALIDATE FORMAT
     /// <summary>
     /// Validates markup is in this format
     /// </summary>
@@ -249,10 +255,7 @@ public class DialogueMarkup : ScriptableObject
         return (markup.Substring(0, format.tagStart.Length) == format.tagStart
         && markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd);
     }
-
-
-
-
+    #endregion
 
     #region VALIDATE MARKUPDATA
 
@@ -271,7 +274,6 @@ public class DialogueMarkup : ScriptableObject
 
         return false;
     }
-
 
     /// <summary>
     /// Validates there is a valid markupData instance in markup of this format
@@ -298,7 +300,7 @@ public class DialogueMarkup : ScriptableObject
     /// <param name="format"></param>
     /// <returns></returns>
     virtual public bool ValidateMarkupData(string markup, MarkupData markupData, DialogueMarkupFormat format)
-    {
+    {   
         string markupKeyName = "";
         bool postEquals = false;
 
