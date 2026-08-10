@@ -4,33 +4,31 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using Codice.Client.GameUI.Explorer;
 using UnityEditor.Search;
+using Codice.CM.Common.Update.Partial;
+using UnityEditor.Build.Pipeline.Tasks;
 
-public class DialogueEditor : EditorWindow
+[CustomEditor(typeof(Dialogue))]
+public class DialogueEditor : Editor
 {
-    [MenuItem("Tools/DialogueEditor")]
-    public static void ShowExample()
-    {
-        DialogueEditor wnd = GetWindow<DialogueEditor>();
-        wnd.titleContent = new GUIContent("DialogueEditor");
-    }
-
-    TextField focusField;
-
 	//SOURCE VALUES
+	Dialogue theDialogue;
 	List<DialogueMarkup> markups = new List<DialogueMarkup>();
 	List<MarkupData> markupDatas = new List<MarkupData>();
 
 
 	//EDITABLE VALUES
+	MarkupData selectedMarkupData = null;
 	List<string> dialougeLines = new List<string>();
 	bool hasSpeaker = false;
 	bool hasTypeWriter = false;
     DialogueSpeaker speaker = null;
     DialogueExpression expression = null;
 
-	public void CreateGUI()
+	public override VisualElement CreateInspectorGUI()
     {
-		VisualElement root = rootVisualElement;
+		theDialogue = (Dialogue)target;
+		
+		VisualElement root = new VisualElement();
 
 		var splitView = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
         root.Add(splitView);
@@ -96,18 +94,17 @@ public class DialogueEditor : EditorWindow
 		SetTypewriter(typewriterToggle);
         rightPane.Add(typewriterToggle);
 
-        
 		Toggle speakerToggle = new Toggle();
 		speakerToggle.text = "Speaker";
 		SetSpeaker(speakerToggle);
 		rightPane.Add(speakerToggle);
 
-        var speakerField = new ObjectField("Speaker");
+        ObjectField speakerField = new ObjectField("Speaker");
         speakerField.objectType = typeof(DialogueSpeaker);
 		SetSpeaker(speakerField);
         rightPane.Add(speakerField);
 
-        var expressionField = new ObjectField("Starting Expression");
+        ObjectField expressionField = new ObjectField("Starting Expression");
         expressionField.objectType = typeof(DialogueExpression);
 		SetExpression(expressionField);
         rightPane.Add(expressionField);
@@ -117,9 +114,9 @@ public class DialogueEditor : EditorWindow
         CreateDialogue(createButton);
         rightPane.Add(createButton);
 
-        #endregion
+		#endregion
 
-
+		return root;
 	}
 
     void RefreshMarkupDatas(ListView markupList, ListView dataList)
@@ -134,6 +131,7 @@ public class DialogueEditor : EditorWindow
 			foreach (DialogueMarkup dialogueMarkup in selectedItems)
 			{
 
+				selectedMarkupData = null;
 				markupDatas.Clear();
 				dataList.selectedIndex = -1;
 
@@ -159,6 +157,14 @@ public class DialogueEditor : EditorWindow
 		list.bindItem = (item, index) => { (item as Label).text = markupDatas[index].name; };
 		list.itemsSource = markupDatas;
 		list.selectionType = SelectionType.Single;
+
+		list.itemsChosen += (selectedItems) =>
+		{
+			foreach(MarkupData markupData in selectedItems)
+			{
+				selectedMarkupData = markupData;
+			}
+		};
 	}
 
 	void SetDialogueLines(ListView list)

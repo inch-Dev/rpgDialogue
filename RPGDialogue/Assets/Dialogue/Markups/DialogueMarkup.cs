@@ -2,10 +2,6 @@ using System;
 using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Reflection;
-using UnityEngine.Localization.PropertyVariants.TrackedProperties;
-using JetBrains.Annotations;
-using System.Diagnostics.CodeAnalysis;
 
 public enum FormatType
 {
