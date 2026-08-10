@@ -6,27 +6,23 @@ using Codice.Client.GameUI.Explorer;
 using UnityEditor.Search;
 using Codice.CM.Common.Update.Partial;
 using UnityEditor.Build.Pipeline.Tasks;
+using System.Linq;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueEditor : Editor
 {
 	//SOURCE VALUES
-	Dialogue theDialogue;
+	Dialogue thisDialogue;
 	List<DialogueMarkup> markups = new List<DialogueMarkup>();
 	List<MarkupData> markupDatas = new List<MarkupData>();
 
 
 	//EDITABLE VALUES
 	MarkupData selectedMarkupData = null;
-	List<string> dialougeLines = new List<string>();
-	bool hasSpeaker = false;
-	bool hasTypeWriter = false;
-    DialogueSpeaker speaker = null;
-    DialogueExpression expression = null;
 
 	public override VisualElement CreateInspectorGUI()
     {
-		theDialogue = (Dialogue)target;
+		SetDialogue();
 		
 		VisualElement root = new VisualElement();
 
@@ -43,6 +39,7 @@ public class DialogueEditor : Editor
 
 
 		string[] allMarkupGuids = AssetDatabase.FindAssets("t:DialogueMarkup");
+		markups.Clear();
 		foreach (var guid in allMarkupGuids)
 		{
 			markups.Add(AssetDatabase.LoadAssetAtPath<DialogueMarkup>(AssetDatabase.GUIDToAssetPath(guid)));
@@ -50,7 +47,7 @@ public class DialogueEditor : Editor
 		var markupList = new ListView();
 		SetMarkups(markupList);
         leftPane.Add(markupList);
-
+		
 
         Label dataLabel = new Label("<b>Markup Datas");
         dataLabel.style.fontSize = 12;
@@ -81,7 +78,7 @@ public class DialogueEditor : Editor
         dialogueLabel.style.fontSize = 12;
         rightPane.Add(dialogueLabel);
 
-        var dialogueLineList = new ListView() { itemsSource = dialougeLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
+        var dialogueLineList = new ListView() { itemsSource = thisDialogue.dialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
 		SetDialogueLines(dialogueLineList);
         rightPane.Add(dialogueLineList);
 
@@ -91,28 +88,32 @@ public class DialogueEditor : Editor
 
         Toggle typewriterToggle = new Toggle();
         typewriterToggle.text = "Type Writer Effect";
+		typewriterToggle.value = thisDialogue.hasTypeWriter;
 		SetTypewriter(typewriterToggle);
         rightPane.Add(typewriterToggle);
 
 		Toggle speakerToggle = new Toggle();
 		speakerToggle.text = "Speaker";
+		speakerToggle.value = thisDialogue.hasSpeaker;
 		SetSpeaker(speakerToggle);
 		rightPane.Add(speakerToggle);
 
         ObjectField speakerField = new ObjectField("Speaker");
         speakerField.objectType = typeof(DialogueSpeaker);
+		speakerField.value = thisDialogue.speaker;
 		SetSpeaker(speakerField);
         rightPane.Add(speakerField);
 
         ObjectField expressionField = new ObjectField("Starting Expression");
         expressionField.objectType = typeof(DialogueExpression);
+		expressionField.value = thisDialogue.startExpression;
 		SetExpression(expressionField);
         rightPane.Add(expressionField);
 
-		Button createButton = new Button();
-        createButton.text = "Create Dialogue";
-        CreateDialogue(createButton);
-        rightPane.Add(createButton);
+		//Button createButton = new Button();
+  //      createButton.text = "Create Dialogue";
+  //      CreateDialogue(createButton);
+  //      rightPane.Add(createButton);
 
 		#endregion
 
@@ -143,6 +144,12 @@ public class DialogueEditor : Editor
 		};
 	}
 
+	void SetDialogue()
+	{
+		if (!(Dialogue)target)
+			return;
+		thisDialogue = (Dialogue)target;
+	}
 	void SetMarkups(ListView list)
 	{
 		list.makeItem = () => new Label();
@@ -174,9 +181,9 @@ public class DialogueEditor : Editor
 			var textField = new TextField();
 			textField.RegisterValueChangedCallback(evt =>
 			{
-				if (textField.userData is int index && index >= 0 && index < dialougeLines.Count)
+				if (textField.userData is int index && index >= 0 && index < thisDialogue.dialogueLines.Count())
 				{
-					dialougeLines[index] = evt.newValue;
+					thisDialogue.dialogueLines[index] = evt.newValue;
 
 				}
 			});
@@ -187,7 +194,7 @@ public class DialogueEditor : Editor
 		{
 			var field = (TextField)item;
 			field.userData = index;
-			field.SetValueWithoutNotify(dialougeLines[index]);
+			field.SetValueWithoutNotify(thisDialogue.dialogueLines[index]);
 		};
 	}
 
@@ -195,7 +202,7 @@ public class DialogueEditor : Editor
     {
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
-			hasSpeaker = toggle.value;
+			thisDialogue.hasSpeaker = toggle.value;
 		});
 	}
 
@@ -203,7 +210,7 @@ public class DialogueEditor : Editor
     {
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
-			speaker = (DialogueSpeaker)evt.newValue;
+			thisDialogue.speaker = (DialogueSpeaker)evt.newValue;
 		});
 	}
 
@@ -211,12 +218,12 @@ public class DialogueEditor : Editor
     {
         toggle.RegisterCallback<ClickEvent>( evt =>
         {
-            hasSpeaker = toggle.value;
+            thisDialogue.hasSpeaker = toggle.value;
         });
 
         field.RegisterCallback<ChangeEvent<Object>>(evt =>
         {
-            speaker = (DialogueSpeaker)evt.newValue; 
+            thisDialogue.speaker = (DialogueSpeaker)evt.newValue; 
         });
     }
 
@@ -224,7 +231,7 @@ public class DialogueEditor : Editor
     {
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
-			hasTypeWriter = toggle.value;
+			thisDialogue.hasTypeWriter = toggle.value;
 		});
 	}
 
@@ -232,31 +239,31 @@ public class DialogueEditor : Editor
     {
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
-			expression = (DialogueExpression)evt.newValue;
+			thisDialogue.startExpression = (DialogueExpression)evt.newValue;
 		});
 	}
 
-    void CreateDialogue(Button button)
-    {
-	    button.RegisterCallback<ClickEvent>(evt =>
-		{
-			Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
-			newDialogue.hasSpeaker = hasSpeaker;
-			newDialogue.speaker = speaker;
-			newDialogue.hasTypeWriterEffect = hasTypeWriter;
-			newDialogue.startingExpression = expression;
-			newDialogue.dialogueLines = dialougeLines.ToArray();
+ //   void CreateDialogue(Button button)
+ //   {
+	//    button.RegisterCallback<ClickEvent>(evt =>
+	//	{
+	//		Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
+	//		newDialogue.hasSpeaker = hasSpeaker;
+	//		newDialogue.speaker = speaker;
+	//		newDialogue.hasTypeWriter = hasTypeWriter;
+	//		newDialogue.startExpression = expression;
+	//		newDialogue.dialogueLines = dialougeLines.ToArray();
 
-			string path = "Assets/NewDialogue.asset";
-			path = AssetDatabase.GenerateUniqueAssetPath(path);
+	//		string path = "Assets/NewDialogue.asset";
+	//		path = AssetDatabase.GenerateUniqueAssetPath(path);
 
-			AssetDatabase.CreateAsset(newDialogue, path);
-			AssetDatabase.SaveAssets();
+	//		AssetDatabase.CreateAsset(newDialogue, path);
+	//		AssetDatabase.SaveAssets();
 
-			EditorUtility.FocusProjectWindow();
-			Selection.activeObject = newDialogue;
-		});
-	}
+	//		EditorUtility.FocusProjectWindow();
+	//		Selection.activeObject = newDialogue;
+	//	});
+	//}
 
 
 

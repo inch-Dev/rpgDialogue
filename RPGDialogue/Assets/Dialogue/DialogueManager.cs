@@ -150,7 +150,7 @@ public class DialogueManager : MonoBehaviour
         if(dialogue.hasSpeaker)
         {
             curSpeaker = dialogue.speaker;
-            curExpression = dialogue.startingExpression;
+            curExpression = dialogue.startExpression;
         }
         else
         {
@@ -159,7 +159,7 @@ public class DialogueManager : MonoBehaviour
         }
         readingDialogue = true;
 
-        if(dialogue.hasTypeWriterEffect)
+        if(dialogue.hasTypeWriter)
         {
             StartCoroutine(TypewriterReadDialogue(dialogue));
         }
@@ -171,19 +171,19 @@ public class DialogueManager : MonoBehaviour
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, RemoveMarkups(totalText), totalText.Length);
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startExpression, RemoveMarkups(totalText), totalText.Length);
         }
     }
 
     void ReadDialogueLine(Dialogue dialogue, int dialogueLineIndex, string dialogueLine)
     {
         //NEEDS MARKUP TEXT TO WAIT AND CHANGE EXPRESSIONS
-        if(dialogue.hasTypeWriterEffect)
+        if(dialogue.hasTypeWriter)
             StartCoroutine(TypewriterReadDialogue(dialogue));
         else
         {
             //Eventually need function that reads for markup text 
-            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startingExpression, dialogueLine, dialogueLine.Length);
+            updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startExpression, dialogueLine, dialogueLine.Length);
         }
     }
 
