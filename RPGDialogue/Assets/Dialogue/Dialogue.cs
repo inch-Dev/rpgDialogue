@@ -7,11 +7,11 @@ public class Dialogue : ScriptableObject
     [SerializeField] public bool hasSpeaker;
     [ShowIf("hasSpeaker")] public DialogueSpeaker speaker;
     [ShowIf("hasSpeaker")] public DialogueExpression startExpression;
-    [SerializeField] public string[] dialogueLines;
+    [SerializeField] public List<string> dialogueLines;
     [SerializeField] public bool hasTypeWriter = true;
 
 
-	public Dialogue(bool hasSpeaker, DialogueSpeaker speaker, DialogueExpression startingExpression, string[] dialogueLines, bool hasTypeWriterEffect)
+	public Dialogue(bool hasSpeaker, DialogueSpeaker speaker, DialogueExpression startingExpression, List<string> dialogueLines, bool hasTypeWriterEffect)
 	{
 		this.hasSpeaker = hasSpeaker;
 		this.speaker = speaker;
@@ -21,7 +21,7 @@ public class Dialogue : ScriptableObject
 	}
 
 
-	public Dialogue(DialogueSpeaker speaker, DialogueExpression startingExpression, string[] dialogueLines, bool hasTypeWriterEffect)
+	public Dialogue(DialogueSpeaker speaker, DialogueExpression startingExpression, List<string> dialogueLines, bool hasTypeWriterEffect)
 	{
 		this.hasSpeaker = true;
 		this.speaker = speaker;
@@ -30,7 +30,7 @@ public class Dialogue : ScriptableObject
 		this.hasTypeWriter |= hasTypeWriterEffect;
 	}
 
-	public Dialogue(string[] dialogueLines, bool hasTypeWriterEffect)
+	public Dialogue(List<string> dialogueLines, bool hasTypeWriterEffect)
 	{
 		this.hasSpeaker = false;
 		this.speaker = null;

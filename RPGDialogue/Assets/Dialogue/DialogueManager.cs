@@ -167,7 +167,7 @@ public class DialogueManager : MonoBehaviour
         else
         {
             string totalText = "";
-            for(int i = 0; i < dialogue.dialogueLines.Length; i++)
+            for(int i = 0; i < dialogue.dialogueLines.Count; i++)
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
@@ -509,9 +509,9 @@ public class DialogueManager : MonoBehaviour
     {
         int charIndex = 0;
         string curLogicText = "";
-        string[] dialogueLines = dialogue.dialogueLines;
+        List<string> dialogueLines = dialogue.dialogueLines;
 
-        for(int i = 0; i < dialogue.dialogueLines.Length; i++)
+        for(int i = 0; i < dialogue.dialogueLines.Count; i++)
         {
             curLogicText = "";
             charIndex = 0;
