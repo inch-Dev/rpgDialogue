@@ -14,18 +14,14 @@ public class DialogueEditor : EditorWindow
         wnd.titleContent = new GUIContent("DialogueEditor");
     }
 
+    TextField focusField = new TextField();
+
     public void CreateGUI()
     {
-
-        
-
-		// Each editor window contains a root VisualElement object
 		VisualElement root = rootVisualElement;
 
 		var splitView = new TwoPaneSplitView(0, 250, TwoPaneSplitViewOrientation.Horizontal);
-
         root.Add(splitView);
-
 
 		#region LEFT PANE
 		VisualElement leftPane = new VisualElement();
@@ -124,8 +120,6 @@ public class DialogueEditor : EditorWindow
         #endregion
 
         #region FUNCTIONS
-
-       
 
 		markupList.itemsChosen += (selectedItems) =>
 		{
