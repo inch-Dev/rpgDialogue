@@ -7,16 +7,28 @@ using UnityEditor.Search;
 
 public class DialogueEditor : EditorWindow
 {
-    [MenuItem("Window/DialogueEditor")]
+    [MenuItem("Tools/DialogueEditor")]
     public static void ShowExample()
     {
         DialogueEditor wnd = GetWindow<DialogueEditor>();
         wnd.titleContent = new GUIContent("DialogueEditor");
     }
 
-    TextField focusField = new TextField();
+    TextField focusField;
 
-    public void CreateGUI()
+	//SOURCE VALUES
+	List<DialogueMarkup> allMarkups = new List<DialogueMarkup>();
+	List<MarkupData> markupDatas = new List<MarkupData>();
+
+
+	//EDITABLE VALUES
+	List<string> allDialogueLines = new List<string>();
+	bool hasSpeaker = false;
+	bool hasTypeWriter = false;
+    DialogueSpeaker speaker = null;
+    DialogueExpression expression = null;
+
+	public void CreateGUI()
     {
 		VisualElement root = rootVisualElement;
 
@@ -31,8 +43,8 @@ public class DialogueEditor : EditorWindow
         markupLabel.style.fontSize = 12;
         leftPane.Add(markupLabel);
 
-		var allMarkupGuids = AssetDatabase.FindAssets("t:DialogueMarkup");
-		var allMarkups = new List<DialogueMarkup>();
+
+		string[] allMarkupGuids = AssetDatabase.FindAssets("t:DialogueMarkup");
 		foreach (var guid in allMarkupGuids)
 		{
 			allMarkups.Add(AssetDatabase.LoadAssetAtPath<DialogueMarkup>(AssetDatabase.GUIDToAssetPath(guid)));
@@ -49,12 +61,6 @@ public class DialogueEditor : EditorWindow
         dataLabel.style.fontSize = 12;
         leftPane.Add(dataLabel);
 
-        //var allMarkupDataGuids = AssetDatabase.FindAssets("t:MarkupData");
-        var markupDatas = new List<MarkupData>();
-        //foreach(var guid in allMarkupDataGuids)
-        //{
-        //    markupDatas.Add(AssetDatabase.LoadAssetAtPath<MarkupData>(AssetDatabase.GUIDToAssetPath(guid)));
-        //}
         var markupDataList = new ListView();
         markupDataList.makeItem = () => new Label();
         markupDataList.bindItem = (item, index) => { (item as Label).text = markupDatas[index].name; };
@@ -87,7 +93,6 @@ public class DialogueEditor : EditorWindow
         dialogueLabel.style.fontSize = 12;
         rightPane.Add(dialogueLabel);
 
-        List<string> allDialogueLines  = new List<string>();
         var dialogueLineList = new ListView() { itemsSource = allDialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
         
         rightPane.Add(dialogueLineList);
@@ -98,23 +103,28 @@ public class DialogueEditor : EditorWindow
 
         Toggle typewriterToggle = new Toggle();
         typewriterToggle.text = "Type Writer Effect";
+		SetTypewriter(typewriterToggle);
         rightPane.Add(typewriterToggle);
 
         
 		Toggle speakerToggle = new Toggle();
 		speakerToggle.text = "Speaker";
+		SetSpeaker(speakerToggle);
 		rightPane.Add(speakerToggle);
 
         var speakerField = new ObjectField("Speaker");
         speakerField.objectType = typeof(DialogueSpeaker);
+		SetSpeaker(speakerField);
         rightPane.Add(speakerField);
 
         var expressionField = new ObjectField("Starting Expression");
         expressionField.objectType = typeof(DialogueExpression);
+		SetExpression(expressionField);
         rightPane.Add(expressionField);
 
 		Button createButton = new Button();
         createButton.text = "Create Dialogue";
+        CreateDialogue(createButton);
         rightPane.Add(createButton);
 
         #endregion
@@ -142,7 +152,6 @@ public class DialogueEditor : EditorWindow
 		};
 
 
-		List<string> dialogueLines = new List<string>();
 		dialogueLineList.makeItem = () =>
 		{
 			var textField = new TextField();
@@ -164,60 +173,130 @@ public class DialogueEditor : EditorWindow
 			field.SetValueWithoutNotify(allDialogueLines[index]);
 		};
 
-		bool hasSpeaker = false;
-		speakerToggle.RegisterCallback<ClickEvent>(evt =>
-		{
-			hasSpeaker = speakerToggle.value;
-			//Debug.Log($"Has speaker is {hasSpeaker}");
-		});
+		//speakerToggle.RegisterCallback<ClickEvent>(evt =>
+		//{
+		//	hasSpeaker = speakerToggle.value;
+		//	//Debug.Log($"Has speaker is {hasSpeaker}");
+		//});
 
-        bool hasTypeWriterEffect = false;
-        typewriterToggle.RegisterCallback<ClickEvent>(evt =>
-        {
-            hasTypeWriterEffect = typewriterToggle.value;
-        });
+        //typewriterToggle.RegisterCallback<ClickEvent>(evt =>
+        //{
+        //    hasTypeWriter = typewriterToggle.value;
+        //});
 
-        DialogueSpeaker speaker = ScriptableObject.CreateInstance<DialogueSpeaker>();
-        speakerField.RegisterCallback<ChangeEvent<Object>>(evt =>
-        {
-            speaker = (DialogueSpeaker)evt.newValue;
-        });
+        
+        //speakerField.RegisterCallback<ChangeEvent<Object>>(evt =>
+        //{
+        //    speaker = (DialogueSpeaker)evt.newValue;
+        //});
 
-        DialogueExpression expression = ScriptableObject.CreateInstance<DialogueExpression>();
-        expressionField.RegisterCallback<ChangeEvent<Object>>(evt =>
-        {
-            expression = (DialogueExpression)evt.newValue;
-        });
+        //expressionField.RegisterCallback<ChangeEvent<Object>>(evt =>
+        //{
+        //    expression = (DialogueExpression)evt.newValue;
+        //});
 
-        createButton.RegisterCallback<ClickEvent>(evt =>
-        {
-            Debug.Log("Clicked create!");
+  //      createButton.RegisterCallback<ClickEvent>(evt =>
+  //      {
+  //          Debug.Log("Clicked create!");
 
-            Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
-            newDialogue.hasSpeaker = hasSpeaker;
-            newDialogue.speaker = speaker;
-            newDialogue.hasTypeWriterEffect = hasTypeWriterEffect;
-            newDialogue.startingExpression = expression;
-            newDialogue.dialogueLines = allDialogueLines.ToArray();
+  //          Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
+  //          newDialogue.hasSpeaker = hasSpeaker;
+  //          newDialogue.speaker = speaker;
+  //          newDialogue.hasTypeWriterEffect = hasTypeWriter;
+  //          newDialogue.startingExpression = expression;
+  //          newDialogue.dialogueLines = allDialogueLines.ToArray();
 
-            string path = "Assets/NewDialogue.asset";
-            path = AssetDatabase.GenerateUniqueAssetPath(path);
+  //          string path = "Assets/NewDialogue.asset";
+  //          path = AssetDatabase.GenerateUniqueAssetPath(path);
 
-            AssetDatabase.CreateAsset(newDialogue, path);
-            AssetDatabase.SaveAssets();
+  //          AssetDatabase.CreateAsset(newDialogue, path);
+  //          AssetDatabase.SaveAssets();
 
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = newDialogue;
+  //          EditorUtility.FocusProjectWindow();
+  //          Selection.activeObject = newDialogue;
 
-            Debug.Log("Created new dialogue!");
+  //          Debug.Log("Created new dialogue!");
             
 
-		});
+		//});
 
 		#endregion
 
 
 	}
+
+    void RefreshMarkupDatas()
+    {
+        
+    }
+
+    void SetSpeaker(Toggle toggle)
+    {
+		toggle.RegisterCallback<ClickEvent>(evt =>
+		{
+			hasSpeaker = toggle.value;
+		});
+	}
+
+    void SetSpeaker(ObjectField field)
+    {
+		field.RegisterCallback<ChangeEvent<Object>>(evt =>
+		{
+			speaker = (DialogueSpeaker)evt.newValue;
+		});
+	}
+
+    void SetSpeaker(Toggle toggle, ObjectField field)
+    {
+        toggle.RegisterCallback<ClickEvent>( evt =>
+        {
+            hasSpeaker = toggle.value;
+        });
+
+        field.RegisterCallback<ChangeEvent<Object>>(evt =>
+        {
+            speaker = (DialogueSpeaker)evt.newValue; 
+        });
+    }
+
+    void SetTypewriter(Toggle toggle)
+    {
+		toggle.RegisterCallback<ClickEvent>(evt =>
+		{
+			hasTypeWriter = toggle.value;
+		});
+	}
+
+    void SetExpression(ObjectField field)
+    {
+		field.RegisterCallback<ChangeEvent<Object>>(evt =>
+		{
+			expression = (DialogueExpression)evt.newValue;
+		});
+	}
+
+    void CreateDialogue(Button button)
+    {
+	    button.RegisterCallback<ClickEvent>(evt =>
+		{
+			Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
+			newDialogue.hasSpeaker = hasSpeaker;
+			newDialogue.speaker = speaker;
+			newDialogue.hasTypeWriterEffect = hasTypeWriter;
+			newDialogue.startingExpression = expression;
+			newDialogue.dialogueLines = allDialogueLines.ToArray();
+
+			string path = "Assets/NewDialogue.asset";
+			path = AssetDatabase.GenerateUniqueAssetPath(path);
+
+			AssetDatabase.CreateAsset(newDialogue, path);
+			AssetDatabase.SaveAssets();
+
+			EditorUtility.FocusProjectWindow();
+			Selection.activeObject = newDialogue;
+		});
+	}
+
 
 
 }
