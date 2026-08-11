@@ -7,13 +7,14 @@ using UnityEditor.Search;
 using Codice.CM.Common.Update.Partial;
 using UnityEditor.Build.Pipeline.Tasks;
 using System.Linq;
+using System.Security.Permissions;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueEditor : Editor
 {
 	Dialogue thisDialogue;
-	List<DialogueMarkup> markups;
-	List<MarkupData> markupDatas;
+	List<DialogueMarkup> markups = new List<DialogueMarkup>();
+	List<MarkupData> markupDatas = new List<MarkupData>();
 
 	DialogueMarkup selectedMarkup;
 	MarkupData selectedMarkupData;
@@ -111,11 +112,6 @@ public class DialogueEditor : Editor
 		SetExpression(expressionField);
         rightPane.Add(expressionField);
 
-		//Button createButton = new Button();
-  //      createButton.text = "Create Dialogue";
-  //      CreateDialogue(createButton);
-  //      rightPane.Add(createButton);
-
 		#endregion
 
 		return root;
@@ -135,25 +131,17 @@ public class DialogueEditor : Editor
 	#region SETTERS
 	void SetFocus(TextField field)
 	{
-		field.UnregisterCallback<FocusInEvent>(evt =>
-		{
-			focusField = (TextField)evt.target;
-			focusIndex = (int)focusField.userData;
 
-		});
-
-		field.RegisterCallback<FocusInEvent>(evt =>
-		{
-			focusField = (TextField)evt.target;
-			focusIndex = (int)focusField.userData;
-
-		});
+		focusField = field;
+		focusIndex = (int)field.userData;
 	}
+
 	void SetDialogue()
 	{
 		if (!(Dialogue)target)
 			return;
 		thisDialogue = (Dialogue)target;
+
 	}
 	void SetMarkups(ListView list)
 	{
@@ -191,23 +179,34 @@ public class DialogueEditor : Editor
 	{
 		list.makeItem = () =>
 		{
-			var textField = new TextField();
-			textField.RegisterValueChangedCallback(evt =>
+			TextField field = new TextField();
+			field.RegisterValueChangedCallback(evt =>
 			{
-				if (textField.userData is int index && index >= 0 && index < thisDialogue.dialogueLines.Count())
+				if (field.userData is int index && index >= 0 && index < thisDialogue.dialogueLines.Count())
 				{
 					thisDialogue.dialogueLines[index] = evt.newValue;
 
 				}
 			});
-			return textField;
+			return field;
 		};
 
 		list.bindItem = (item,index) =>
 		{
-			var field = (TextField)item;
+			TextField field = (TextField)item;
 			field.userData = index;
+
 			field.SetValueWithoutNotify(thisDialogue.dialogueLines[index]);
+
+			field.selectAllOnFocus = false;
+			field.selectAllOnMouseUp = false;
+
+			if(index == focusIndex)
+			{
+				field.Focus();
+				field.SelectRange(field.text.Length, field.text.Length);
+			}
+	
 		};
 	}
 
@@ -259,6 +258,11 @@ public class DialogueEditor : Editor
 	}
 
 	#endregion
+
+	void AddMarkup()
+	{
+		
+	}
 	void RefreshMarkupDatas(ListView markupList, ListView dataList)
 	{
 		markupList.itemsChosen += (selectedItems) =>
