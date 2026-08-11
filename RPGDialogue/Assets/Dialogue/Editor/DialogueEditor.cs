@@ -131,9 +131,17 @@ public class DialogueEditor : Editor
 	#region SETTERS
 	void SetFocus(TextField field)
 	{
+		field.RegisterCallback<FocusInEvent>(SetFocus);
+		field.RegisterCallback<FocusInEvent>(SetFocus);
+	}
 
+	void SetFocus(FocusInEvent evt)
+	{
+		TextField field = (TextField)evt.currentTarget;
 		focusField = field;
 		focusIndex = (int)field.userData;
+		Debug.Log(focusField);
+		Debug.Log(focusIndex);
 	}
 
 	void SetDialogue()
@@ -177,6 +185,12 @@ public class DialogueEditor : Editor
 
 	void SetDialogueLines(ListView list)
 	{
+		list.onRemove = (baseListview) =>
+		{
+			
+		};
+
+		
 		list.makeItem = () =>
 		{
 			TextField field = new TextField();
@@ -200,6 +214,8 @@ public class DialogueEditor : Editor
 
 			field.selectAllOnFocus = false;
 			field.selectAllOnMouseUp = false;
+
+			SetFocus(field);
 
 			if(index == focusIndex)
 			{
