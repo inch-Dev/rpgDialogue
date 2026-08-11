@@ -40,57 +40,27 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] List<MarkupData> markupDatas;
     protected string lastStoredParameter;
 
-    virtual public void ApplyMarkup(string rawText)
-    {
-
-    }
+   
 
     #region GETTERS
 
-    /// <summary>
-    /// Get format type of markup
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <returns></returns>
-    virtual public FormatType GetFormatType(string markup)
+    virtual public string GetMarkup(DialogueMarkupFormat format)
     {
-        Debug.Log($"Getting markup text:{markup}");
-        FormatType theType = FormatType.INVALID;
+        string markup;
 
-        foreach (DialogueMarkupFormat format in formats)
-        {
-            if (ValidateFormat(markup, format))
-                return format.type;
-        }
+        markup = format.tagStart + keyName + " " + equals + " " + format.tagEnd;
 
-        return theType;
+        return markup;
     }
 
-
-    /// <summary>
-    /// Get format of markup
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <returns></returns>
-    virtual public DialogueMarkupFormat GetFormat(string markup)
+    virtual public string GetMarkup(MarkupData markupData, DialogueMarkupFormat format)
     {
-        DialogueMarkupFormat theFormat = null;
+        string markup;
 
-        char[] textArray = markup.ToCharArray();
+        markup = format.tagStart + keyName + " " + equals + " " + markupData.keyName + format.tagEnd;
 
-        foreach (DialogueMarkupFormat format in formats)
-        {
-            if (markup.Length < format.tagStart.Length + format.tagEnd.Length)
-                continue;
-
-            if (markup.Substring(0, format.tagStart.Length) == format.tagStart
-            && markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd)
-                return format;
-        }
-
-        return theFormat;
+        return markup;
     }
-
 
     virtual public List<MarkupData> GetMarkupDatas(){ return markupDatas; }
 
@@ -99,96 +69,150 @@ public class DialogueMarkup : ScriptableObject
     /// </summary>
     /// <param name="markup"></param>
     /// <returns></returns>
-    virtual public MarkupData GetMarkupData(string markup)
-    {
-        foreach (DialogueMarkupFormat format in formats)
-        {
-            MarkupData theMarkupData = GetMarkupData(markup, format);
-            if (theMarkupData)
-                return theMarkupData;
+ 
+	#endregion
 
-        }
-        return null;
-    }
+	#region PARSERS
 
-    /// <summary>
-    /// Get markupData in markup of this format
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <param name="format"></param>
-    /// <returns></returns>
-    virtual public MarkupData GetMarkupData(string markup, DialogueMarkupFormat format)
-    {
-        foreach (MarkupData markupData in markupDatas)
-        {
-            if (ValidateMarkupData(markup, markupData, format))
-                return markupData;
-        }
+	/// <summary>
+	/// Get format type of markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+	virtual public FormatType ParseFormatType(string markup)
+	{
+		Debug.Log($"Getting markup text:{markup}");
+		FormatType theType = FormatType.INVALID;
 
-        return null;
-    }
+		foreach (DialogueMarkupFormat format in formats)
+		{
+			if (ValidateFormat(markup, format))
+				return format.type;
+		}
 
-    /// <summary>
-    /// Gets first valid markup in rawText
-    /// </summary>
-    virtual public string GetMarkup(string rawText)
-    {
-        for (int i = 0; i < rawText.Length; i++)
-        {
-            if (GetMarkup(rawText, i) != null)
-                return GetMarkup(rawText, i);
-        }
-        return null;
-    }
+		return theType;
+	}
 
-    /// <summary>
-    /// Gets valid markup in rawText at starting index
-    /// </summary>
-    virtual public string GetMarkup(string rawText, int startIndex)
-    {
-        //Check all formats for first valid instance
 
-        foreach (DialogueMarkupFormat format in formats)
-        {
-            string markupString = GetMarkup(rawText, startIndex, format);
-            if (markupString != null)
-            {
-                return markupString;
-            }
-        }
+	/// <summary>
+	/// Get format of markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+	virtual public DialogueMarkupFormat ParseFormat(string markup)
+	{
+		DialogueMarkupFormat theFormat = null;
 
-        return null;
-    }
+		char[] textArray = markup.ToCharArray();
 
-    /// <summary>
-    /// Gets valid markup in rawText at starting index in this format
-    /// </summary>
-    virtual public string GetMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
-    {
+		foreach (DialogueMarkupFormat format in formats)
+		{
+			if (markup.Length < format.tagStart.Length + format.tagEnd.Length)
+				continue;
 
-        if (startIndex + format.tagStart.Length < rawText.Length)
-        {
+			if (markup.Substring(0, format.tagStart.Length) == format.tagStart
+			&& markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd)
+				return format;
+		}
 
-            if (rawText.Substring(startIndex, format.tagStart.Length) == format.tagStart)
-            {
-                //Debug.Log($"Looking at {rawText.Substring(i, format.tagStart.Length)}, Format start:{format.tagStart}");
-                int endIndex = rawText.IndexOf(format.tagEnd.ToCharArray()[format.tagEnd.Length - 1], startIndex + 1);
-                //Debug.Log($"Looking for...{format.tagEnd.ToCharArray()[format.tagEnd.Length - 1]}");
-                if (endIndex != -1)
-                {
-                    string tryMarkup = rawText.Substring(startIndex, endIndex + 1 - startIndex);
-                    //Debug.Log($"Found {tryMarkup}");
-                    if (ValidateFormat(tryMarkup, format) && ValidateKeyName(tryMarkup, format) && ValidateMarkupData(tryMarkup, format))
-                    {
-                        //Debug.Log($"FOUND {tryMarkup} AT Raw text:{rawText}, startIndex:{startIndex}, format:{format.type}");
-                        return tryMarkup;
+		return theFormat;
+	}
 
-                    }
-                }
-            }
-        }
-        return null;
-    }
+	/// <summary>
+	/// Get markupData in markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+	virtual public MarkupData ParseMarkupData(string markup)
+	{
+		foreach (DialogueMarkupFormat format in formats)
+		{
+			MarkupData theMarkupData = ParseMarkupData(markup, format);
+			if (theMarkupData)
+				return theMarkupData;
+
+		}
+		return null;
+	}
+
+	/// <summary>
+	/// Get markupData in markup of this format
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <param name="format"></param>
+	/// <returns></returns>
+	virtual public MarkupData ParseMarkupData(string markup, DialogueMarkupFormat format)
+	{
+		foreach (MarkupData markupData in markupDatas)
+		{
+			if (ValidateMarkupData(markup, markupData, format))
+				return markupData;
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Gets first valid markup in rawText
+	/// </summary>
+	virtual public string ParseMarkup(string rawText)
+	{
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (ParseMarkup(rawText, i) != null)
+				return ParseMarkup(rawText, i);
+		}
+		return null;
+	}
+
+	/// <summary>
+	/// Gets valid markup in rawText at starting index
+	/// </summary>
+	virtual public string ParseMarkup(string rawText, int startIndex)
+	{
+		//Check all formats for first valid instance
+
+		foreach (DialogueMarkupFormat format in formats)
+		{
+			string markupString = ParseMarkup(rawText, startIndex, format);
+			if (markupString != null)
+			{
+				return markupString;
+			}
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Gets valid markup in rawText at starting index in this format
+	/// </summary>
+	virtual public string ParseMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
+	{
+
+		if (startIndex + format.tagStart.Length < rawText.Length)
+		{
+
+			if (rawText.Substring(startIndex, format.tagStart.Length) == format.tagStart)
+			{
+				//Debug.Log($"Looking at {rawText.Substring(i, format.tagStart.Length)}, Format start:{format.tagStart}");
+				int endIndex = rawText.IndexOf(format.tagEnd.ToCharArray()[format.tagEnd.Length - 1], startIndex + 1);
+				//Debug.Log($"Looking for...{format.tagEnd.ToCharArray()[format.tagEnd.Length - 1]}");
+				if (endIndex != -1)
+				{
+					string tryMarkup = rawText.Substring(startIndex, endIndex + 1 - startIndex);
+					//Debug.Log($"Found {tryMarkup}");
+					if (ValidateFormat(tryMarkup, format) && ValidateKeyName(tryMarkup, format) && ValidateMarkupData(tryMarkup, format))
+					{
+						//Debug.Log($"FOUND {tryMarkup} AT Raw text:{rawText}, startIndex:{startIndex}, format:{format.type}");
+						return tryMarkup;
+
+					}
+				}
+			}
+		}
+		return null;
+	}
 	#endregion
 
 	#region VALIDATE INSTANCES
@@ -386,24 +410,73 @@ public class DialogueMarkup : ScriptableObject
         if (rawText == null || rawText.Length <= 0)
             return false;
 
-        if (ValidateMarkup(GetMarkup(rawText, index)))
+        if (ValidateMarkup(ParseMarkup(rawText, index)))
             return true;
 
         return false;
     }
 
-    #endregion
+	#endregion
 
-    #endregion
+	#endregion
 
-    #region REMOVE TEXT
+	#region APPLY TEXT
 
-    /// <summary>
-    /// Removes all valid markup strings
-    /// </summary>
-    /// <param name="rawText"></param>
-    /// <returns></returns>
-    virtual public string RemoveMarkup(string rawText)
+
+
+
+	virtual public string ApplyMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
+	{
+		string applyText = "";
+		char[] textArray = rawText.ToCharArray();
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (i == startIndex)
+			{
+               applyText += textArray[i];
+                applyText += GetMarkup(format);
+			}
+            else
+            {
+                applyText += textArray[i];
+            }
+		}
+
+		return applyText;
+	}
+
+    virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData, DialogueMarkupFormat format)
+    {
+		string applyText = "";
+		char[] textArray = rawText.ToCharArray();
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (i == startIndex)
+			{
+				applyText += textArray[i];
+				applyText += GetMarkup(markupData, format);
+			}
+			else
+			{
+				applyText += textArray[i];
+			}
+		}
+
+		return applyText;
+	}
+
+	#endregion
+
+	#region REMOVE TEXT
+
+	/// <summary>
+	/// Removes all valid markup strings
+	/// </summary>
+	/// <param name="rawText"></param>
+	/// <returns></returns>
+	virtual public string RemoveMarkup(string rawText)
     {
         string removedMarkupText = "";
 
@@ -413,7 +486,7 @@ public class DialogueMarkup : ScriptableObject
         {
             if (ValidateMarkup(rawText, i))
             {
-                i += GetMarkup(rawText, i).Length;
+                i += ParseMarkup(rawText, i).Length;
             }
 
             else
@@ -424,105 +497,6 @@ public class DialogueMarkup : ScriptableObject
 
         return removedMarkupText;
     }
-
-    //virtual public string RemoveOpenMarkup(string text)
-    //{
-    //    string removedText = "";
-    //    char[] textArray = text.ToCharArray();
-
-    //    for(int i = 0; i < textArray.Length; i++)
-    //    {
-    //        if(ValidateOpenMarkup(text, i))
-    //        {
-    //            int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
-
-    //            if(indexOfEnd != -1)
-    //            {
-    //                int lengthOfTag = indexOfEnd - i + 1;
-    //                i += lengthOfTag;
-    //                continue;
-    //            }
-    //        }
-    //            removedText += textArray[i];
-    //    }
-    //    return removedText;
-    //}
-
-    //virtual public string RemoveCloseMarkup(string text)
-    //{
-    //    string removedText = "";
-    //    char[] textArray = text.ToCharArray();
-
-    //    for(int i = 0; i < textArray.Length; i++)
-    //    {
-    //        if(ValidateCloseMarkup(text, i))
-    //        {
-    //            int indexOfEnd = text.IndexOf(closeFormatTagEnd, i + 1);
-    //            if(indexOfEnd != -1)
-    //            {
-    //                int lengthOfTag = indexOfEnd - i + 1;
-    //                i += lengthOfTag;
-    //                continue;
-    //            }
-    //        }
-    //            removedText += textArray[i];
-    //    }
-    //    Debug.Log($"Removed close makrup text {removedText}");
-    //    return removedText;
-    //}
-
-    //virtual public string RemoveFormatTagText(string text)
-    //{
-    //    //Need open and close
-    //    //Debug.Log($"Incoming text:{text}");
-    //    string excludedMarkupText = "";
-    //    char[] textArray = text.ToCharArray();
-    //    bool isReadingTag = false;
-
-    //    for(int i = 0; i < textArray.Length; i++)
-    //    {
-    //        if(i + 1 < textArray.Length && textArray[i].ToString() == openFormatTagStart) //Skip over beginning of tag
-    //        {
-    //            int indexOfEnd = text.IndexOf(openFormatTagEnd, i + 1);
-    //            if(indexOfEnd != -1 )
-    //            {
-    //                string tryTag = text.Substring(i + 1, indexOfEnd - 2 - i);
-    //                char tryChar = text.Substring(indexOfEnd - 1, 1).ToCharArray()[0];
-
-    //                if(OLDValidateParameter(tryTag) && tryChar == markupCharacter)
-    //                {
-    //                    //Debug.Log($"Reading tag as:{parameterType}");
-    //                    isReadingTag = true;
-    //                    continue;
-    //                }
-    //                else
-    //                {
-    //                    Debug.Log($"Failed to recognize {tryTag} as {parameterType} or {tryChar} as {markupCharacter}");
-    //                }
-    //            }
-    //        }
-
-    //        if(!isReadingTag)
-    //        {
-    //            excludedMarkupText += textArray[i];
-    //        }
-
-
-    //        if(textArray[i] == '>') //Skip over ending of tag
-    //        {
-    //            if(isReadingTag)
-    //            {
-    //                isReadingTag = false;
-    //                continue;
-    //            }
-    //        }
-
-
-    //        //Debug.Log($"Exluded markup text:{excludedMarkupText}");
-    //    }
-    //    return excludedMarkupText;
-    //}
-
     #endregion
 
     #region LOGIC
@@ -530,16 +504,16 @@ public class DialogueMarkup : ScriptableObject
     virtual public bool HandleLogic(DialogueManager dialogueManager, string deltaLogicText)
     {
         //Error handling
-        if (!ValidateMarkup(GetMarkup(deltaLogicText)))
+        if (!ValidateMarkup(ParseMarkup(deltaLogicText)))
         {
             //Debug.Log($"Could not validate from:{deltaLogicText}");
             return false;
         }
         else
         {
-            MarkupData theMarkupData = GetMarkupData(deltaLogicText);
+            MarkupData theMarkupData = ParseMarkupData(deltaLogicText);
 
-            switch (GetFormatType(GetMarkup(deltaLogicText)))
+            switch (ParseFormatType(ParseMarkup(deltaLogicText)))
             {
                 case FormatType.OPEN:
                     theMarkupData.OpenLogic();
@@ -548,7 +522,7 @@ public class DialogueMarkup : ScriptableObject
                     theMarkupData.CloseLogic();
                     break;
                 default:
-                    Debug.Log($"Could not get format type from {GetFormatType(GetMarkup(deltaLogicText))}");
+                    Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaLogicText))}");
                     break;
             }
         }

@@ -11,14 +11,15 @@ using System.Linq;
 [CustomEditor(typeof(Dialogue))]
 public class DialogueEditor : Editor
 {
-	//SOURCE VALUES
 	Dialogue thisDialogue;
-	List<DialogueMarkup> markups = new List<DialogueMarkup>();
-	List<MarkupData> markupDatas = new List<MarkupData>();
+	List<DialogueMarkup> markups;
+	List<MarkupData> markupDatas;
 
+	DialogueMarkup selectedMarkup;
+	MarkupData selectedMarkupData;
 
-	//EDITABLE VALUES
-	MarkupData selectedMarkupData = null;
+	TextField focusField;
+	int focusIndex = -1;
 
 	public override VisualElement CreateInspectorGUI()
     {
@@ -120,30 +121,34 @@ public class DialogueEditor : Editor
 		return root;
 	}
 
-    void RefreshMarkupDatas(ListView markupList, ListView dataList)
-    {
-		markupList.itemsChosen += (selectedItems) =>
-		{
+	#region GETTERS
 
-		};
-
-		markupList.selectionChanged += (selectedItems) =>
-		{
-			foreach (DialogueMarkup dialogueMarkup in selectedItems)
-			{
-
-				selectedMarkupData = null;
-				markupDatas.Clear();
-				dataList.selectedIndex = -1;
-
-				markupDatas.AddRange(dialogueMarkup.GetMarkupDatas());
-				dataList.RefreshItems();
-
-
-			}
-		};
+	public (TextField field, int index) GetFocus()
+	{
+		if (focusField == null || focusField.panel == null)
+			return (null, -1);
+		return(focusField, focusIndex);
 	}
 
+	#endregion
+
+	#region SETTERS
+	void SetFocus(TextField field)
+	{
+		field.UnregisterCallback<FocusInEvent>(evt =>
+		{
+			focusField = (TextField)evt.target;
+			focusIndex = (int)focusField.userData;
+
+		});
+
+		field.RegisterCallback<FocusInEvent>(evt =>
+		{
+			focusField = (TextField)evt.target;
+			focusIndex = (int)focusField.userData;
+
+		});
+	}
 	void SetDialogue()
 	{
 		if (!(Dialogue)target)
@@ -156,6 +161,14 @@ public class DialogueEditor : Editor
 		list.bindItem = (item, index) => { (item as Label).text = markups[index].name; };
 		list.itemsSource = markups;
 		list.selectionType = SelectionType.Single;
+
+		list.itemsChosen += (selectedItems) =>
+		{
+			foreach (DialogueMarkup markup in selectedItems)
+			{
+				selectedMarkup = markup;
+			}
+		};
 	}
 
 	void SetMarkupDatas(ListView list)
@@ -198,7 +211,8 @@ public class DialogueEditor : Editor
 		};
 	}
 
-    void SetSpeaker(Toggle toggle)
+	#region SPEAKER
+	void SetSpeaker(Toggle toggle)
     {
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
@@ -226,6 +240,7 @@ public class DialogueEditor : Editor
             thisDialogue.speaker = (DialogueSpeaker)evt.newValue; 
         });
     }
+	#endregion
 
     void SetTypewriter(Toggle toggle)
     {
@@ -243,28 +258,29 @@ public class DialogueEditor : Editor
 		});
 	}
 
- //   void CreateDialogue(Button button)
- //   {
-	//    button.RegisterCallback<ClickEvent>(evt =>
-	//	{
-	//		Dialogue newDialogue = ScriptableObject.CreateInstance<Dialogue>();
-	//		newDialogue.hasSpeaker = hasSpeaker;
-	//		newDialogue.speaker = speaker;
-	//		newDialogue.hasTypeWriter = hasTypeWriter;
-	//		newDialogue.startExpression = expression;
-	//		newDialogue.dialogueLines = dialougeLines.ToArray();
+	#endregion
+	void RefreshMarkupDatas(ListView markupList, ListView dataList)
+	{
+		markupList.itemsChosen += (selectedItems) =>
+		{
 
-	//		string path = "Assets/NewDialogue.asset";
-	//		path = AssetDatabase.GenerateUniqueAssetPath(path);
+		};
 
-	//		AssetDatabase.CreateAsset(newDialogue, path);
-	//		AssetDatabase.SaveAssets();
+		markupList.selectionChanged += (selectedItems) =>
+		{
+			foreach (DialogueMarkup dialogueMarkup in selectedItems)
+			{
 
-	//		EditorUtility.FocusProjectWindow();
-	//		Selection.activeObject = newDialogue;
-	//	});
-	//}
+				selectedMarkupData = null;
+				markupDatas.Clear();
+				dataList.selectedIndex = -1;
+
+				markupDatas.AddRange(dialogueMarkup.GetMarkupDatas());
+				dataList.RefreshItems();
 
 
+			}
+		};
+	}
 
 }
