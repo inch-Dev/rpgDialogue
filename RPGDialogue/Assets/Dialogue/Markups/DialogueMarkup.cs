@@ -30,21 +30,13 @@ public class DialogueMarkupFormat
 public class DialogueMarkup : ScriptableObject
 {
     [SerializeField] public string keyName;
-    [SerializeField] protected char markupCharacter;
     protected static DialogueMarkupFormat openFormat = new DialogueMarkupFormat(FormatType.OPEN, "{", "}");
     protected static DialogueMarkupFormat closeFormat = new DialogueMarkupFormat(FormatType.CLOSE, "{/", "}");
     protected static DialogueMarkupFormat[] formats = new DialogueMarkupFormat[2] { openFormat, closeFormat };
     protected char equals = '=';
-    [SerializeField] protected bool hasParameters;
-    [ShowIf("hasParameters")]
     [SerializeField] List<MarkupData> markupDatas;
-    protected string lastStoredParameter;
-
-   
 
     #region GETTERS
-
-
     virtual public string GetMarkup()
     {
         string markup;
@@ -83,8 +75,6 @@ public class DialogueMarkup : ScriptableObject
     virtual public string GetMarkup(MarkupData markupData, DialogueMarkupFormat format)
     {
         string markup;
-
-        Debug.Log($"Keyname of markup:{markupData.keyName}");
 
         markup = format.tagStart + keyName + " " + equals + " " + markupData.keyName + format.tagEnd;
 
@@ -453,8 +443,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string ApplyMarkup(string rawText, int startIndex)
     {
-
-        //Debug.Log($"Length:{rawText.Length}, Start:{startIndex}");
         string applyText = "";
         char[] textArray = rawText.ToCharArray();
 
@@ -476,8 +464,6 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData)
     {
-
-        Debug.Log($"Getting markupData...{markupData}");
 		string applyText = "";
 		char[] textArray = rawText.ToCharArray();
 
