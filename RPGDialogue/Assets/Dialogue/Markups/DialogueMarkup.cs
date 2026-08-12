@@ -44,6 +44,33 @@ public class DialogueMarkup : ScriptableObject
 
     #region GETTERS
 
+
+    virtual public string GetMarkup()
+    {
+        string markup;
+
+        string openMarkup = GetMarkup(openFormat);
+
+        string closeMarkup = GetMarkup(closeFormat);
+
+        markup = openMarkup + closeMarkup;
+
+        return markup;
+    }
+
+    virtual public string GetMarkup(MarkupData markupData)
+    {
+        string markup;
+
+        string openMarkup = GetMarkup(markupData, openFormat);
+
+        string closeMarkup = GetMarkup(markupData, closeFormat);
+
+        markup = openMarkup + closeMarkup;
+
+        return markup;
+    }
+
     virtual public string GetMarkup(DialogueMarkupFormat format)
     {
         string markup;
@@ -422,8 +449,47 @@ public class DialogueMarkup : ScriptableObject
 
 	#region APPLY TEXT
 
+    virtual public string ApplyMarkup(string rawText, int startIndex)
+    {
+        string applyText = "";
+        char[] textArray = rawText.ToCharArray();
 
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if(i == startIndex)
+            {
+                applyText += textArray[i];
+                applyText += GetMarkup();
+            }
+            else
+            {
+                applyText += textArray[i];
+            }
+        }
 
+        return applyText;
+    }
+
+    virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData)
+    {
+		string applyText = "";
+		char[] textArray = rawText.ToCharArray();
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (i == startIndex)
+			{
+				applyText += textArray[i];
+				applyText += GetMarkup(markupData);
+			}
+			else
+			{
+				applyText += textArray[i];
+			}
+		}
+
+		return applyText;
+	}
 
 	virtual public string ApplyMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
 	{
@@ -434,7 +500,7 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == startIndex)
 			{
-               applyText += textArray[i];
+                applyText += textArray[i];
                 applyText += GetMarkup(format);
 			}
             else
@@ -457,6 +523,60 @@ public class DialogueMarkup : ScriptableObject
 			{
 				applyText += textArray[i];
 				applyText += GetMarkup(markupData, format);
+			}
+			else
+			{
+				applyText += textArray[i];
+			}
+		}
+
+		return applyText;
+	}
+
+    virtual public string ApplyMarkup(string rawText, Vector2Int indexRange)
+    {
+		string applyText = "";
+		char[] textArray = rawText.ToCharArray();
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (i == indexRange.x)
+			{
+				applyText += textArray[i];
+				applyText += GetMarkup(openFormat);
+			}
+
+            else if(i == indexRange.y)
+            {
+                applyText += textArray[i];
+                applyText += GetMarkup(closeFormat);
+            }
+			else
+			{
+				applyText += textArray[i];
+			}
+		}
+
+		return applyText;
+	}
+
+	virtual public string ApplyMarkup(string rawText, Vector2Int indexRange, MarkupData markupData)
+	{
+		string applyText = "";
+		char[] textArray = rawText.ToCharArray();
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (i == indexRange.x)
+			{
+				applyText += textArray[i];
+				applyText += GetMarkup(markupData, openFormat);
+			}
+
+			else if (i == indexRange.y)
+			{
+				applyText += textArray[i];
+				applyText += GetMarkup(markupData, closeFormat);
 			}
 			else
 			{

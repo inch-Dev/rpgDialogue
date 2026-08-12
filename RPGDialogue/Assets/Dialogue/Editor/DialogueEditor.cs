@@ -16,8 +16,14 @@ public class DialogueEditor : Editor
 	List<DialogueMarkup> markups = new List<DialogueMarkup>();
 	List<MarkupData> markupDatas = new List<MarkupData>();
 
-	DialogueMarkup selectedMarkup;
-	MarkupData selectedMarkupData;
+	DialogueMarkup selectedMarkup = null;
+	MarkupData selectedMarkupData = null;
+
+	TextField buttonFocusField;
+	int buttonFocusIndex = -1;
+	int buttonFocusCursorIndex = -1;
+	int buttonFocusSelectIndex = -1;
+
 
 	TextField focusField;
 	int focusIndex = -1;
@@ -82,7 +88,8 @@ public class DialogueEditor : Editor
 
         var dialogueLineList = new ListView() { itemsSource = thisDialogue.dialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
 		SetDialogueLines(dialogueLineList);
-        rightPane.Add(dialogueLineList);
+		AddMarkup(markupButton, dialogueLineList);
+		rightPane.Add(dialogueLineList);
 
         Label optionsLabel = new Label("<b>Dialogue Options");
         optionsLabel.style.fontSize = 12;
@@ -129,6 +136,25 @@ public class DialogueEditor : Editor
 	#endregion
 
 	#region SETTERS
+
+	void SetButtonFocus(TextField field)
+	{
+		if (field == null || field.panel == null)
+		{
+			buttonFocusField = null;
+			buttonFocusIndex = -1;
+			buttonFocusCursorIndex = -1;
+			buttonFocusSelectIndex = -1;
+			Debug.Log("Resetting BUTTON focus");
+			return;
+		}
+
+		buttonFocusField = field;
+		buttonFocusIndex = (int)field.userData;
+		buttonFocusCursorIndex = field.cursorIndex;
+		buttonFocusSelectIndex = field.selectIndex;
+
+	}
 	void SetFocus(TextField field)
 	{
 		field.UnregisterCallback<FocusInEvent>(SetFocus);
@@ -143,8 +169,8 @@ public class DialogueEditor : Editor
 		TextField field = (TextField)evt.currentTarget;
 		focusField = field;
 		focusIndex = (int)field.userData;
-		Debug.Log(focusField);
-		Debug.Log(focusIndex);
+
+		SetButtonFocus(field);
 	}
 
 	void SetFocus(FocusOutEvent evt)
@@ -174,6 +200,7 @@ public class DialogueEditor : Editor
 
 		list.itemsChosen += (selectedItems) =>
 		{
+			SetButtonFocus(null);
 			foreach (DialogueMarkup markup in selectedItems)
 			{
 				selectedMarkup = markup;
@@ -190,10 +217,16 @@ public class DialogueEditor : Editor
 
 		list.itemsChosen += (selectedItems) =>
 		{
+			SetButtonFocus(null);
 			foreach(MarkupData markupData in selectedItems)
 			{
 				selectedMarkupData = markupData;
 			}
+		};
+
+		list.selectionChanged += (selectedItems) =>
+		{
+			SetButtonFocus(null);
 		};
 	}
 
@@ -204,17 +237,28 @@ public class DialogueEditor : Editor
 			if(focusIndex >= 0)
 			{
 				thisDialogue.dialogueLines.RemoveAt(focusIndex);
+
+				//If removed don't store for markup button
+				if(focusIndex == buttonFocusIndex)
+				{
+					SetButtonFocus(null);
+				}
 				focusIndex--;
 			}
 
 			else
 			{
 				thisDialogue.dialogueLines.RemoveAt(thisDialogue.dialogueLines.Count - 1);
+
+				//If removed don't store for markup button
+				if (thisDialogue.dialogueLines.Count - 1 == buttonFocusIndex)
+				{
+					SetButtonFocus(null);
+				}
 			}
 
 			list.RefreshItems();
 		};
-
 
 		list.makeItem = () =>
 		{
@@ -256,6 +300,7 @@ public class DialogueEditor : Editor
     {
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
+			SetButtonFocus(null);
 			thisDialogue.hasSpeaker = toggle.value;
 		});
 	}
@@ -264,28 +309,18 @@ public class DialogueEditor : Editor
     {
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
+			SetButtonFocus(null);
 			thisDialogue.speaker = (DialogueSpeaker)evt.newValue;
 		});
 	}
 
-    void SetSpeaker(Toggle toggle, ObjectField field)
-    {
-        toggle.RegisterCallback<ClickEvent>( evt =>
-        {
-            thisDialogue.hasSpeaker = toggle.value;
-        });
-
-        field.RegisterCallback<ChangeEvent<Object>>(evt =>
-        {
-            thisDialogue.speaker = (DialogueSpeaker)evt.newValue; 
-        });
-    }
 	#endregion
 
     void SetTypewriter(Toggle toggle)
     {
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
+			SetButtonFocus(null);
 			thisDialogue.hasTypeWriter = toggle.value;
 		});
 	}
@@ -294,15 +329,60 @@ public class DialogueEditor : Editor
     {
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
+			SetButtonFocus(null);
 			thisDialogue.startExpression = (DialogueExpression)evt.newValue;
 		});
 	}
 
 	#endregion
 
-	void AddMarkup()
+
+	void AddMarkup(Button button, ListView dialogueLinesList)
 	{
-		
+		button.RegisterCallback<ClickEvent>(evt =>
+		{
+			Debug.Log("Button clicked");
+			if (buttonFocusField == null || buttonFocusField.panel == null)
+			{
+				SetButtonFocus(null);
+				return;
+			}
+
+			//If range of highlight selection
+			if (buttonFocusSelectIndex != -1)
+			{
+				if (selectedMarkup && selectedMarkupData)
+				{
+					Vector2Int selectRange = new Vector2Int(buttonFocusSelectIndex, buttonFocusCursorIndex);
+					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange, selectedMarkupData);
+				}
+
+				else if (selectedMarkup)
+				{
+					Vector2Int selectRange = new Vector2Int(buttonFocusSelectIndex, buttonFocusCursorIndex);
+					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange);
+				}
+			}
+
+			//If just cursor
+			else if (buttonFocusCursorIndex != -1)
+			{
+				if (selectedMarkup && selectedMarkupData)
+				{
+					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex, selectedMarkupData);
+				}
+
+				else if(selectedMarkup)
+				{
+					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex);
+				}
+
+				Debug.Log("Working??");
+			}
+
+			dialogueLinesList.RefreshItems();
+
+		});
 	}
 	void RefreshMarkupDatas(ListView markupList, ListView dataList)
 	{
@@ -313,6 +393,7 @@ public class DialogueEditor : Editor
 
 		markupList.selectionChanged += (selectedItems) =>
 		{
+			SetButtonFocus(null);
 			foreach (DialogueMarkup dialogueMarkup in selectedItems)
 			{
 
