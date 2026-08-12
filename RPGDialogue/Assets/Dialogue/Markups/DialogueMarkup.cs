@@ -1,8 +1,6 @@
 using System;
-using NaughtyAttributes;
 using UnityEngine;
 using System.Collections.Generic;
-
 public enum FormatType
 {
     INVALID = -1,

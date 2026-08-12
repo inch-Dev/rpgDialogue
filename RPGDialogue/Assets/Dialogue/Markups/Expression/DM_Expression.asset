@@ -13,6 +13,4 @@ MonoBehaviour:
   m_Name: DM_Expression
   m_EditorClassIdentifier: Assembly-CSharp::DM_Expression
   keyName: Expression
-  markupCharacter: 120
-  hasParameters: 1
   markupDatas: []
