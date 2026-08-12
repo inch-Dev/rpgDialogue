@@ -452,7 +452,7 @@ public class DialogueMarkup : ScriptableObject
     virtual public string ApplyMarkup(string rawText, int startIndex)
     {
 
-        Debug.Log($"Length:{rawText.Length}, Start:{startIndex}");
+        //Debug.Log($"Length:{rawText.Length}, Start:{startIndex}");
         string applyText = "";
         char[] textArray = rawText.ToCharArray();
 

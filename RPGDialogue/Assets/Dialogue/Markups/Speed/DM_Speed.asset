@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377fbdab55b3f6d48961eac2627cd083, type: 3}
   m_Name: DM_Speed
   m_EditorClassIdentifier: Assembly-CSharp::DM_Speed
+  keyName: Speed
   markupCharacter: 115
   hasParameters: 1
-  parameterType: 128
-  parameterSequences: []
+  markupDatas:
+  - {fileID: 11400000, guid: b30113c1692993d4a9c7e873d212457e, type: 2}
+  - {fileID: 11400000, guid: 1df74e22a4e022c4fbd8c00aff2cd6d3, type: 2}
+  - {fileID: 11400000, guid: b6d53a885288c4940b02b708171b7700, type: 2}

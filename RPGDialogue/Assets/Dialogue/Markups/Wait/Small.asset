@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 53f2e61cf31c7bf4c9a85eb7b8f9a3a2, type: 3}
-  m_Name: DM_Expression
-  m_EditorClassIdentifier: Assembly-CSharp::DM_Expression
-  keyName: Expression
-  markupCharacter: 120
-  hasParameters: 1
-  markupDatas: []
+  m_Script: {fileID: 11500000, guid: d5c7895799dde3745bf6080d5af9d014, type: 3}
+  m_Name: Small
+  m_EditorClassIdentifier: Assembly-CSharp::WaitMarkupData
+  keyName: Small
+  time: 1.2

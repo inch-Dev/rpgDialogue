@@ -251,6 +251,7 @@ public class DialogueEditor : Editor
 			foreach(MarkupData markupData in selectedItems)
 			{
 				selectedMarkupData = markupData;
+				Debug.Log("Got markupData!");
 			}
 		};
 
@@ -391,7 +392,7 @@ public class DialogueEditor : Editor
 			//If range of highlight selection
 			if (buttonFocusSelectIndex != -1 && buttonFocusCursorIndex != -1 && buttonFocusSelectIndex != buttonFocusCursorIndex)
 			{
-				if (selectedMarkup && selectedMarkupData)
+				if (selectedMarkup != null && selectedMarkupData != null)
 				{
 					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
 					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
@@ -400,9 +401,9 @@ public class DialogueEditor : Editor
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange, selectedMarkupData);
 				}
 
-				else if (selectedMarkup)
+				else if (selectedMarkup != null)
 				{
-
+					Debug.Log("No markupData");
 					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
 					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
 
@@ -456,6 +457,7 @@ public class DialogueEditor : Editor
 
 			}
 		};
+
 	}
 
 }
