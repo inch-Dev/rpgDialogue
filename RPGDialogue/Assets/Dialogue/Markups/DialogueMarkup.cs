@@ -451,6 +451,8 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string ApplyMarkup(string rawText, int startIndex)
     {
+
+        Debug.Log($"Length:{rawText.Length}, Start:{startIndex}");
         string applyText = "";
         char[] textArray = rawText.ToCharArray();
 
@@ -458,16 +460,16 @@ public class DialogueMarkup : ScriptableObject
         {
             if(i == startIndex)
             {
-                applyText += textArray[i];
                 applyText += GetMarkup();
-            }
-            else
-            {
-                applyText += textArray[i];
-            }
+			}
+            
+            applyText += textArray[i];
         }
 
-        return applyText;
+		if (startIndex >= rawText.Length)
+			applyText += GetMarkup();
+
+		return applyText;
     }
 
     virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData)
@@ -479,17 +481,42 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == startIndex)
 			{
-				applyText += textArray[i];
 				applyText += GetMarkup(markupData);
 			}
-			else
-			{
-				applyText += textArray[i];
-			}
+            
+            applyText += textArray[i];
 		}
+
+        if(startIndex >= rawText.Length)
+            applyText += GetMarkup(markupData);
 
 		return applyText;
 	}
+
+    virtual public string ApplyMarkup(string rawText, int startIndex, FormatType type)
+    {
+        switch (type)
+        {
+            case FormatType.OPEN:
+                return ApplyMarkup(rawText, startIndex, openFormat);
+            case FormatType.CLOSE:
+                return ApplyMarkup(rawText, startIndex, closeFormat);
+        }
+        return null;
+    }
+
+    virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData, FormatType type)
+    {
+        switch (type)
+        {
+            case FormatType.OPEN:
+                return ApplyMarkup(rawText, startIndex, markupData, openFormat);
+            case FormatType.CLOSE:
+                return ApplyMarkup(rawText, startIndex, markupData, closeFormat);
+        }
+
+        return null;
+}
 
 	virtual public string ApplyMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
 	{
@@ -500,14 +527,14 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == startIndex)
 			{
-                applyText += textArray[i];
                 applyText += GetMarkup(format);
 			}
-            else
-            {
-                applyText += textArray[i];
-            }
+            
+            applyText += textArray[i];
 		}
+
+        if(startIndex >= rawText.Length)
+            applyText += GetMarkup(format);
 
 		return applyText;
 	}
@@ -521,16 +548,18 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == startIndex)
 			{
-				applyText += textArray[i];
 				applyText += GetMarkup(markupData, format);
 			}
-			else
-			{
-				applyText += textArray[i];
-			}
+
+		    applyText += textArray[i];
 		}
 
+        if (startIndex >= rawText.Length)
+            applyText += GetMarkup(markupData, format);
+
 		return applyText;
+
+        
 	}
 
     virtual public string ApplyMarkup(string rawText, Vector2Int indexRange)
@@ -542,20 +571,19 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == indexRange.x)
 			{
-				applyText += textArray[i];
 				applyText += GetMarkup(openFormat);
 			}
 
-            else if(i == indexRange.y)
-            {
-                applyText += textArray[i];
-                applyText += GetMarkup(closeFormat);
-            }
-			else
-			{
 				applyText += textArray[i];
+
+			if (i == indexRange.y)
+			{
+				applyText += GetMarkup(closeFormat);
 			}
 		}
+
+        if(indexRange.y >= rawText.Length)
+            applyText += GetMarkup(closeFormat);
 
 		return applyText;
 	}
@@ -569,20 +597,19 @@ public class DialogueMarkup : ScriptableObject
 		{
 			if (i == indexRange.x)
 			{
-				applyText += textArray[i];
 				applyText += GetMarkup(markupData, openFormat);
 			}
 
-			else if (i == indexRange.y)
+			applyText += textArray[i];
+
+			if (i == indexRange.y)
 			{
-				applyText += textArray[i];
 				applyText += GetMarkup(markupData, closeFormat);
 			}
-			else
-			{
-				applyText += textArray[i];
-			}
 		}
+
+        if(indexRange.y >= rawText.Length)
+            applyText += GetMarkup(markupData, closeFormat);
 
 		return applyText;
 	}

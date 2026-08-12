@@ -140,7 +140,7 @@ public class DialogueEditor : Editor
 	void SetButtonFocus(TextField field)
 	{
 
-		Debug.Log("Setting button focus");
+		//Debug.Log("Setting button focus");
 
 		if (field == null || field.panel == null)
 		{
@@ -152,10 +152,10 @@ public class DialogueEditor : Editor
 			return;
 		}
 
-		
-
-		field.RegisterCallback<MouseDownEvent>(SetButtonMouseFocus,TrickleDown.TrickleDown);
-		field.RegisterCallback<KeyDownEvent>(SetButtonMouseFocus, TrickleDown.TrickleDown);
+		field.RegisterCallback<KeyUpEvent>(SetButtonMouseFocus);
+		field.RegisterCallback<PointerUpEvent>(SetButtonMouseFocus);
+		field.RegisterCallback<PointerDownEvent>(SetButtonMouseFocus);
+		field.RegisterCallback<PointerMoveEvent>(SetButtonMouseFocus);
 
 		//Debug.Log("Registered callbacks");
 
@@ -168,7 +168,7 @@ public class DialogueEditor : Editor
 
 	void SetButtonMouseFocus(EventBase evt)
 	{
-		Debug.Log("Calling mouse focus");
+		//Debug.Log("Calling mouse focus");
 
 		TextField field = (TextField)evt.currentTarget;
 
@@ -183,7 +183,7 @@ public class DialogueEditor : Editor
 			buttonFocusCursorIndex = (int)field.cursorIndex;
 		}
 
-		Debug.Log($"Setting selection to {buttonFocusSelectIndex} and cursor to {buttonFocusCursorIndex}");
+		//Debug.Log($"Setting selection to {buttonFocusSelectIndex} and cursor to {buttonFocusCursorIndex}");
 	}
 	void SetFocus(TextField field)
 	{
@@ -371,24 +371,42 @@ public class DialogueEditor : Editor
 		button.RegisterCallback<ClickEvent>(evt =>
 		{
 			Debug.Log($"Button clicked...indexes are select:{buttonFocusSelectIndex} and cursor:{buttonFocusCursorIndex}");
+
 			if (buttonFocusField == null || buttonFocusField.panel == null)
 			{
 				SetButtonFocus(null);
 				return;
 			}
 
+			if(selectedMarkup == null)
+			{
+				Debug.Log("No markup!");
+			}
+
+			else if(selectedMarkupData = null)
+			{
+				Debug.Log("No markupData!");
+			}
+
 			//If range of highlight selection
-			if (buttonFocusSelectIndex != -1)
+			if (buttonFocusSelectIndex != -1 && buttonFocusCursorIndex != -1 && buttonFocusSelectIndex != buttonFocusCursorIndex)
 			{
 				if (selectedMarkup && selectedMarkupData)
 				{
-					Vector2Int selectRange = new Vector2Int(buttonFocusSelectIndex, buttonFocusCursorIndex);
+					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
+					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
+
+					Vector2Int selectRange = new Vector2Int(min, max);
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange, selectedMarkupData);
 				}
 
 				else if (selectedMarkup)
 				{
-					Vector2Int selectRange = new Vector2Int(buttonFocusSelectIndex, buttonFocusCursorIndex);
+
+					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
+					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
+
+					Vector2Int selectRange = new Vector2Int(min, max);
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange);
 				}
 			}
@@ -409,7 +427,9 @@ public class DialogueEditor : Editor
 
 			}
 
-			dialogueLinesList.RefreshItems();
+			Debug.Log($"New line is {thisDialogue.dialogueLines[buttonFocusIndex]}");
+
+			dialogueLinesList.Rebuild();
 
 		});
 	}
