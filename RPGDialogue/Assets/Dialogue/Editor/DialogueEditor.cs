@@ -234,6 +234,7 @@ public class DialogueEditor : Editor
 			foreach (DialogueMarkup markup in selectedItems)
 			{
 				selectedMarkup = markup;
+				Debug.Log($"Selected markup:{selectedMarkup}");
 			}
 		};
 	}
@@ -248,16 +249,18 @@ public class DialogueEditor : Editor
 		list.itemsChosen += (selectedItems) =>
 		{
 			SetButtonFocus(null);
-			foreach(MarkupData markupData in selectedItems)
-			{
-				selectedMarkupData = markupData;
-				Debug.Log("Got markupData!");
-			}
+			
 		};
 
 		list.selectionChanged += (selectedItems) =>
 		{
+			
 			SetButtonFocus(null);
+			foreach (MarkupData markupData in selectedItems)
+			{
+				selectedMarkupData = markupData;
+				Debug.Log($"Set markupData! {selectedMarkupData}");
+			}
 		};
 	}
 
@@ -371,7 +374,7 @@ public class DialogueEditor : Editor
 	{
 		button.RegisterCallback<ClickEvent>(evt =>
 		{
-			Debug.Log($"Button clicked...indexes are select:{buttonFocusSelectIndex} and cursor:{buttonFocusCursorIndex}");
+			//Debug.Log($"Button clicked...indexes are select:{buttonFocusSelectIndex} and cursor:{buttonFocusCursorIndex}");
 
 			if (buttonFocusField == null || buttonFocusField.panel == null)
 			{
@@ -384,7 +387,7 @@ public class DialogueEditor : Editor
 				Debug.Log("No markup!");
 			}
 
-			else if(selectedMarkupData = null)
+			else if(selectedMarkupData == null)
 			{
 				Debug.Log("No markupData!");
 			}
@@ -403,7 +406,6 @@ public class DialogueEditor : Editor
 
 				else if (selectedMarkup != null)
 				{
-					Debug.Log("No markupData");
 					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
 					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
 
@@ -416,13 +418,16 @@ public class DialogueEditor : Editor
 			else if (buttonFocusCursorIndex != -1)
 			{
 				
-				if (selectedMarkup && selectedMarkupData)
+				if (selectedMarkup != null && selectedMarkupData != null)
 				{
+
+					Debug.Log($"Running with markupData:{selectedMarkupData}");
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex, selectedMarkupData);
 				}
 
-				else if(selectedMarkup)
+				else if(selectedMarkup != null)
 				{
+					Debug.Log("No selected markupData");
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex);
 				}
 
@@ -436,10 +441,6 @@ public class DialogueEditor : Editor
 	}
 	void RefreshMarkupDatas(ListView markupList, ListView dataList)
 	{
-		markupList.itemsChosen += (selectedItems) =>
-		{
-
-		};
 
 		markupList.selectionChanged += (selectedItems) =>
 		{
@@ -447,6 +448,8 @@ public class DialogueEditor : Editor
 			foreach (DialogueMarkup dialogueMarkup in selectedItems)
 			{
 
+				selectedMarkup = dialogueMarkup;
+				Debug.Log("Setting selectedMarkupData to null");
 				selectedMarkupData = null;
 				markupDatas.Clear();
 				dataList.selectedIndex = -1;

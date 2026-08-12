@@ -84,6 +84,8 @@ public class DialogueMarkup : ScriptableObject
     {
         string markup;
 
+        Debug.Log($"Keyname of markup:{markupData.keyName}");
+
         markup = format.tagStart + keyName + " " + equals + " " + markupData.keyName + format.tagEnd;
 
         return markup;
@@ -474,6 +476,8 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public string ApplyMarkup(string rawText, int startIndex, MarkupData markupData)
     {
+
+        Debug.Log($"Getting markupData...{markupData}");
 		string applyText = "";
 		char[] textArray = rawText.ToCharArray();
 
