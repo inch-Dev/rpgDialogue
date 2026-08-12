@@ -139,6 +139,9 @@ public class DialogueEditor : Editor
 
 	void SetButtonFocus(TextField field)
 	{
+
+		Debug.Log("Setting button focus");
+
 		if (field == null || field.panel == null)
 		{
 			buttonFocusField = null;
@@ -149,11 +152,38 @@ public class DialogueEditor : Editor
 			return;
 		}
 
+		
+
+		field.RegisterCallback<MouseDownEvent>(SetButtonMouseFocus,TrickleDown.TrickleDown);
+		field.RegisterCallback<KeyDownEvent>(SetButtonMouseFocus, TrickleDown.TrickleDown);
+
+		//Debug.Log("Registered callbacks");
+
 		buttonFocusField = field;
 		buttonFocusIndex = (int)field.userData;
 		buttonFocusCursorIndex = field.cursorIndex;
 		buttonFocusSelectIndex = field.selectIndex;
 
+	}
+
+	void SetButtonMouseFocus(EventBase evt)
+	{
+		Debug.Log("Calling mouse focus");
+
+		TextField field = (TextField)evt.currentTarget;
+
+		if(field == buttonFocusField && field.selectIndex != buttonFocusSelectIndex)
+		{
+			buttonFocusSelectIndex = (int)field.selectIndex;
+		}
+
+
+		if(field == buttonFocusField && field.cursorIndex != buttonFocusCursorIndex)
+		{
+			buttonFocusCursorIndex = (int)field.cursorIndex;
+		}
+
+		Debug.Log($"Setting selection to {buttonFocusSelectIndex} and cursor to {buttonFocusCursorIndex}");
 	}
 	void SetFocus(TextField field)
 	{
@@ -180,8 +210,8 @@ public class DialogueEditor : Editor
 		{
 			focusField = null;
 			focusIndex = -1;
-			Debug.Log("Resetting focus");
 		}
+
 	}
 
 	void SetDialogue()
@@ -268,7 +298,6 @@ public class DialogueEditor : Editor
 				if (field.userData is int index && index >= 0 && index < thisDialogue.dialogueLines.Count())
 				{
 					thisDialogue.dialogueLines[index] = evt.newValue;
-
 				}
 			});
 			return field;
@@ -341,7 +370,7 @@ public class DialogueEditor : Editor
 	{
 		button.RegisterCallback<ClickEvent>(evt =>
 		{
-			Debug.Log("Button clicked");
+			Debug.Log($"Button clicked...indexes are select:{buttonFocusSelectIndex} and cursor:{buttonFocusCursorIndex}");
 			if (buttonFocusField == null || buttonFocusField.panel == null)
 			{
 				SetButtonFocus(null);
@@ -367,6 +396,7 @@ public class DialogueEditor : Editor
 			//If just cursor
 			else if (buttonFocusCursorIndex != -1)
 			{
+				
 				if (selectedMarkup && selectedMarkupData)
 				{
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex, selectedMarkupData);
@@ -377,7 +407,6 @@ public class DialogueEditor : Editor
 					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex);
 				}
 
-				Debug.Log("Working??");
 			}
 
 			dialogueLinesList.RefreshItems();
