@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dialogue
   hasSpeaker: 1
   speaker: {fileID: 11400000, guid: 5cafd533c8bd2dc4f842b55252fa72a5, type: 2}
-  startingExpression: {fileID: 11400000, guid: b788f7f292d6d6e4682208e265f19673, type: 2}
+  startExpression: {fileID: 0}
   dialogueLines:
   - <2w>Check for markups!
   - See if this works
-  hasTypeWriterEffect: 0
+  hasTypewriter: 0

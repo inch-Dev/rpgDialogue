@@ -4,11 +4,16 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using UnityEditor.Search;
 using System.Linq;
+using UnityEngine.Rendering;
+using System.Runtime.Serialization;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueEditor : Editor
 {
+	SerializedObject serializedObject;
 	Dialogue thisDialogue;
+
+	SerializedProperty dialogueLines;
 	List<DialogueMarkup> markups = new List<DialogueMarkup>();
 	List<MarkupData> markupDatas = new List<MarkupData>();
 
@@ -26,7 +31,8 @@ public class DialogueEditor : Editor
 
 	public override VisualElement CreateInspectorGUI()
     {
-		SetDialogue();
+		serializedObject = new SerializedObject(target);
+		SetObject();
 		
 		VisualElement root = new VisualElement();
 
@@ -82,8 +88,9 @@ public class DialogueEditor : Editor
         Label dialogueLabel = new Label("<b>Dialogue Lines");
         dialogueLabel.style.fontSize = 12;
         rightPane.Add(dialogueLabel);
-
-        var dialogueLineList = new ListView() { itemsSource = thisDialogue.dialogueLines, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
+		List<string> dialogueLinesSource = new List<string>();
+		SetDialogueLines(dialogueLinesSource);
+        var dialogueLineList = new ListView() { itemsSource = dialogueLinesSource, fixedItemHeight = 24, showAddRemoveFooter = true, reorderable = true };
 		SetDialogueLines(dialogueLineList);
 		AddMarkup(markupButton, dialogueLineList);
 		rightPane.Add(dialogueLineList);
@@ -94,27 +101,32 @@ public class DialogueEditor : Editor
 
         Toggle typewriterToggle = new Toggle();
         typewriterToggle.text = "Type Writer Effect";
-		typewriterToggle.value = thisDialogue.hasTypeWriter;
+		typewriterToggle.value = serializedObject.FindProperty("hasTypewriter").boolValue;
 		SetTypewriter(typewriterToggle);
         rightPane.Add(typewriterToggle);
 
 		Toggle speakerToggle = new Toggle();
 		speakerToggle.text = "Speaker";
-		speakerToggle.value = thisDialogue.hasSpeaker;
+		speakerToggle.value = serializedObject.FindProperty("hasSpeaker").boolValue;
 		SetSpeaker(speakerToggle);
 		rightPane.Add(speakerToggle);
 
         ObjectField speakerField = new ObjectField("Speaker");
         speakerField.objectType = typeof(DialogueSpeaker);
-		speakerField.value = thisDialogue.speaker;
+		speakerField.value = serializedObject.FindProperty("speaker").objectReferenceValue;
 		SetSpeaker(speakerField);
         rightPane.Add(speakerField);
 
         ObjectField expressionField = new ObjectField("Starting Expression");
         expressionField.objectType = typeof(DialogueExpression);
-		expressionField.value = thisDialogue.startExpression;
+		expressionField.value = serializedObject.FindProperty("startExpression").objectReferenceValue;
 		SetExpression(expressionField);
         rightPane.Add(expressionField);
+
+		serializedObject.Update();
+		serializedObject.ApplyModifiedProperties();
+		Debug.Log($"Applied: {serializedObject.ApplyModifiedProperties()}");
+		EditorUtility.SetDirty(target);
 
 		#endregion
 
@@ -225,11 +237,11 @@ public class DialogueEditor : Editor
 
 	}
 
-	void SetDialogue()
+	void SetObject()
 	{
 		if (!(Dialogue)target)
 			return;
-		thisDialogue = (Dialogue)target;
+		serializedObject.Update();
 
 	}
 	void SetMarkups(ListView list)
@@ -275,14 +287,31 @@ public class DialogueEditor : Editor
 		};
 	}
 
+
+	void SetDialogueLines(List<string> sourceList)
+	{
+		sourceList.Clear();
+
+		serializedObject.Update();
+		SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+
+		for(int i = 0; i < dialogueLines.arraySize; i++)
+		{
+			sourceList.Add(dialogueLines.GetArrayElementAtIndex(i).stringValue);
+		}
+	}
+
 	void SetDialogueLines(ListView list)
 	{
 		list.onRemove = (baseListView) =>
 		{
+			serializedObject.Update();
+			SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+			
 			if(focusIndex >= 0)
 			{
-				thisDialogue.dialogueLines.RemoveAt(focusIndex);
-
+				serializedObject.Update();
+				dialogueLines.DeleteArrayElementAtIndex(focusIndex);
 				//If removed don't store for markup button
 				if(focusIndex == buttonFocusIndex)
 				{
@@ -293,10 +322,10 @@ public class DialogueEditor : Editor
 
 			else
 			{
-				thisDialogue.dialogueLines.RemoveAt(thisDialogue.dialogueLines.Count - 1);
-
+				serializedObject.Update();
+				dialogueLines.DeleteArrayElementAtIndex(dialogueLines.arraySize - 1);
 				//If removed don't store for markup button
-				if (thisDialogue.dialogueLines.Count - 1 == buttonFocusIndex)
+				if (dialogueLines.arraySize - 1 == buttonFocusIndex)
 				{
 					SetButtonFocus(null);
 				}
@@ -310,9 +339,14 @@ public class DialogueEditor : Editor
 			TextField field = new TextField();
 			field.RegisterValueChangedCallback(evt =>
 			{
-				if (field.userData is int index && index >= 0 && index < thisDialogue.dialogueLines.Count())
+				serializedObject.Update();
+				SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+
+				if (field.userData is int index && index >= 0 && index < dialogueLines.arraySize)
 				{
-					thisDialogue.dialogueLines[index] = evt.newValue;
+					SerializedProperty indexElement = dialogueLines.GetArrayElementAtIndex(index);
+					indexElement.stringValue = evt.newValue;
+					serializedObject.ApplyModifiedProperties();
 				}
 			});
 			return field;
@@ -323,7 +357,11 @@ public class DialogueEditor : Editor
 			TextField field = (TextField)item;
 			field.userData = index;
 
-			field.SetValueWithoutNotify(thisDialogue.dialogueLines[index]);
+			serializedObject.Update();
+			SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+
+			field.SetValueWithoutNotify(dialogueLines.GetArrayElementAtIndex(index).stringValue);
+			serializedObject.ApplyModifiedProperties();
 
 			field.selectAllOnFocus = false;
 			field.selectAllOnMouseUp = false;
@@ -345,7 +383,10 @@ public class DialogueEditor : Editor
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
 			SetButtonFocus(null);
-			thisDialogue.hasSpeaker = toggle.value;
+			serializedObject.Update();
+			serializedObject.FindProperty("hasSpeaker").boolValue = toggle.value;
+			serializedObject.ApplyModifiedProperties();
+			
 		});
 	}
 
@@ -354,7 +395,10 @@ public class DialogueEditor : Editor
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
 			SetButtonFocus(null);
-			thisDialogue.speaker = (DialogueSpeaker)evt.newValue;
+			serializedObject.Update();
+			serializedObject.FindProperty("speaker").objectReferenceValue = (DialogueSpeaker)evt.newValue;
+			serializedObject.ApplyModifiedProperties();
+			
 		});
 	}
 
@@ -365,7 +409,10 @@ public class DialogueEditor : Editor
 		toggle.RegisterCallback<ClickEvent>(evt =>
 		{
 			SetButtonFocus(null);
-			thisDialogue.hasTypeWriter = toggle.value;
+			serializedObject.Update();
+			serializedObject.FindProperty("hasTypewriter").boolValue = toggle.value;
+			serializedObject.ApplyModifiedProperties();
+		
 		});
 	}
 
@@ -374,7 +421,9 @@ public class DialogueEditor : Editor
 		field.RegisterCallback<ChangeEvent<Object>>(evt =>
 		{
 			SetButtonFocus(null);
-			thisDialogue.startExpression = (DialogueExpression)evt.newValue;
+			serializedObject.Update();
+			serializedObject.FindProperty("startExpression").objectReferenceValue = (DialogueExpression)evt.newValue;
+			serializedObject.ApplyModifiedProperties();
 		});
 	}
 
@@ -410,18 +459,24 @@ public class DialogueEditor : Editor
 				{
 					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
 					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
-
 					Vector2Int selectRange = new Vector2Int(min, max);
-					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange, selectedMarkupData);
+
+					serializedObject.Update();
+					SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+					dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue = selectedMarkup.ApplyMarkup(dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue, selectRange, selectedMarkupData);
+					serializedObject.ApplyModifiedProperties();
 				}
 
 				else if (selectedMarkup != null)
 				{
 					int min = Mathf.Min(buttonFocusSelectIndex, buttonFocusCursorIndex);
 					int max = Mathf.Max(buttonFocusSelectIndex, buttonFocusCursorIndex);
-
 					Vector2Int selectRange = new Vector2Int(min, max);
-					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], selectRange);
+
+					serializedObject.Update();
+					SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+					dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue = selectedMarkup.ApplyMarkup(dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue, selectRange);
+					serializedObject.ApplyModifiedProperties();
 				}
 			}
 
@@ -433,18 +488,25 @@ public class DialogueEditor : Editor
 				{
 
 					Debug.Log($"Running with markupData:{selectedMarkupData}");
-					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex, selectedMarkupData);
+
+					serializedObject.Update();
+					SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+					dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue = selectedMarkup.ApplyMarkup(dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue, buttonFocusCursorIndex, selectedMarkupData);
+					serializedObject.ApplyModifiedProperties();
 				}
 
 				else if(selectedMarkup != null)
 				{
 					Debug.Log("No selected markupData");
-					thisDialogue.dialogueLines[buttonFocusIndex] = selectedMarkup.ApplyMarkup(thisDialogue.dialogueLines[buttonFocusIndex], buttonFocusCursorIndex);
+					serializedObject.Update();
+					SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+					dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue = selectedMarkup.ApplyMarkup(dialogueLines.GetArrayElementAtIndex(buttonFocusIndex).stringValue, buttonFocusCursorIndex);
+					serializedObject.ApplyModifiedProperties();
 				}
 
 			}
 
-			Debug.Log($"New line is {thisDialogue.dialogueLines[buttonFocusIndex]}");
+			//Debug.Log($"New line is {thisDialogue.dialogueLines[buttonFocusIndex]}");
 
 			dialogueLinesList.Rebuild();
 

@@ -156,7 +156,7 @@ public class DialogueManager : MonoBehaviour
         }
         readingDialogue = true;
 
-        if(dialogue.hasTypeWriter)
+        if(dialogue.hasTypewriter)
         {
             StartCoroutine(TypewriterReadDialogue(dialogue));
         }
@@ -175,7 +175,7 @@ public class DialogueManager : MonoBehaviour
     void ReadDialogueLine(Dialogue dialogue, int dialogueLineIndex, string dialogueLine)
     {
         //NEEDS MARKUP TEXT TO WAIT AND CHANGE EXPRESSIONS
-        if(dialogue.hasTypeWriter)
+        if(dialogue.hasTypewriter)
             StartCoroutine(TypewriterReadDialogue(dialogue));
         else
         {
