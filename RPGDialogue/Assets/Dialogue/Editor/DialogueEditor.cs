@@ -35,6 +35,7 @@ public class DialogueEditor : Editor
 
 		#region LEFT PANE
 		VisualElement leftPane = new VisualElement();
+		SetFocusable(leftPane, false);
 		splitView.Add(leftPane);
 
         Label markupLabel = new Label("<b>Dialogue Markups");
@@ -133,6 +134,20 @@ public class DialogueEditor : Editor
 
 	#region SETTERS
 
+	void SetFocusable(VisualElement element, bool focus)
+	{
+		element.RegisterCallback<PointerDownEvent>(evt =>
+		{
+			if ((evt.currentTarget as VisualElement) != null)
+				(evt.currentTarget as VisualElement).focusable = focus;
+
+			if ((evt.currentTarget as VisualElement)?.focusable == false)
+			{
+				(evt.currentTarget as VisualElement).focusController.IgnoreEvent(evt);
+			}
+		}, TrickleDown.TrickleDown);
+	}
+
 	void SetButtonFocus(TextField field)
 	{
 
@@ -226,7 +241,7 @@ public class DialogueEditor : Editor
 
 		list.itemsChosen += (selectedItems) =>
 		{
-			SetButtonFocus(null);
+			//SetButtonFocus(null);
 			foreach (DialogueMarkup markup in selectedItems)
 			{
 				selectedMarkup = markup;
@@ -244,14 +259,14 @@ public class DialogueEditor : Editor
 
 		list.itemsChosen += (selectedItems) =>
 		{
-			SetButtonFocus(null);
+			//SetButtonFocus(null);
 			
 		};
 
 		list.selectionChanged += (selectedItems) =>
 		{
 			
-			SetButtonFocus(null);
+			//SetButtonFocus(null);
 			foreach (MarkupData markupData in selectedItems)
 			{
 				selectedMarkupData = markupData;
@@ -440,7 +455,7 @@ public class DialogueEditor : Editor
 
 		markupList.selectionChanged += (selectedItems) =>
 		{
-			SetButtonFocus(null);
+			//SetButtonFocus(null);
 			foreach (DialogueMarkup dialogueMarkup in selectedItems)
 			{
 

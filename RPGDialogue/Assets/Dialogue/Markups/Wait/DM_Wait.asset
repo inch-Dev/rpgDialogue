@@ -13,7 +13,5 @@ MonoBehaviour:
   m_Name: DM_Wait
   m_EditorClassIdentifier: Assembly-CSharp::DM_Wait
   keyName: Wait
-  markupCharacter: 119
-  hasParameters: 1
   markupDatas:
   - {fileID: 11400000, guid: 0163bdafbda2f1b4687bb8d110fb97ee, type: 2}
