@@ -1,6 +1,14 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+
+public enum MarkupType
+{
+    LOGIC,
+    DISPLAY,
+    NUM_TYPES
+}
+
 public enum FormatType
 {
     INVALID = -1,
@@ -27,6 +35,7 @@ public class DialogueMarkupFormat
 [CreateAssetMenu(fileName = "DialogueMarkup", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DialogueMarkup", order = 1)]
 public class DialogueMarkup : ScriptableObject
 {
+    [SerializeField] public MarkupType type;
     [SerializeField] public string keyName;
     protected static DialogueMarkupFormat openFormat = new DialogueMarkupFormat(FormatType.OPEN, "{", "}");
     protected static DialogueMarkupFormat closeFormat = new DialogueMarkupFormat(FormatType.CLOSE, "{/", "}");
@@ -35,6 +44,8 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] List<MarkupData> markupDatas;
 
     #region GETTERS
+
+    virtual public MarkupType GetMarkupType(){ return type; }
     virtual public string GetMarkup()
     {
         string markup;
@@ -455,7 +466,6 @@ public class DialogueMarkup : ScriptableObject
 	#endregion
 
 	#region APPLY TEXT
-
     virtual public string ApplyMarkup(string rawText, int startIndex)
     {
         string applyText = "";
@@ -653,22 +663,68 @@ public class DialogueMarkup : ScriptableObject
 
     #region LOGIC
     //Move this to markupData
-    virtual public bool HandleLogic(DialogueManager dialogueManager, string deltaLogicText)
+
+    /// <summary>
+    /// Handles logic for this markup in fullText
+    /// </summary>
+    /// <param name="dialogueManager"></param>
+    /// <param name="fullText"></param>
+    /// <returns></returns>
+    virtual public bool Handle(DialogueManager dialogueManager, string fullText)
+    {
+        if (!ValidateMarkup(ParseMarkup(fullText)))
+        {
+            return false;
+        }
+
+        char[] textArray = fullText.ToCharArray();
+
+        for(int i = 0; i < fullText.Length; i++)
+        {
+            if(ValidateMarkup(ParseMarkup(fullText, i)))
+            {
+                string thisMarkup = ParseMarkup(fullText, i);
+                MarkupData thisMarkupData = ParseMarkupData(thisMarkup);
+
+                switch(ParseFormatType(thisMarkup))
+                {
+                    case FormatType.OPEN:
+                        thisMarkupData.OpenLogic();
+                        break;
+
+                    case FormatType.CLOSE:
+                        thisMarkupData.CloseLogic();
+                        break;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// Handles logic for this markup in deltaText
+    /// </summary>
+    /// <param name="dialogueManager"></param>
+    /// <param name="deltaText"></param>
+    /// <returns></returns>
+    virtual public bool HandleDelta(DialogueManager dialogueManager, string deltaText)
     {
         //Debug.Log($"Delta logic text:{deltaLogicText}");
         //Error handling
-        if (!ValidateMarkup(ParseMarkup(deltaLogicText)))
+        if (!ValidateMarkup(ParseMarkup(deltaText)))
         {
             //Debug.Log($"Could not validate from:{deltaLogicText}");
             return false;
         }
         else
         {
-            MarkupData theMarkupData = ParseMarkupData(deltaLogicText);
+            MarkupData theMarkupData = ParseMarkupData(deltaText);
 
             //Debug.Log($"Parsed markupData:{theMarkupData}");
 
-            switch (ParseFormatType(ParseMarkup(deltaLogicText)))
+            switch (ParseFormatType(ParseMarkup(deltaText)))
             {
                 case FormatType.OPEN:
                     theMarkupData.OpenLogic();
@@ -677,15 +733,10 @@ public class DialogueMarkup : ScriptableObject
                     theMarkupData.CloseLogic();
                     break;
                 default:
-                    Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaLogicText))}");
+                    Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaText))}");
                     break;
             }
         }
-
-        //Get markupData
-        //Run markupData function
-
-
 
         return true;
     }
