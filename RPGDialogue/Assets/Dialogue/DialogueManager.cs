@@ -168,6 +168,7 @@ public class DialogueManager : MonoBehaviour
             {
                 totalText += dialogue.dialogueLines[i] + "\n";
             }
+            Handle(totalText, MarkupType.DISPLAY);
             updateDialogue?.Invoke(dialogue.speaker.speakerName, dialogue.startExpression, RemoveMarkups(totalText), totalText.Length);
         }
     }

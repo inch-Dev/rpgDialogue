@@ -92,15 +92,60 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public List<MarkupData> GetMarkupDatas(){ return markupDatas; }
 
-    /// <summary>
-    /// Get markupData in markup
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <returns></returns>
- 
+	/// <summary>
+	/// Get markupData in markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+
 	#endregion
 
 	#region PARSERS
+
+	virtual public Vector2Int ParseIndexRange(string rawText)
+	{
+		Vector2Int indexRange = new Vector2Int(-1, -1);
+		char[] textArray = rawText.ToCharArray();
+
+		if (!ValidateMarkup(ParseMarkup(rawText)))
+		{
+			return indexRange;
+		}
+
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (ParseMarkup(rawText, i) != null)
+			{
+				indexRange.x = i;
+				indexRange.y = ParseMarkup(rawText, i).Length + i;
+			}
+		}
+
+		return indexRange;
+	}
+
+    virtual public Vector2Int ParseAppliedIndexRange(string rawText)
+    {
+        Vector2Int indexRange = new Vector2Int(-1, -1);
+        char[] textArray = rawText.ToCharArray();
+
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if(ParseMarkup(rawText, i, openFormat) != null)
+            {
+                
+                //Get length of open format tag
+                //Get index immmediately after
+            }
+
+            if(ParseMarkup(rawText, i, closeFormat) != null)
+            {
+                //Get length of close format tag
+                //Get index from - i
+            }
+        }
+        return indexRange;
+    }
 
 	/// <summary>
 	/// Get format type of markup
@@ -193,6 +238,28 @@ public class DialogueMarkup : ScriptableObject
 		return null;
 	}
 
+	virtual public string ParseMarkup(string rawText, FormatType type)
+	{
+		switch (type)
+		{
+			case FormatType.OPEN:
+                return ParseMarkup(rawText, openFormat);
+			case FormatType.CLOSE:
+                return ParseMarkup(rawText, closeFormat);
+		}
+        return null;
+	}
+
+	virtual public string ParseMarkup(string rawText, DialogueMarkupFormat format)
+    {
+		for (int i = 0; i < rawText.Length; i++)
+		{
+			if (ParseMarkup(rawText, i) != null)
+				return ParseMarkup(rawText, i, format);
+		}
+		return null;
+	}
+
 	/// <summary>
 	/// Gets valid markup in rawText at starting index
 	/// </summary>
@@ -212,10 +279,31 @@ public class DialogueMarkup : ScriptableObject
 		return null;
 	}
 
-	/// <summary>
-	/// Gets valid markup in rawText at starting index in this format
-	/// </summary>
-	virtual public string ParseMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
+    /// <summary>
+    /// Gets valid markup of this format type in rawText at starting index 
+    /// </summary>
+    /// <param name="rawText"></param>
+    /// <param name="startIndex"></param>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    virtual public string ParseMarkup(string rawText, int startIndex, FormatType type)
+    {
+        switch(type)
+        {
+            case FormatType.OPEN:
+                return ParseMarkup(rawText, startIndex, openFormat);
+            case FormatType.CLOSE:
+                return ParseMarkup(rawText, startIndex, closeFormat);
+
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets valid markup in rawText at starting index in this format
+    /// </summary>
+    virtual public string ParseMarkup(string rawText, int startIndex, DialogueMarkupFormat format)
 	{
 
 		if (startIndex + format.tagStart.Length < rawText.Length)
