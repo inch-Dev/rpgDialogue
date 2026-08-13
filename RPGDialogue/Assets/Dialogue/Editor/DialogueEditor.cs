@@ -125,7 +125,7 @@ public class DialogueEditor : Editor
 
 		serializedObject.Update();
 		serializedObject.ApplyModifiedProperties();
-		Debug.Log($"Applied: {serializedObject.ApplyModifiedProperties()}");
+		//Debug.Log($"Applied: {serializedObject.ApplyModifiedProperties()}");
 		EditorUtility.SetDirty(target);
 
 		#endregion

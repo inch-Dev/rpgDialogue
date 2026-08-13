@@ -303,9 +303,26 @@ public class DialogueMarkup : ScriptableObject
     /// <returns></returns>
     virtual public bool ValidateMarkupData(string markup)
     {
-        foreach (DialogueMarkupFormat format in formats)
+        foreach (MarkupData markupData in markupDatas)
         {
-            if (ValidateMarkupData(markup, format))
+            if (ValidateMarkupData(markup, markupData))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Validates there is a valid instance of this markupData in markup
+    /// </summary>
+    /// <param name="markup"></param>
+    /// <param name="markupData"></param>
+    /// <returns></returns>
+    virtual public bool ValidateMarkupData(string markup, MarkupData markupData)
+    {
+        foreach(DialogueMarkupFormat format in formats)
+        {
+            if (ValidateMarkupData(markup, markupData, format))
                 return true;
         }
 
@@ -638,6 +655,7 @@ public class DialogueMarkup : ScriptableObject
     //Move this to markupData
     virtual public bool HandleLogic(DialogueManager dialogueManager, string deltaLogicText)
     {
+        //Debug.Log($"Delta logic text:{deltaLogicText}");
         //Error handling
         if (!ValidateMarkup(ParseMarkup(deltaLogicText)))
         {
@@ -647,6 +665,8 @@ public class DialogueMarkup : ScriptableObject
         else
         {
             MarkupData theMarkupData = ParseMarkupData(deltaLogicText);
+
+            //Debug.Log($"Parsed markupData:{theMarkupData}");
 
             switch (ParseFormatType(ParseMarkup(deltaLogicText)))
             {

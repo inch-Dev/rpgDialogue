@@ -250,7 +250,7 @@ public class DialogueManager : MonoBehaviour
         
     }
 
-    string DisplayDraftIndex(int index, string rawText)
+    string DisplayIndex(int index, string rawText)
     {
         string indexedText = "";
         string deltaText = "";
@@ -328,7 +328,7 @@ public class DialogueManager : MonoBehaviour
 		return indexedText;
     }
 
-    string LogicDraftIndex(int index, string rawText)
+    string LogicIndex(int index, string rawText)
     {
         //Substring of raw text with number of visible characters up to length of index
         string indexedText = "";
@@ -430,12 +430,12 @@ public class DialogueManager : MonoBehaviour
 		return indexedText;
 	}
 
-	void HandleMarkups(string delaText)
+	void HandleMarkups(string deltaText)
     {
         //Debug.Log($"Logic text:{delaText}");
         for(int i = 0; i < markups.Count; i++)
         {
-            markups[i].HandleLogic(this, delaText);
+            markups[i].HandleLogic(this, deltaText);
         }
     }
 
@@ -514,7 +514,7 @@ public class DialogueManager : MonoBehaviour
             charIndex = 0;
 
             string dialogueLine = dialogueLines[i];
-            string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
+            string cleanedDialogue = DisplayIndex(dialogueLine.Length, dialogueLine);
             //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
             this.logicText = null; 
 
@@ -523,7 +523,7 @@ public class DialogueManager : MonoBehaviour
                 float localCharWaitSeconds = charWaitSecondsInterval;
                 float localLineWaitSeconds = lineWaitSecondsInterval;
 
-                curLogicText = LogicDraftIndex(charIndex, dialogueLine);
+                curLogicText = LogicIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
                 yield return new WaitForSeconds(startWaitTime);
