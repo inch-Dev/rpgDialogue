@@ -1,13 +1,11 @@
 using System;
 using TMPro;
-using Unity.Mathematics;
-using UnityEditor.U2D.Animation;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class DialogueUI : MonoBehaviour
 {
+    [HideInInspector]  public static DialogueUI Instance;
     [SerializeField] Image portraitImage;
     [SerializeField] GameObject portrait;
     [SerializeField] TextMeshProUGUI nameTF;
@@ -21,33 +19,41 @@ public class DialogueUI : MonoBehaviour
 
     void OnEnable()
     {
-        DialogueManager.updateDialogue += UpdateDialogue;
+        DialogueManager.updateDialogue += SetDialogue;
 
     }
 
     void OnDisable()
     {
-        DialogueManager.updateDialogue -= UpdateDialogue;
+        DialogueManager.updateDialogue -= SetDialogue;
     }
 
-    #endregion
-    void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index)
+	#endregion
+
+	private void Start()
+	{
+        if(Instance == null)
+		    Instance = this;
+	}
+
+	#region SETTERS
+	void SetDialogue(string speakerName, DialogueExpression expression, string curText, int index)
     {
-        UpdateSpeakerName(speakerName);
-        UpdateSpeakerExpression(expression);
+        SetSpeakerName(speakerName);
+        SetExpression(expression);
 
         if(expression == null)
         {
-            UpdateAltTextbox(curText, index);
+            SetAltTextbox(curText, index);
         }
         else
         {
-            UpdateTextbox(curText, index);
+            SetTextbox(curText, index);
         }
 
     }
 
-    void UpdateSpeakerName(string name)
+    void SetSpeakerName(string name)
     {
         if(name == null || name == "") 
         {
@@ -61,7 +67,7 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    void UpdateSpeakerExpression(DialogueExpression expression)
+    void SetExpression(DialogueExpression expression)
     {
         if(expression == null)
         {
@@ -74,27 +80,27 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    void UpdateAltTextbox(String dialogueText, int index)
+    void SetAltTextbox(String dialogueText, int index)
     {
         textBox.SetActive(false);
         altTextBox.SetActive(true);
 
-        IndexTextVisbility(altTextBox.GetComponent<TMP_Text>(), dialogueText, index);
+        IndexTextVisbility(dialogueText, index, altTextBox.GetComponent<TMP_Text>());
 
     }
 
-    void UpdateTextbox(String dialogueText, int index)
+    void SetTextbox(String dialogueText, int index)
     {
         altTextBox.SetActive(false);
         textBox.SetActive(true);
 
-        IndexTextVisbility(textBox.GetComponent<TMP_Text>(), dialogueText, index);
+        IndexTextVisbility(dialogueText, index, textBox.GetComponent<TMP_Text>());
     }
 
-    void IndexTextVisbility(TMP_Text textBox, string rawText, int index)
-    {
+    #endregion
 
-        //Debug.Log($"Raw text for visibility:{rawText}");
+    void IndexTextVisbility(string rawText, int index, TMP_Text textBox)
+    {
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
@@ -119,11 +125,29 @@ public class DialogueUI : MonoBehaviour
 
         visibleChars = textBox.maxVisibleCharacters;
 
-		    //Debug.Log($"Visible characters:{index},{rawText.Substring(0, visibleChars)}");
-
 	}
 
 	#region TEXT EFFECTS
+
+    void TextOperation(string rawText, int startIndex)
+    {
+
+    }
+
+    void TextOperation(string rawText, int startIndex, int endIndex)
+    {
+
+    }
+
+    void TextOperation(string rawText, int startIndex, TMP_Text textBox)
+    {
+
+    }
+
+    void TextOperation(string rawText, int startIndex, int endIndex, TMP_Text textBox)
+    {
+
+    }
 
     #endregion
 }

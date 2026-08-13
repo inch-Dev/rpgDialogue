@@ -1,107 +1,95 @@
 using System.Collections;
-using NUnit.Framework;
-using UnityEditor.AdaptivePerformance.Editor;
-using UnityEditor.EditorTools;
-using UnityEngine;
 using System.Collections.Generic;
-using System;
-using UnityEngine.UI;
-using Unity.VisualScripting;
-using UnityEditor.U2D.Animation;
-using TMPro;
-using JetBrains.Annotations;
+using UnityEngine;
 
 public class DialogueManager : MonoBehaviour
 {
     [HideInInspector] public static DialogueManager Instance;
 
-    [SerializeField] DialogueSpeed curSpeed;
-
-    public void ChangeSpeed(DialogueSpeedID ID)
-    {
-        foreach(DialogueSpeed ds in dialogueSpeeds)
-        {
-            if(ds.id == ID)
-            {
-                ChangeSpeed(ds);
-            }
-        }
-    }
-    public void ChangeSpeed(DialogueSpeed newSpeed)
-    {
-        curSpeed = newSpeed;
-        charWaitSeconds = curSpeed.charWaitSeconds;
-        lineWaitSeconds = curSpeed.lineWaitSeconds;
-    }
-
-    [SerializeField] List<DialogueSpeed> dialogueSpeeds;
-    [SerializeField] float charWaitSeconds = 10;
-    [SerializeField] float lineWaitSeconds = 5;
+	Dialogue dialogue;
+	DialogueSpeed speed;
+	float charWaitSecondsInterval = .1f;
+	float lineWaitSecondsInterval = .25f;
+	float startWaitTime = 0;
+	float endWaitTime = 0;
+	DialogueSpeaker speaker;
+	DialogueExpression expression;
 
 
-    [SerializeField] List<DialogueMarkup> dialogueMarkups = new List<DialogueMarkup>();
+	[SerializeField] List<DialogueSpeed> dialogueSpeeds;
+
+    [SerializeField] List<DialogueMarkup> markups = new List<DialogueMarkup>();
+
     [Tooltip("Markups to trigger custom functions to edit dialogue. Should follow TextMeshPro markup standard format")]
-    Dialogue curDialogue; 
+    
+    
     float timeTillNextChar;
     bool readingDialogue = false;
     
-    string curRawTextSource = "";
-    string curLogicText = "";
-    string curDisplayText = "";
-    string curLogicDeltaText = "";
-    string curDisplayDeltaText = "";
-    
-    [Header("Editable By Markups")]
-    public float curStartWaitTime = 0;
-    public float curEndWaitTime = 0;
-    public DialogueExpression curExpression;
+    string rawTextSource = "";
+    string logicText = "";
+    string displayText = "";
+    string logicDeltaText = "";
+    string displayDeltaText = "";
 
-    public void ChangeExpression(DialogueExpressionID id)
-    {
-        if(curSpeaker == null)
-        {
-            return;
-        }
-        if(curSpeaker.getExpressionOf(id) != null)
-            curExpression = curSpeaker.getExpressionOf(id);
-    }
-    DialogueSpeaker curSpeaker;
-
-
-    #region EVENTS
-    public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index);
+	#region EVENTS
+	public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index);
     public static event UpdateDialogue updateDialogue;
 
     #endregion
-    void Start()
-    {
-        if(Instance == null)
-        Instance = this;
-        timeTillNextChar = charWaitSeconds;
 
-        ChangeSpeed(DialogueSpeedID.DEFAULT);
-    }
-    
-    public Vector2 GetDisplayIndexRange(string target)
+
+	#region SETTERS
+	public void SetSpeed(DialogueSpeedID ID)
+	{
+		foreach (DialogueSpeed ds in dialogueSpeeds)
+		{
+			if (ds.id == ID)
+			{
+				SetSpeed(ds);
+			}
+		}
+	}
+	public void SetSpeed(DialogueSpeed newSpeed)
+	{
+		speed = newSpeed;
+		charWaitSecondsInterval = speed.charWaitSeconds;
+		lineWaitSecondsInterval = speed.lineWaitSeconds;
+	}
+
+
+	public void SetExpression(DialogueExpressionID id)
+	{
+		if (speaker == null)
+		{
+			return;
+		}
+		if (speaker.getExpressionOf(id) != null)
+			expression = speaker.getExpressionOf(id);
+	}
+	#endregion
+
+	#region GETTERS
+	public Vector2 GetDisplayIndexRange(string target)
     {
         Vector2 indexRange = Vector2.zero;
-        char[] displayArray = curDisplayText.ToCharArray();
+        char[] displayArray = displayText.ToCharArray();
         char[] targetArray = target.ToCharArray();
 
-        if (target.Length > curDisplayText.Length)
+        if (target.Length > displayText.Length)
             return indexRange;
 
         //Iterate through display text until start of target string
-        for(int i = 0; i < curDisplayText.Length; i++)
+        for(int i = 0; i < displayText.Length; i++)
         {
-            if (i + target.Length >= curDisplayText.Length)
+            if (i + target.Length >= displayText.Length)
                 break;
             if(displayArray[i] == targetArray[0])
             {
-                int indexOfEnd = curDisplayText.IndexOf(targetArray[targetArray.Length - 1]);
+                int indexOfEnd = displayText.IndexOf(targetArray[targetArray.Length - 1]);
                 if(indexOfEnd != -1)
                 {
-                    string targetText = curDisplayText.Substring(i, indexOfEnd - 1 - i);
+                    string targetText = displayText.Substring(i, indexOfEnd - 1 - i);
                     if(targetText == target)
                     {
                         indexRange = new Vector2(i, indexOfEnd);
@@ -115,23 +103,23 @@ public class DialogueManager : MonoBehaviour
     public Vector2 GetLogicIndexRange(string target)
     {
         Vector2 indexRange = Vector2.zero;
-        char[] logicArray = curLogicText.ToCharArray();
+        char[] logicArray = logicText.ToCharArray();
         char[] targetArray = target.ToCharArray();
 
-		if (target.Length > curLogicText.Length)
+		if (target.Length > logicText.Length)
 			return indexRange;
 
 		//Iterate through display text until start of target string
-		for (int i = 0; i < curLogicText.Length; i++)
+		for (int i = 0; i < logicText.Length; i++)
 	    { 
-			if (i + target.Length >= curLogicText.Length)
+			if (i + target.Length >= logicText.Length)
 				break;
 			if (logicArray[i] == targetArray[0])
 			{
-				int indexOfEnd = curLogicText.IndexOf(targetArray[targetArray.Length - 1]);
+				int indexOfEnd = logicText.IndexOf(targetArray[targetArray.Length - 1]);
 				if (indexOfEnd != -1)
 				{
-					string targetText = curLogicText.Substring(i, indexOfEnd - 1 - i);
+					string targetText = logicText.Substring(i, indexOfEnd - 1 - i);
 					if (targetText == target)
 					{
 						indexRange = new Vector2(i, indexOfEnd);
@@ -141,21 +129,30 @@ public class DialogueManager : MonoBehaviour
 		}
 		return indexRange;
 	}
-    public void ReadDialogue(Dialogue dialogue)
+	#endregion
+
+	void Start()
+	{
+		if (Instance == null)
+			Instance = this;
+		timeTillNextChar = charWaitSecondsInterval;
+	}
+
+	public void ReadDialogue(Dialogue dialogue)
     {
         if(readingDialogue)
             return;
 
-        curDialogue = dialogue;
+        this.dialogue = dialogue;
         if(dialogue.hasSpeaker)
         {
-            curSpeaker = dialogue.speaker;
-            curExpression = dialogue.startExpression;
+            speaker = dialogue.speaker;
+            expression = dialogue.startExpression;
         }
         else
         {
-            curSpeaker = null;
-            curExpression = null;
+            speaker = null;
+            expression = null;
         }
         readingDialogue = true;
 
@@ -199,7 +196,7 @@ public class DialogueManager : MonoBehaviour
         for(int i = 0; visibleCharCount < index; i++)
         {
             //If markup recognized 
-            foreach(DialogueMarkup dm in dialogueMarkups)
+            foreach(DialogueMarkup dm in markups)
             {
                 if(dm.ValidateMarkup(rawText, i))
                 {
@@ -225,17 +222,17 @@ public class DialogueManager : MonoBehaviour
     
 
         //If new line of dialogue clear comparison text
-        if(rawText != curRawTextSource)
+        if(rawText != rawTextSource)
         {
-            curRawTextSource = rawText;
-            curLogicText = "";
+            rawTextSource = rawText;
+            logicText = "";
         }
 
         //Get text added to display string per call
         string newAddedText;
-        if(indexedRawText.Length > curLogicText.Length)
+        if(indexedRawText.Length > logicText.Length)
         {
-            newAddedText = indexedRawText.Substring(curLogicText.Length);
+            newAddedText = indexedRawText.Substring(logicText.Length);
         }
         else
         {
@@ -247,7 +244,7 @@ public class DialogueManager : MonoBehaviour
             HandleMarkups(newAddedText);
         }
 
-        curLogicText = indexedRawText;
+        logicText = indexedRawText;
         Debug.Log($"Indexed Raw Text:{indexedRawText}, index:{index}");
         return RemoveMarkups(indexedRawText);
         
@@ -272,7 +269,7 @@ public class DialogueManager : MonoBehaviour
 
             recognizedMarkup = false;
             isRichText = false;
-            foreach(DialogueMarkup dm in dialogueMarkups)
+            foreach(DialogueMarkup dm in markups)
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
@@ -315,18 +312,18 @@ public class DialogueManager : MonoBehaviour
             i++;
         }
 
-        if(curDisplayText  != null && curRawTextSource == rawText)
+        if(displayText  != null && rawTextSource == rawText)
         {
-            int deltaLength = curDisplayText.Length - indexedText.Length;
+            int deltaLength = displayText.Length - indexedText.Length;
             deltaText = rawText.Substring(indexedText.Length - deltaLength, deltaLength);
         }
-        else if(curRawTextSource != rawText)
+        else if(rawTextSource != rawText)
         {
-            curDisplayDeltaText = indexedText;
+            displayDeltaText = indexedText;
         }
 
-        curDisplayText = indexedText;
-		curDisplayDeltaText = deltaText;
+        displayText = indexedText;
+		displayDeltaText = deltaText;
 
 		return indexedText;
     }
@@ -356,7 +353,7 @@ public class DialogueManager : MonoBehaviour
             recognizedMarkup = false;
             isRichText = false;
 
-            foreach (DialogueMarkup dm in dialogueMarkups)
+            foreach (DialogueMarkup dm in markups)
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
@@ -410,22 +407,22 @@ public class DialogueManager : MonoBehaviour
         
 
         //Setting change in deltaLogicText
-        if(curLogicText != null && curRawTextSource == rawText)
+        if(logicText != null && rawTextSource == rawText)
         {
             //Debug.Log($"Last indexed logic text:{lastIndexedLogicText}, length:{lastIndexedLogicText.Length}");
-            int deltaLength = indexedText.Length - curLogicText.Length;
+            int deltaLength = indexedText.Length - logicText.Length;
             //Debug.Log($"Indexed test length:{indexedText.Length}, Indexed text:{indexedText}, Delta length:{deltaLength}");
             deltaText = indexedText.Substring(indexedText.Length - deltaLength, deltaLength); //INDEXING ERROR
         }
-        else if(curRawTextSource != rawText)
+        else if(rawTextSource != rawText)
         {
             deltaText = indexedText;
             //Debug.Log($"New dialogue line...delta text:{deltaText}");
         }
 
-        curRawTextSource = rawText;
-        curLogicText = indexedText;
-        curLogicDeltaText = deltaText;
+        rawTextSource = rawText;
+        logicText = indexedText;
+        logicDeltaText = deltaText;
 
         //Debug.Log($"Char index for visible chars:{index}, Indexed text:{indexedText}, Delta text:{deltaText}");
         HandleMarkups(deltaText);
@@ -436,18 +433,18 @@ public class DialogueManager : MonoBehaviour
 	void HandleMarkups(string delaText)
     {
         //Debug.Log($"Logic text:{delaText}");
-        for(int i = 0; i < dialogueMarkups.Count; i++)
+        for(int i = 0; i < markups.Count; i++)
         {
-            dialogueMarkups[i].HandleLogic(this, delaText);
+            markups[i].HandleLogic(this, delaText);
         }
     }
 
     string RemoveMarkups(string rawText)
     {
         string handledMarkupText = rawText;
-       for(int i = 0; i < dialogueMarkups.Count; i++)
+       for(int i = 0; i < markups.Count; i++)
         {
-            handledMarkupText = dialogueMarkups[i].RemoveMarkup(handledMarkupText);
+            handledMarkupText = markups[i].RemoveMarkup(handledMarkupText);
         }
 
         return handledMarkupText;
@@ -466,7 +463,7 @@ public class DialogueManager : MonoBehaviour
         {
             isMarkup = false;
             isRichText = false;
-            foreach (DialogueMarkup dm in dialogueMarkups)
+            foreach (DialogueMarkup dm in markups)
             {
                 if (dm.ValidateMarkup(rawText, i))
                 {
@@ -519,23 +516,23 @@ public class DialogueManager : MonoBehaviour
             string dialogueLine = dialogueLines[i];
             string cleanedDialogue = DisplayDraftIndex(dialogueLine.Length, dialogueLine);
             //Debug.Log($"Cleaned dialogue: {cleanedDialogue}, Length:{cleanedDialogue.Length}");
-            this.curLogicText = null; 
+            this.logicText = null; 
 
             while(charIndex <= cleanedDialogue.Length)
             {   
-                float localCharWaitSeconds = charWaitSeconds;
-                float localLineWaitSeconds = lineWaitSeconds;
+                float localCharWaitSeconds = charWaitSecondsInterval;
+                float localLineWaitSeconds = lineWaitSecondsInterval;
 
                 curLogicText = LogicDraftIndex(charIndex, dialogueLine);
                 //Debug.Log($"Curtext:{curText}");
 
-                yield return new WaitForSeconds(curStartWaitTime);
-                updateDialogue?.Invoke(dialogue.speaker.speakerName, curExpression, cleanedDialogue, charIndex);
+                yield return new WaitForSeconds(startWaitTime);
+                updateDialogue?.Invoke(dialogue.speaker.speakerName, expression, cleanedDialogue, charIndex);
 
-                yield return new WaitForSeconds(curEndWaitTime);
+                yield return new WaitForSeconds(endWaitTime);
 
-                curStartWaitTime = 0;
-                curEndWaitTime = 0;
+                startWaitTime = 0;
+                endWaitTime = 0;
 
                 yield return new WaitForSeconds(localCharWaitSeconds);
                 charIndex++; 
@@ -546,10 +543,10 @@ public class DialogueManager : MonoBehaviour
                     break;
                 }
             }
-            yield return new WaitForSeconds(lineWaitSeconds);
+            yield return new WaitForSeconds(lineWaitSecondsInterval);
         }
         
         readingDialogue = false;
-        curDialogue = null;
+        this.dialogue = null;
     }
 }

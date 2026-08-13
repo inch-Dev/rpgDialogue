@@ -2,12 +2,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
-using Codice.Client.GameUI.Explorer;
 using UnityEditor.Search;
-using Codice.CM.Common.Update.Partial;
-using UnityEditor.Build.Pipeline.Tasks;
 using System.Linq;
-using System.Security.Permissions;
 
 [CustomEditor(typeof(Dialogue))]
 public class DialogueEditor : Editor
