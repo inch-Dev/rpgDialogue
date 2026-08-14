@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro.EditorUtilities;
 
 public enum MarkupType
 {
@@ -102,6 +103,45 @@ public class DialogueMarkup : ScriptableObject
 
 	#region PARSERS
 
+    /// <summary>
+    /// Get text this markup applies to
+    /// </summary>
+    virtual public string ParseAppliedText(string rawText)
+    {
+        string appliedText = "";
+        char[] textArray = rawText.ToCharArray();
+        bool isAppliedText = false;
+
+        if (!ValidateMarkup(ParseMarkup(rawText)))
+            return null;
+
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if(ParseMarkup(rawText, i, openFormat) != null)
+            {
+                i += ParseMarkup(rawText, i, openFormat).Length;
+                isAppliedText = true;
+            }
+
+            if(ParseMarkup(rawText, i, closeFormat) != null)
+            {
+                isAppliedText = false;
+            }
+
+            if(isAppliedText)
+            {
+                appliedText += textArray[i];
+            }
+        }
+
+        return appliedText;
+    }
+
+    /// <summary>
+    /// Get index range of this markup in rawText
+    /// </summary>
+    /// <param name="rawText"></param>
+    /// <returns></returns>
 	virtual public Vector2Int ParseIndexRange(string rawText)
 	{
 		Vector2Int indexRange = new Vector2Int(-1, -1);
@@ -124,6 +164,11 @@ public class DialogueMarkup : ScriptableObject
 		return indexRange;
 	}
 
+    /// <summary>
+    /// Get index range of the text this markup applies to in rawText
+    /// </summary>
+    /// <param name="rawText"></param>
+    /// <returns></returns>
     virtual public Vector2Int ParseAppliedIndexRange(string rawText)
     {
         Vector2Int indexRange = new Vector2Int(-1, -1);
@@ -162,7 +207,6 @@ public class DialogueMarkup : ScriptableObject
 
 		return theType;
 	}
-
 
 	/// <summary>
 	/// Get format of markup
@@ -774,11 +818,11 @@ public class DialogueMarkup : ScriptableObject
                 switch(ParseFormatType(thisMarkup))
                 {
                     case FormatType.OPEN:
-                        thisMarkupData.OpenLogic();
+                        thisMarkupData.OpenLogic(this);
                         break;
 
                     case FormatType.CLOSE:
-                        thisMarkupData.CloseLogic();
+                        thisMarkupData.CloseLogic(this);
                         break;
                 }
             }
@@ -812,10 +856,10 @@ public class DialogueMarkup : ScriptableObject
             switch (ParseFormatType(ParseMarkup(deltaText)))
             {
                 case FormatType.OPEN:
-                    theMarkupData.OpenLogic();
+                    theMarkupData.OpenLogic(this);
                     break;
                 case FormatType.CLOSE:
-                    theMarkupData.CloseLogic();
+                    theMarkupData.CloseLogic(this);
                     break;
                 default:
                     Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaText))}");

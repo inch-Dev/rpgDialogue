@@ -36,6 +36,32 @@ public class DialogueUI : MonoBehaviour
 		    Instance = this;
 	}
 
+	#region GETTERS
+
+    GameObject GetActiveTextbox()
+    {
+        if (textBox.activeSelf)
+            return textBox;
+
+
+        if (altTextBox.activeSelf)
+            return altTextBox;
+
+        return null;
+    }
+
+    TMP_Text GetActiveText()
+    {
+        if(GetActiveTextbox() == textBox)
+            return textBox.GetComponent<TMP_Text>();
+        if(GetActiveTextbox() == altTextBox)
+            return altTextBox.GetComponent<TMP_Text>();
+
+        return null;
+    }
+
+    #endregion
+
 	#region SETTERS
 	void SetDialogue(string speakerName, DialogueExpression expression, string curText, int index)
     {
@@ -129,22 +155,22 @@ public class DialogueUI : MonoBehaviour
 
 	#region TEXT EFFECTS
 
-    void TextOperation(string rawText, int startIndex)
+    public void TextOperation(int startIndex)
+    {
+        TextOperation(startIndex, GetActiveText());
+    }
+
+	public void TextOperation(Vector2Int indexRange)
+	{
+		TextOperation(indexRange, GetActiveText());
+	}
+
+	public void TextOperation(int startIndex, TMP_Text textBox)
     {
 
     }
 
-    void TextOperation(string rawText, int startIndex, int endIndex)
-    {
-
-    }
-
-    void TextOperation(string rawText, int startIndex, TMP_Text textBox)
-    {
-
-    }
-
-    void TextOperation(string rawText, int startIndex, int endIndex, TMP_Text textBox)
+    public void TextOperation(Vector2Int indexRange, TMP_Text textBox)
     {
 
     }

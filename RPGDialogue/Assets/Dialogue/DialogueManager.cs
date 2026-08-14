@@ -36,7 +36,69 @@ public class DialogueManager : MonoBehaviour
 	public delegate void UpdateDialogue(string speakerName, DialogueExpression expression, string curText, int index);
     public static event UpdateDialogue updateDialogue;
 
-    #endregion
+	#endregion
+
+
+	#region GETTERS
+	public Vector2Int GetDisplayIndexRange(string target)
+	{
+		Vector2Int indexRange = new Vector2Int(-1, -1);
+		char[] displayArray = displayIndexText.ToCharArray();
+		char[] targetArray = target.ToCharArray();
+
+		if (target.Length > displayIndexText.Length)
+			return indexRange;
+
+		//Iterate through display text until start of target string
+		for (int i = 0; i < displayIndexText.Length; i++)
+		{
+
+			if (displayArray[i] == targetArray[0])
+			{
+				int indexOfEnd = displayIndexText.IndexOf(targetArray[targetArray.Length - 1], i + 1);
+				if (indexOfEnd != -1)
+				{
+					string targetText = displayIndexText.Substring(i, indexOfEnd - 1 - i);
+					if (targetText == target)
+					{
+						indexRange = new Vector2Int(i, indexOfEnd);
+					}
+				}
+			}
+		}
+		return indexRange;
+	}
+
+	public Vector2 GetMarkupIndexRange(string target)
+	{
+		Vector2 indexRange = Vector2.zero;
+		char[] logicArray = markupIndexText.ToCharArray();
+		char[] targetArray = target.ToCharArray();
+
+		if (target.Length > markupIndexText.Length)
+			return indexRange;
+
+		//Iterate through display text until start of target string
+		for (int i = 0; i < markupIndexText.Length; i++)
+		{
+			if (i + target.Length >= markupIndexText.Length)
+				break;
+			if (logicArray[i] == targetArray[0])
+			{
+				int indexOfEnd = markupIndexText.IndexOf(targetArray[targetArray.Length - 1]);
+				if (indexOfEnd != -1)
+				{
+					string targetText = markupIndexText.Substring(i, indexOfEnd - 1 - i);
+					if (targetText == target)
+					{
+						indexRange = new Vector2(i, indexOfEnd);
+					}
+				}
+			}
+		}
+		return indexRange;
+	}
+	#endregion
 
 
 	#region SETTERS
@@ -69,67 +131,7 @@ public class DialogueManager : MonoBehaviour
 	}
 	#endregion
 
-	#region GETTERS
-	public Vector2 GetDisplayIndexRange(string target)
-    {
-        Vector2 indexRange = Vector2.zero;
-        char[] displayArray = displayIndexText.ToCharArray();
-        char[] targetArray = target.ToCharArray();
-
-        if (target.Length > displayIndexText.Length)
-            return indexRange;
-
-        //Iterate through display text until start of target string
-        for(int i = 0; i < displayIndexText.Length; i++)
-        {
-            if (i + target.Length >= displayIndexText.Length)
-                break;
-            if(displayArray[i] == targetArray[0])
-            {
-                int indexOfEnd = displayIndexText.IndexOf(targetArray[targetArray.Length - 1]);
-                if(indexOfEnd != -1)
-                {
-                    string targetText = displayIndexText.Substring(i, indexOfEnd - 1 - i);
-                    if(targetText == target)
-                    {
-                        indexRange = new Vector2(i, indexOfEnd);
-                    }
-                }
-            }
-        }
-        return indexRange;
-    }
-
-    public Vector2 GetLogicIndexRange(string target)
-    {
-        Vector2 indexRange = Vector2.zero;
-        char[] logicArray = markupIndexText.ToCharArray();
-        char[] targetArray = target.ToCharArray();
-
-		if (target.Length > markupIndexText.Length)
-			return indexRange;
-
-		//Iterate through display text until start of target string
-		for (int i = 0; i < markupIndexText.Length; i++)
-	    { 
-			if (i + target.Length >= markupIndexText.Length)
-				break;
-			if (logicArray[i] == targetArray[0])
-			{
-				int indexOfEnd = markupIndexText.IndexOf(targetArray[targetArray.Length - 1]);
-				if (indexOfEnd != -1)
-				{
-					string targetText = markupIndexText.Substring(i, indexOfEnd - 1 - i);
-					if (targetText == target)
-					{
-						indexRange = new Vector2(i, indexOfEnd);
-					}
-				}
-			}
-		}
-		return indexRange;
-	}
-	#endregion
+	
 
 	void Start()
 	{

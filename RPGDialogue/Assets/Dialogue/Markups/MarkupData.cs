@@ -7,20 +7,7 @@ using UnityEngine;
 public class MarkupData : ScriptableObject
 {
     [SerializeField] public string keyName;
+    public virtual void OpenLogic(DialogueMarkup markup, string rawText){ }
 
-
-    //Get all variables (parameters) in this markupData that is not its keyName
-    public FieldInfo[] GetParameters()
-    {
-        Type type = typeof(MarkupData);
-        FieldInfo[] fields = null;
-
-        BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-        fields = type.GetFields(flags);
-
-        return fields;
-    }
-    public virtual void OpenLogic(){ }
-
-    public virtual void CloseLogic(){ }
+    public virtual void CloseLogic(DialogueMarkup markup, string rawText){ }
 }
