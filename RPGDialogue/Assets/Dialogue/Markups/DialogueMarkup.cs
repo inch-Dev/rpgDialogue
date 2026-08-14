@@ -133,15 +133,12 @@ public class DialogueMarkup : ScriptableObject
         {
             if(ParseMarkup(rawText, i, openFormat) != null)
             {
-                
-                //Get length of open format tag
-                //Get index immmediately after
+                indexRange.x = i + ParseMarkup(rawText, i, openFormat).Length;
             }
 
             if(ParseMarkup(rawText, i, closeFormat) != null)
             {
-                //Get length of close format tag
-                //Get index from - i
+                indexRange.y = i - 1;
             }
         }
         return indexRange;
