@@ -7,6 +7,7 @@ public class ColorMarkupData : MarkupData
 {
 	public override void OpenLogic(DialogueMarkup markup, string rawText)
 	{
+		Debug.Log($"Markup applied range is: {DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText))}");
 		DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText)));
 	}
 

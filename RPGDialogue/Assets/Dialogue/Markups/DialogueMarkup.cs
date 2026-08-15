@@ -38,11 +38,12 @@ public class DialogueMarkup : ScriptableObject
 {
     [SerializeField] public MarkupType type;
     [SerializeField] public string keyName;
-    protected static DialogueMarkupFormat openFormat = new DialogueMarkupFormat(FormatType.OPEN, "{", "}");
+	[SerializeField] List<MarkupData> markupDatas;
+    bool activeLastDelta = false;
+	protected static DialogueMarkupFormat openFormat = new DialogueMarkupFormat(FormatType.OPEN, "{", "}");
     protected static DialogueMarkupFormat closeFormat = new DialogueMarkupFormat(FormatType.CLOSE, "{/", "}");
     protected static DialogueMarkupFormat[] formats = new DialogueMarkupFormat[2] { openFormat, closeFormat };
     protected char equals = '=';
-    [SerializeField] List<MarkupData> markupDatas;
 
     #region GETTERS
 
@@ -93,19 +94,20 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public List<MarkupData> GetMarkupDatas(){ return markupDatas; }
 
-	/// <summary>
-	/// Get markupData in markup
-	/// </summary>
-	/// <param name="markup"></param>
-	/// <returns></returns>
+    /// <summary>
+    /// Get markupData in markup
+    /// </summary>
+    /// <param name="markup"></param>
+    /// <returns></returns>
 
-	#endregion
+    #endregion
 
-	#region PARSERS
+    #region PARSERS
 
     /// <summary>
     /// Get text this markup applies to
     /// </summary>
+    /// 
     virtual public string ParseAppliedText(string rawText)
     {
         string appliedText = "";
@@ -115,27 +117,31 @@ public class DialogueMarkup : ScriptableObject
         if (!ValidateMarkup(ParseMarkup(rawText)))
             return null;
 
-        for(int i = 0; i < rawText.Length; i++)
+        for (int i = 0; i < rawText.Length; i++)
         {
-            if(ParseMarkup(rawText, i, openFormat) != null)
+            if (ParseMarkup(rawText, i, openFormat) != null)
             {
                 i += ParseMarkup(rawText, i, openFormat).Length;
                 isAppliedText = true;
             }
 
-            if(ParseMarkup(rawText, i, closeFormat) != null)
+            if (ParseMarkup(rawText, i, closeFormat) != null)
             {
                 isAppliedText = false;
             }
 
-            if(isAppliedText)
+            if (i < rawText.Length && isAppliedText)
             {
                 appliedText += textArray[i];
             }
         }
 
+        Debug.Log($"Applied text in string:{rawText} is:{appliedText}");
+
         return appliedText;
     }
+
+
 
     /// <summary>
     /// Get index range of this markup in rawText
@@ -818,11 +824,11 @@ public class DialogueMarkup : ScriptableObject
                 switch(ParseFormatType(thisMarkup))
                 {
                     case FormatType.OPEN:
-                        thisMarkupData.OpenLogic(this);
+                        thisMarkupData.OpenLogic(this, fullText);
                         break;
 
                     case FormatType.CLOSE:
-                        thisMarkupData.CloseLogic(this);
+                        thisMarkupData.CloseLogic(this, fullText);
                         break;
                 }
             }
@@ -856,10 +862,10 @@ public class DialogueMarkup : ScriptableObject
             switch (ParseFormatType(ParseMarkup(deltaText)))
             {
                 case FormatType.OPEN:
-                    theMarkupData.OpenLogic(this);
+                    theMarkupData.OpenLogic(this, deltaText);
                     break;
                 case FormatType.CLOSE:
-                    theMarkupData.CloseLogic(this);
+                    theMarkupData.CloseLogic(this, deltaText);
                     break;
                 default:
                     Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaText))}");

@@ -727,7 +727,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: markups.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: 'markups.Array.data[0]'
@@ -741,6 +741,10 @@ PrefabInstance:
       propertyPath: 'markups.Array.data[2]'
       value: 
       objectReference: {fileID: 11400000, guid: ba1fec3053780f6439a53dd4dc4f3966, type: 2}
+    - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
+      propertyPath: 'markups.Array.data[3]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 912f7ebc0687e0d4fbedebc6922608bc, type: 2}
     - target: {fileID: 4723835461094115449, guid: d63c320e216366c4aad6a09f4a160f51, type: 3}
       propertyPath: dialogueMarkups.Array.size
       value: 1

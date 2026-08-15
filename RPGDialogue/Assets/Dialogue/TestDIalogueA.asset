@@ -16,7 +16,7 @@ MonoBehaviour:
   speaker: {fileID: 11400000, guid: b6ab180ddaf7f8d45978bc4765c7973a, type: 2}
   startExpression: {fileID: 0}
   dialogueLines:
-  - Also has a markup{Wait = Small}
+  - Markup {Color = Test}Test{/Color = Test}
   - '{ANGRYx}test text{/ANGRYx}'
   - This is a <b>test!</b>
   - Another line of dialogue...{Wait = Small}{/Wait = Small}
