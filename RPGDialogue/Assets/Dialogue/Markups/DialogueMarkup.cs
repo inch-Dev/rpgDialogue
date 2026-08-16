@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using TMPro.EditorUtilities;
+using NaughtyAttributes.Editor;
 
 public enum MarkupType
 {
@@ -40,6 +41,7 @@ public class DialogueMarkup : ScriptableObject
     [SerializeField] public string keyName;
 	[SerializeField] List<MarkupData> markupDatas;
     bool activeLastDelta = false;
+    string dialogueSource = null;
 	protected static DialogueMarkupFormat openFormat = new DialogueMarkupFormat(FormatType.OPEN, "{", "}");
     protected static DialogueMarkupFormat closeFormat = new DialogueMarkupFormat(FormatType.CLOSE, "{/", "}");
     protected static DialogueMarkupFormat[] formats = new DialogueMarkupFormat[2] { openFormat, closeFormat };
@@ -94,20 +96,40 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public List<MarkupData> GetMarkupDatas(){ return markupDatas; }
 
-    /// <summary>
-    /// Get markupData in markup
-    /// </summary>
-    /// <param name="markup"></param>
-    /// <returns></returns>
+	/// <summary>
+	/// Get markupData in markup
+	/// </summary>
+	/// <param name="markup"></param>
+	/// <returns></returns>
+
+	#endregion
+
+	#region SETTERS
+
+    virtual public void SetDialogueSource(string newSource){  dialogueSource = newSource; }
+
+    virtual public void SetActiveLastDelta(bool newActive){ activeLastDelta = newActive; }
 
     #endregion
 
-    #region PARSERS
+	#region PARSERS
 
-    /// <summary>
-    /// Get text this markup applies to
-    /// </summary>
-    /// 
+	/// <summary>
+	/// Get text this markup applies to
+	/// </summary>
+	/// 
+	virtual public string ParseAppliedText(string rawText, DialogueCall callType)
+    {
+        switch(callType)
+        {
+            case DialogueCall.DELTA:
+                return ParseAppliedDeltaText(rawText);
+            case DialogueCall.FULL:
+                return ParseAppliedText(rawText);
+        }
+
+        return null;
+    }
     virtual public string ParseAppliedText(string rawText)
     {
         string appliedText = "";
@@ -141,6 +163,41 @@ public class DialogueMarkup : ScriptableObject
         return appliedText;
     }
 
+    virtual public string ParseAppliedDeltaText(string rawText)
+    {
+        string appliedText = "";
+        char[] textArray = rawText.ToCharArray();
+        bool isAppliedText = false;
+
+        if(!ValidateMarkup(ParseMarkup(rawText)))
+        {
+            return null;
+        }
+
+        if (activeLastDelta)
+            isAppliedText = true;
+
+        for (int i = 0; i < rawText.Length; i++)
+        {
+            if (ParseMarkup(rawText, i, openFormat) != null)
+            {
+                i += ParseMarkup(rawText, i, openFormat).Length;
+                isAppliedText = true;
+            }
+
+            if(ParseMarkup(rawText, i, closeFormat) != null)
+            {
+                isAppliedText = false;
+            }
+
+            if( i < rawText.Length && isAppliedText)
+            {
+                appliedText += textArray[i];
+            }
+        }
+
+        return appliedText;
+    }
 
 
     /// <summary>
@@ -202,7 +259,7 @@ public class DialogueMarkup : ScriptableObject
 	/// <returns></returns>
 	virtual public FormatType ParseFormatType(string markup)
 	{
-		Debug.Log($"Getting markup text:{markup}");
+		//Debug.Log($"Getting markup text:{markup}");
 		FormatType theType = FormatType.INVALID;
 
 		foreach (DialogueMarkupFormat format in formats)
@@ -783,10 +840,11 @@ public class DialogueMarkup : ScriptableObject
         {
             if (ValidateMarkup(rawText, i))
             {
+                //Debug.Log($"Got markup:{ParseMarkup(rawText, i)}....moved to{textArray[i + ParseMarkup(rawText, i).Length]}");
                 i += ParseMarkup(rawText, i).Length;
             }
 
-            else
+            if (i < rawText.Length)
             {
                 removedMarkupText += textArray[i];
             }
@@ -797,7 +855,18 @@ public class DialogueMarkup : ScriptableObject
     #endregion
 
     #region LOGIC
-    //Move this to markupData
+    virtual public bool Handle(string rawText, DialogueCall callType)
+    {
+        switch (callType)
+        {
+            case DialogueCall.DELTA:
+                return HandleDelta(rawText);
+            case DialogueCall.FULL:
+                return HandleFull(rawText);
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Handles logic for this markup in fullText
@@ -805,7 +874,7 @@ public class DialogueMarkup : ScriptableObject
     /// <param name="dialogueManager"></param>
     /// <param name="fullText"></param>
     /// <returns></returns>
-    virtual public bool Handle(DialogueManager dialogueManager, string fullText)
+    virtual public bool HandleFull(string fullText)
     {
         if (!ValidateMarkup(ParseMarkup(fullText)))
         {
@@ -824,11 +893,11 @@ public class DialogueMarkup : ScriptableObject
                 switch(ParseFormatType(thisMarkup))
                 {
                     case FormatType.OPEN:
-                        thisMarkupData.OpenLogic(this, fullText);
+                        thisMarkupData.Open(this, fullText, DialogueCall.FULL);
                         break;
 
                     case FormatType.CLOSE:
-                        thisMarkupData.CloseLogic(this, fullText);
+                        thisMarkupData.Close(this, fullText, DialogueCall.FULL);
                         break;
                 }
             }
@@ -844,17 +913,20 @@ public class DialogueMarkup : ScriptableObject
     /// <param name="dialogueManager"></param>
     /// <param name="deltaText"></param>
     /// <returns></returns>
-    virtual public bool HandleDelta(DialogueManager dialogueManager, string deltaText)
+    virtual public bool HandleDelta(string deltaText)
     {
         //Debug.Log($"Delta logic text:{deltaLogicText}");
         //Error handling
         if (!ValidateMarkup(ParseMarkup(deltaText)))
         {
             //Debug.Log($"Could not validate from:{deltaLogicText}");
+            activeLastDelta = false;
             return false;
         }
+        
         else
         {
+            activeLastDelta = true;
             MarkupData theMarkupData = ParseMarkupData(deltaText);
 
             //Debug.Log($"Parsed markupData:{theMarkupData}");
@@ -862,13 +934,14 @@ public class DialogueMarkup : ScriptableObject
             switch (ParseFormatType(ParseMarkup(deltaText)))
             {
                 case FormatType.OPEN:
-                    theMarkupData.OpenLogic(this, deltaText);
+                    //Debug.Log("Open delta!");
+                    theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
                     break;
                 case FormatType.CLOSE:
-                    theMarkupData.CloseLogic(this, deltaText);
+                    //Debug.Log("Closing delta!");
+                    theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
                     break;
                 default:
-                    Debug.Log($"Could not get format type from {ParseFormatType(ParseMarkup(deltaText))}");
                     break;
             }
         }

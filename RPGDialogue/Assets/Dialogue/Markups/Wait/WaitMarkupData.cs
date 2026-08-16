@@ -6,14 +6,14 @@ public class WaitMarkupData : MarkupData
 {
     [SerializeField] float time;
 
-	public override void OpenLogic(DialogueMarkup markup, string rawText)
+	public override void Open(DialogueMarkup markup, string rawText, DialogueCall callType)
 	{
-		base.OpenLogic(markup, rawText);
+		base.Open(markup, rawText);
 	}
 
-	public override void CloseLogic(DialogueMarkup markup, string rawText)
+	public override void Close(DialogueMarkup markup, string rawText, DialogueCall callType)
 	{
-		base.CloseLogic(markup, rawText);
+		base.Close(markup, rawText);
 	}
 
 }
