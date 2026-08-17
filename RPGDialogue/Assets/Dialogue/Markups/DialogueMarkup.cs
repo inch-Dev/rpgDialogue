@@ -607,10 +607,11 @@ public class DialogueMarkup : ScriptableObject
     /// <returns></returns>
     virtual public bool ValidateFormat(string markup, DialogueMarkupFormat format)
     {
+        //Debug.Log($"Running validate format {markup} and {format}");
         if (markup.Length < format.tagStart.Length + format.tagEnd.Length)
             return false;
 
-
+        //Debug.Log($"Ending validate format, {markup} and {format}");
         return (markup.Substring(0, format.tagStart.Length) == format.tagStart
         && markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd);
     }
@@ -1083,26 +1084,33 @@ public class DialogueMarkup : ScriptableObject
 
             case MarkupType.DISPLAY:
             {
-                switch(ParseFormatType(ParseMarkup(deltaText)))
-                {
-                        case FormatType.OPEN:
-                            theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
-                            isActiveApplying = true;
-                            applyingData = theMarkupData;
-                            break;
-                        case FormatType.CLOSE:
-                            theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
-                            isActiveApplying = false;
-                            applyingData = null;
-                            break;
 
-                        default:
-                            if(isActiveApplying && applyingData)
-                            {
-                                applyingData.Continue(this, deltaText);
-                            }
-                            break;
-                }
+
+                    if (ParseMarkup(deltaText) != null)
+                    {
+                        switch (ParseFormatType(ParseMarkup(deltaText)))
+                        {
+                            case FormatType.OPEN:
+                                theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
+                                isActiveApplying = true;
+                                applyingData = theMarkupData;
+                                break;
+                            case FormatType.CLOSE:
+                                Debug.Log("Closing");
+                                theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
+                                isActiveApplying = false;
+                                applyingData = null;
+                                break;
+                        }
+                    }
+
+                    else
+                    {
+                        if (isActiveApplying && applyingData)
+						{
+							applyingData.Continue(this, deltaText);
+						}
+					}
             }
                 break;
 		}

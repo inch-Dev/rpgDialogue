@@ -1,7 +1,10 @@
 using System;
+using System.Security.Cryptography;
+using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class DialogueUI : MonoBehaviour
 {
@@ -168,6 +171,14 @@ public class DialogueUI : MonoBehaviour
 	public void TextOperation(int startIndex, TMP_Text textBox)
     {
 
+    }
+
+    public void TextOperation(List<Vector2Int> indexRanges, TMP_Text textBox)
+    {
+        foreach(Vector2Int indexRange in indexRanges)
+        {
+            TextOperation(indexRange, textBox);
+        }
     }
 
     public void TextOperation(Vector2Int indexRange, TMP_Text textBox)
