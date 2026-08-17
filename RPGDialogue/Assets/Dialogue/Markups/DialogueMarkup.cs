@@ -141,11 +141,6 @@ public class DialogueMarkup : ScriptableObject
         if (!ValidateMarkup(ParseMarkup(rawText)))
             return null;
 
-        if (isActiveApplying)
-        {
-            isAppliedText = true;
-        }
-
         for (int i = 0; i < rawText.Length; i++)
         {
             if (ParseMarkup(rawText, i, openFormat) != null)
@@ -204,12 +199,134 @@ public class DialogueMarkup : ScriptableObject
         return appliedText;
     }
 
+    virtual public List<string> ParseAppliedText(string rawText, DialogueCall callType)
+    {
+        switch (callType)
+        {
+            case DialogueCall.DELTA:
+                return ParseDeltaAppliedText(rawText);
+            case DialogueCall.FULL:
+                return ParseFullAppliedText(rawText);
+            default:
+                return null;
+        }
+
+    }
+
+    virtual public List<string> ParseFullAppliedText(string rawText)
+    {
+        List<string> appliedText = new List<string>();
+        List<Vector2Int> indexRanges = ParseAppliedIndexRanges(rawText, DialogueCall.FULL);
+
+        foreach(Vector2Int range in indexRanges)
+        {
+            string textRange = rawText.Substring(range.x, range.y - range.x);
+            appliedText.Add(textRange);
+        }
+
+        return appliedText;
+    }
+
+    virtual public List<string> ParseDeltaAppliedText(string deltaText)
+    {
+        List<string> appliedText = new List<string>;
+        List<Vector2Int> indexRanges = ParseAppliedIndexRanges(deltaText, DialogueCall.DELTA);
+
+        foreach (Vector2Int range in indexRanges)
+        {
+            string textRange = deltaText.Substring(range.x, range.y - range.x);
+            appliedText.Add(textRange);
+        }
+
+        return appliedText;
+    }
+
+
+    #region INDEX RANGES
+
+    virtual public List<Vector2Int> ParseIndexRanges(string rawText, DialogueCall callType)
+    {
+        switch (callType)
+        {
+            case DialogueCall.FULL:
+                return ParseIndexRanges(rawText);
+            case DialogueCall.DELTA:
+                return ParseDeltaIndexRanges(rawText);
+            default:
+                return null;
+        }
+            
+    }
+
+    virtual public List<Vector2Int> ParseFullIndexRanges(string rawText)
+    {
+        List<Vector2Int> indexRanges = new List<Vector2Int>();
+        char[] textArray = rawText.ToCharArray();
+
+        Vector2Int currentRange = new Vector2Int(-1, -1);
+
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if(ValidateMarkup(ParseMarkup(rawText, i)))
+            {
+                switch(ParseFormatType(ParseMarkup(rawText, i)))
+                {
+                    case FormatType.OPEN:
+                        currentRange.x = i;
+                        break;
+                    case FormatType.CLOSE:
+                        currentRange.y = i;
+                        indexRanges.Add(currentRange);
+                        break;
+                }
+            }
+        }
+        return indexRanges;
+    }
+
+    virtual public List<Vector2Int> ParseDeltaIndexRanges(string deltaText)
+    {
+        List<Vector2Int> indexRanges = new List<Vector2Int>();
+        char[] textArray = deltaText.ToCharArray();
+
+        Vector2Int currentRange = new Vector2Int(-1, -1);
+
+        if(isActiveApplying)
+        {
+            currentRange.x = 0;
+        }
+
+        for(int i = 0; i < deltaText.Length;i++)
+        {
+            if (ValidateMarkup(ParseMarkup(deltaText, i)))
+            {
+                switch(ParseFormatType(ParseMarkup(deltaText, i)))
+                {
+                    case FormatType.OPEN:
+                        currentRange.x = i;
+                        break;
+                    case FormatType.CLOSE:
+                        currentRange.y = i;
+                        indexRanges.Add(currentRange);
+                        break;
+
+                }
+            }
+
+        }
+
+        return indexRanges;
+    }
 
     /// <summary>
     /// Get index range of this markup in rawText
     /// </summary>
     /// <param name="rawText"></param>
     /// <returns></returns>
+    /// 
+
+
+    //REPLACE WITH INDEX RANGES
 	virtual public Vector2Int ParseIndexRange(string rawText)
 	{
 		Vector2Int indexRange = new Vector2Int(-1, -1);
@@ -258,12 +375,87 @@ public class DialogueMarkup : ScriptableObject
         return indexRange;
     }
 
-	/// <summary>
-	/// Get format type of markup
-	/// </summary>
-	/// <param name="markup"></param>
-	/// <returns></returns>
-	virtual public FormatType ParseFormatType(string markup)
+    virtual public List<Vector2Int> ParseAppliedIndexRanges(string rawText, DialogueCall callType)
+    {
+        switch (callType)
+        {
+            case DialogueCall.FULL:
+                return ParseAppliedIndexRanges(rawText);
+            case DialogueCall.DELTA:
+                return ParseDeltaAppliedIndexRanges(rawText);
+            default:
+                return null;
+        }
+
+    }
+
+    virtual public List<Vector2Int> ParseFullAppliedIndexRanges(string rawText)
+    {
+        List<Vector2Int> indexRanges = new List<Vector2Int>();
+        char[] textArray = rawText.ToCharArray();
+
+        Vector2Int currentRange = new Vector2Int(-1, -1);
+
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if(ValidateMarkup(ParseMarkup(rawText, i)))
+            {
+                switch(ParseFormatType(ParseMarkup(rawText, i)))
+                {
+                    case FormatType.OPEN:
+                        currentRange.x = i += ParseMarkup(rawText, i).Length;
+                        break;
+                    case FormatType.CLOSE:
+                        currentRange.y = i - 1;
+                        indexRanges.Add(currentRange);
+                        break;
+                }
+            }
+        }
+
+        return indexRanges;
+    }
+
+    virtual public List<Vector2Int> ParseDeltaAppliedIndexRanges(string rawText)
+    {
+        List<Vector2Int> indexRanges = new List<Vector2Int>();
+        char[] textArray = rawText.ToCharArray();
+
+        Vector2Int currentRange = new Vector2Int(-1, -1);
+
+        if(isActiveApplying)
+        {
+            currentRange.x = 0;
+        }
+
+        for(int i = 0; i < rawText.Length; i++)
+        {
+            if( ValidateMarkup(ParseMarkup(rawText,i)))
+            {
+                switch (ParseFormatType(ParseMarkup(rawText, i)))
+                {
+                    case FormatType.OPEN:
+                        currentRange.x = i += ParseMarkup(rawText, i).Length;
+                        break;
+                    case FormatType.CLOSE:
+                        currentRange.y = i - 1;
+                        indexRanges.Add(currentRange);
+                        break;
+                }
+                    
+            }
+        }
+
+        return indexRanges;
+    }
+    #endregion
+
+    /// <summary>
+    /// Get format type of markup
+    /// </summary>
+    /// <param name="markup"></param>
+    /// <returns></returns>
+    virtual public FormatType ParseFormatType(string markup)
 	{
 		//Debug.Log($"Getting markup text:{markup}");
 		FormatType theType = FormatType.INVALID;
@@ -905,7 +1097,6 @@ public class DialogueMarkup : ScriptableObject
                         switch(ParseFormatType(theMarkup))
                         {
                             case FormatType.OPEN:
-                                //What string to input?
                                 theMarkupData.Open(this, fullText, DialogueCall.FULL);
                                 isActiveApplying = true;
                                 applyingData = theMarkupData;

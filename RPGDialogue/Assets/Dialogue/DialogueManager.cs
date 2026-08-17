@@ -50,6 +50,23 @@ public class DialogueManager : MonoBehaviour
 
 
 	#region GETTERS
+
+
+    public List<Vector2Int> GetDisplayIndexRanges(List<string> targets)
+    {
+        List<Vector2Int> displayRanges = new List<Vector2Int>();
+
+        foreach(string target in targets)
+        {
+            Vector2Int range = GetDisplayIndexRange(target);
+            if (range.x != -1 && range.y != -1)
+                displayRanges.Add(range);
+        }
+
+        return displayRanges;
+    }
+
+
 	public Vector2Int GetDisplayIndexRange(string target)
 	{
         Debug.Log($"Target:{target}, Length:{target.Length}, Display:{displayIndexText}");
@@ -97,9 +114,23 @@ public class DialogueManager : MonoBehaviour
 		return indexRange;
 	}
 
-	public Vector2 GetMarkupIndexRange(string target)
+    public List<Vector2Int> GetMarkupIndexRanges(List<string> targets)
+    {
+        List<Vector2Int> markupRanges = new List<Vector2Int>();
+
+        foreach(string target in targets)
+        {
+            Vector2Int range = GetMarkupIndexRange(target);
+            if (range.x != -1 && range.y != -1)
+                markupRanges.Add(range);
+        }
+
+        return markupRanges;
+    }
+
+	public Vector2Int GetMarkupIndexRange(string target)
 	{
-		Vector2 indexRange = Vector2.zero;
+        Vector2Int indexRange = new Vector2Int(-1, -1);
 		char[] logicArray = markupIndexText.ToCharArray();
 		char[] targetArray = target.ToCharArray();
 
@@ -134,7 +165,7 @@ public class DialogueManager : MonoBehaviour
 					string targetText = markupIndexText.Substring(i, indexOfEnd - 1 - i);
 					if (targetText == target)
 					{
-						indexRange = new Vector2(i, indexOfEnd);
+						indexRange = new Vector2Int(i, indexOfEnd);
 					}
 				}
 			}
