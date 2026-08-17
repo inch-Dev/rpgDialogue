@@ -38,4 +38,6 @@ public class MarkupData : ScriptableObject
     }
     public virtual void Close(DialogueMarkup markup, string rawText) { }
     public virtual void CloseDelta(DialogueMarkup markup, string rawText) { }
+
+    public virtual void Continue(DialogueMarkup markup, string rawText) { }
 }

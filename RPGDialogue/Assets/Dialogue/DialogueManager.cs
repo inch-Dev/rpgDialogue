@@ -57,18 +57,21 @@ public class DialogueManager : MonoBehaviour
 		char[] displayArray = displayIndexText.ToCharArray();
 		char[] targetArray = target.ToCharArray();
 
+        if(target.Length <= 0)
+            return indexRange;
+
 		if (target.Length > displayIndexText.Length)
 			return indexRange;
 
         //If one character
         if(target.Length == 1)
         {
-            int indexOfTarget = displayIndexText.IndexOf(targetArray[0]);
+            int indexOfTarget = displayIndexText.IndexOf(targetArray[0], 1);
             if(indexOfTarget != -1)
             {
                 indexRange.x = indexOfTarget;
                 indexRange.y = indexOfTarget;
-                //Debug.Log($"Range:{indexRange}");
+                Debug.Log($"Range:{indexRange}");
                 return indexRange;
             }
         }
@@ -78,7 +81,6 @@ public class DialogueManager : MonoBehaviour
 		{
 			if (displayArray[i] == targetArray[0])
 			{
-                Debug.Log($"Found beginning...{displayArray[i]}");
 				int indexOfEnd = displayIndexText.IndexOf(targetArray[targetArray.Length - 1], i + 1);
 				if (indexOfEnd != -1)
 				{
@@ -90,6 +92,8 @@ public class DialogueManager : MonoBehaviour
 				}
 			}
 		}
+
+        Debug.Log($"Range:{indexRange}");
 		return indexRange;
 	}
 
@@ -101,6 +105,21 @@ public class DialogueManager : MonoBehaviour
 
 		if (target.Length > markupIndexText.Length)
 			return indexRange;
+
+        if (target.Length <= 0)
+            return indexRange;
+
+        if(target.Length == 1)
+        {
+			int indexOfTarget = markupIndexText.IndexOf(targetArray[0], 1);
+			if (indexOfTarget != -1)
+			{
+				indexRange.x = indexOfTarget;
+				indexRange.y = indexOfTarget;
+				Debug.Log($"Range:{indexRange}");
+				return indexRange;
+			}
+		}
 
 		//Iterate through display text until start of target string
 		for (int i = 0; i < markupIndexText.Length; i++)
@@ -120,6 +139,7 @@ public class DialogueManager : MonoBehaviour
 				}
 			}
 		}
+        Debug.Log($"Range:{indexRange}");
 		return indexRange;
 	}
 	#endregion
@@ -227,7 +247,7 @@ public class DialogueManager : MonoBehaviour
 			string dialogueLine = dialogueLines[i];
             string displayDialogue = RemoveMarkups(dialogueLine);
 
-            Debug.Log($"First display call good, Clean display:{displayDialogue}");
+            //Debug.Log($"First display call good, Clean display:{displayDialogue}");
 
 			this.markupIndexText = null;
 
@@ -337,10 +357,10 @@ public class DialogueManager : MonoBehaviour
 
         if(displayIndexText != null && rawDisplayTextSource == rawText)
         {
-            Debug.Log($"Raw text:{rawDisplayTextSource} equals {rawText}");
-            Debug.Log($"DisplayIndexText:{displayIndexText}...indexedText:{indexedText}");
+            //Debug.Log($"Raw text:{rawDisplayTextSource} equals {rawText}");
+            //Debug.Log($"DisplayIndexText:{displayIndexText}...indexedText:{indexedText}");
             int deltaLength = indexedText.Length - displayIndexText.Length;
-            Debug.Log($"Delta length:{deltaLength}");
+            //Debug.Log($"Delta length:{deltaLength}");
             deltaText = rawText.Substring(indexedText.Length - deltaLength, deltaLength);
         }
 
@@ -353,7 +373,7 @@ public class DialogueManager : MonoBehaviour
 
         rawDisplayTextSource = rawText;
         displayIndexText = indexedText;
-        Debug.Log($"Setting rawTextSource to {rawText}");
+        //Debug.Log($"Setting rawTextSource to {rawText}");
 		displayDeltaText = deltaText;
 
 		return indexedText;
