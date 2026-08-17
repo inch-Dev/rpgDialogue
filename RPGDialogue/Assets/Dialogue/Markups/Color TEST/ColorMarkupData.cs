@@ -33,7 +33,7 @@ public class ColorMarkupData : MarkupData
 
 	public override void CloseDelta(DialogueMarkup markup, string deltaText)
 	{
-		Debug.Log("Closing");
+		Debug.Log("Closing!S");
 		List<string> appliedText = markup.ParseAppliedText(deltaText, DialogueCall.DELTA);
 		foreach(string text in appliedText)
 		{

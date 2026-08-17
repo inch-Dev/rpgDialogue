@@ -644,8 +644,8 @@ public class DialogueMarkup : ScriptableObject
 
         //Calculate length????
 
-        Debug.Log($" Markup:{markup}, Format:{format.type}, tag start:{format.tagStart}, tag end:{format.tagEnd}");
-        Debug.Log($"Try start:{markup.Substring(0, format.tagStart.Length)}, try end:{markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length)}");
+        //Debug.Log($" Markup:{markup}, Format:{format.type}, tag start:{format.tagStart}, tag end:{format.tagEnd}");
+        //Debug.Log($"Try start:{markup.Substring(0, format.tagStart.Length)}, try end:{markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length)}");
         //Debug.Log($"Ending validate format, {markup} and {format}");
         return (markup.Substring(0, format.tagStart.Length) == format.tagStart
         && markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd);
