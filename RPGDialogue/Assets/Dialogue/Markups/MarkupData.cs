@@ -22,7 +22,7 @@ public class MarkupData : ScriptableObject
 
     public virtual void Open(DialogueMarkup markup, string rawText) { }
 
-    public virtual void OpenDelta(DialogueMarkup markup, string rawText) { }
+    public virtual void OpenDelta(DialogueMarkup markup, string deltaText) { }
 
     public virtual void Close(DialogueMarkup markup, string rawText, DialogueCall callType)
     {
@@ -37,7 +37,7 @@ public class MarkupData : ScriptableObject
         }
     }
     public virtual void Close(DialogueMarkup markup, string rawText) { }
-    public virtual void CloseDelta(DialogueMarkup markup, string rawText) { }
+    public virtual void CloseDelta(DialogueMarkup markup, string deltaText) { }
 
-    public virtual void Continue(DialogueMarkup markup, string rawText) { }
+    public virtual void Continue(DialogueMarkup markup, string deltaText) { }
 }

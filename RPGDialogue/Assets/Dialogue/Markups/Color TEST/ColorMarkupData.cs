@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 
 
 [CreateAssetMenu(fileName = "ColorMarkupData", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/MarkupDatas/ColorMarkupData", order = 4)]
@@ -14,9 +14,9 @@ public class ColorMarkupData : MarkupData
 	{
 	}
 
-	public override void OpenDelta(DialogueMarkup markup, string rawText)
+	public override void OpenDelta(DialogueMarkup markup, string deltaText)
 	{
-		Debug.Log("Opened");
+		//Debug.Log("Opened");
 		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
 		//DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
 	}
@@ -31,14 +31,29 @@ public class ColorMarkupData : MarkupData
 		
 	}
 
-	public override void CloseDelta(DialogueMarkup markup, string rawText)
+	public override void CloseDelta(DialogueMarkup markup, string deltaText)
 	{
-		Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
+		Debug.Log("Closing");
+		List<string> appliedText = markup.ParseAppliedText(deltaText, DialogueCall.DELTA);
+		foreach(string text in appliedText)
+		{
+			Debug.Log($"Applied text range:{text}");
+		}
+
+
+		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
 		//DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
 	}
 
-	public override void Continue(DialogueMarkup markup, string rawText)
+	public override void Continue(DialogueMarkup markup, string deltaText)
 	{
-		Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
+		List<string> appliedText = markup.ParseAppliedText(deltaText, DialogueCall.DELTA);
+		foreach (string text in appliedText)
+		{
+			Debug.Log($"Applied text range:{text}");
+		}
+
+		//Debug.Log("Continue!");
+		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
 	}
 }

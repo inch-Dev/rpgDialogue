@@ -153,9 +153,16 @@ public class DialogueMarkup : ScriptableObject
         List<string> appliedText = new List<string>();
         List<Vector2Int> indexRanges = ParseAppliedIndexRanges(deltaText, DialogueCall.DELTA);
 
+
         foreach (Vector2Int range in indexRanges)
         {
-            string textRange = deltaText.Substring(range.x, range.y - range.x);
+            Debug.Log($"Index range:{range}");
+
+            string textRange;
+            if(range.x != range.y)
+                textRange = deltaText.Substring(range.x, range.y - range.x);
+            else
+            textRange = deltaText[range.x].ToString();
             appliedText.Add(textRange);
         }
 
@@ -337,34 +344,52 @@ public class DialogueMarkup : ScriptableObject
         return indexRanges;
     }
 
-    virtual public List<Vector2Int> ParseAppliedDeltaIndexRanges(string rawText)
+    virtual public List<Vector2Int> ParseAppliedDeltaIndexRanges(string deltaText)
     {
+        Debug.Log($"Delta:{deltaText}");
         List<Vector2Int> indexRanges = new List<Vector2Int>();
-        char[] textArray = rawText.ToCharArray();
+        char[] textArray = deltaText.ToCharArray();
+        bool isClosed = false;
 
         Vector2Int currentRange = new Vector2Int(-1, -1);
+
+        if(isActiveApplying && deltaText.Length == 1)
+        {
+            indexRanges.Add(new Vector2Int(0, 0));
+            return indexRanges;
+        }
 
         if(isActiveApplying)
         {
             currentRange.x = 0;
         }
 
-        for(int i = 0; i < rawText.Length; i++)
+        for(int i = 0; i < deltaText.Length; i++)
         {
-            if( ValidateMarkup(ParseMarkup(rawText,i)))
+            if( ValidateMarkup(ParseMarkup(deltaText,i)))
             {
-                switch (ParseFormatType(ParseMarkup(rawText, i)))
+                switch (ParseFormatType(ParseMarkup(deltaText, i)))
                 {
                     case FormatType.OPEN:
-                        currentRange.x = i += ParseMarkup(rawText, i).Length;
+                        currentRange.x = i += ParseMarkup(deltaText, i).Length;
+                        isClosed = false;
                         break;
                     case FormatType.CLOSE:
                         currentRange.y = i - 1;
                         indexRanges.Add(currentRange);
+                        currentRange = new Vector2Int(-1, -1);
+                        isClosed = true;
+                        Debug.Log("Found index range:{currentRange}");
                         break;
                 }
                     
             }
+        }
+
+        if(!isClosed && currentRange.x != -1)
+        {
+            currentRange.y = deltaText.Length - 1;
+            indexRanges.Add(currentRange);
         }
 
         return indexRanges;
@@ -607,10 +632,20 @@ public class DialogueMarkup : ScriptableObject
     /// <returns></returns>
     virtual public bool ValidateFormat(string markup, DialogueMarkupFormat format)
     {
+        //CLOSE PASSES AS OPEN..WHA
         //Debug.Log($"Running validate format {markup} and {format}");
         if (markup.Length < format.tagStart.Length + format.tagEnd.Length)
             return false;
 
+        if(format == openFormat && ValidateFormat(markup, closeFormat))
+        {
+            return false;
+        }
+
+        //Calculate length????
+
+        Debug.Log($" Markup:{markup}, Format:{format.type}, tag start:{format.tagStart}, tag end:{format.tagEnd}");
+        Debug.Log($"Try start:{markup.Substring(0, format.tagStart.Length)}, try end:{markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length)}");
         //Debug.Log($"Ending validate format, {markup} and {format}");
         return (markup.Substring(0, format.tagStart.Length) == format.tagStart
         && markup.Substring(markup.Length - format.tagEnd.Length, format.tagEnd.Length) == format.tagEnd);
@@ -1084,13 +1119,13 @@ public class DialogueMarkup : ScriptableObject
 
             case MarkupType.DISPLAY:
             {
-
-
                     if (ParseMarkup(deltaText) != null)
                     {
+                        Debug.Log($"Got markup:{deltaText}");
                         switch (ParseFormatType(ParseMarkup(deltaText)))
                         {
                             case FormatType.OPEN:
+                                Debug.Log("Open!");
                                 theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
                                 isActiveApplying = true;
                                 applyingData = theMarkupData;
@@ -1100,6 +1135,9 @@ public class DialogueMarkup : ScriptableObject
                                 theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
                                 isActiveApplying = false;
                                 applyingData = null;
+                                break;
+                            default:
+                                Debug.Log($"Cannot parse {deltaText}");
                                 break;
                         }
                     }
