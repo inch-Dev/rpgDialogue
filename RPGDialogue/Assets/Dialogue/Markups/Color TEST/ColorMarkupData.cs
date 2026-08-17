@@ -17,7 +17,7 @@ public class ColorMarkupData : MarkupData
 	public override void OpenDelta(DialogueMarkup markup, string rawText)
 	{
 		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
-		DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
+		//DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
 	}
 
 	public override void Close(DialogueMarkup markup, string rawText, DialogueCall callType)
@@ -33,6 +33,6 @@ public class ColorMarkupData : MarkupData
 	public override void CloseDelta(DialogueMarkup markup, string rawText)
 	{
 		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
-		DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
+		//DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
 	}
 }

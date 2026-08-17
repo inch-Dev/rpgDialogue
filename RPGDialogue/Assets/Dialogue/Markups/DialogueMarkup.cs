@@ -120,100 +120,21 @@ public class DialogueMarkup : ScriptableObject
 	/// Get text this markup applies to
 	/// </summary>
 	/// 
-	virtual public string ParseAppliedText(string rawText, DialogueCall callType)
-    {
-        switch(callType)
-        {
-            case DialogueCall.DELTA:
-                return ParseAppliedDeltaText(rawText);
-            case DialogueCall.FULL:
-                return ParseAppliedText(rawText);
-        }
-
-        return null;
-    }
-    virtual public string ParseAppliedText(string rawText)
-    {
-        string appliedText = "";
-        char[] textArray = rawText.ToCharArray();
-        bool isAppliedText = false;
-
-        if (!ValidateMarkup(ParseMarkup(rawText)))
-            return null;
-
-        for (int i = 0; i < rawText.Length; i++)
-        {
-            if (ParseMarkup(rawText, i, openFormat) != null)
-            {
-                i += ParseMarkup(rawText, i, openFormat).Length;
-                isAppliedText = true;
-            }
-
-            if (ParseMarkup(rawText, i, closeFormat) != null)
-            {
-                isAppliedText = false;
-            }
-
-            if (i < rawText.Length && isAppliedText)
-            {
-                appliedText += textArray[i];
-            }
-        }
-
-        Debug.Log($"Applied text in string:{rawText} is:{appliedText}");
-
-        return appliedText;
-    }
-
-    virtual public string ParseAppliedDeltaText(string deltaText)
-    {
-        Debug.Log($"Parsing in {deltaText}");
-        string appliedText = "";
-        char[] textArray = deltaText.ToCharArray();
-        bool isAppliedText = false;
-
-        if (isActiveApplying)
-        {
-            isAppliedText = true;
-        }
-
-        for (int i = 0; i < deltaText.Length; i++)
-        {
-            if (ParseMarkup(deltaText, i, openFormat) != null)
-            {
-                i += ParseMarkup(deltaText, i, openFormat).Length;
-                isAppliedText = true;
-            }
-
-            if(ParseMarkup(deltaText, i, closeFormat) != null)
-            {
-                isAppliedText = false;
-            }
-
-            if( i < deltaText.Length && isAppliedText)
-            {
-                appliedText += textArray[i];
-            }
-        }
-
-        return appliedText;
-    }
-
     virtual public List<string> ParseAppliedText(string rawText, DialogueCall callType)
     {
         switch (callType)
         {
             case DialogueCall.DELTA:
-                return ParseDeltaAppliedText(rawText);
+                return ParseAppliedDeltaText(rawText);
             case DialogueCall.FULL:
-                return ParseFullAppliedText(rawText);
+                return ParseAppliedFullText(rawText);
             default:
                 return null;
         }
 
     }
 
-    virtual public List<string> ParseFullAppliedText(string rawText)
+    virtual public List<string> ParseAppliedFullText(string rawText)
     {
         List<string> appliedText = new List<string>();
         List<Vector2Int> indexRanges = ParseAppliedIndexRanges(rawText, DialogueCall.FULL);
@@ -227,9 +148,9 @@ public class DialogueMarkup : ScriptableObject
         return appliedText;
     }
 
-    virtual public List<string> ParseDeltaAppliedText(string deltaText)
+    virtual public List<string> ParseAppliedDeltaText(string deltaText)
     {
-        List<string> appliedText = new List<string>;
+        List<string> appliedText = new List<string>();
         List<Vector2Int> indexRanges = ParseAppliedIndexRanges(deltaText, DialogueCall.DELTA);
 
         foreach (Vector2Int range in indexRanges)
@@ -249,7 +170,7 @@ public class DialogueMarkup : ScriptableObject
         switch (callType)
         {
             case DialogueCall.FULL:
-                return ParseIndexRanges(rawText);
+                return ParseFullIndexRanges(rawText);
             case DialogueCall.DELTA:
                 return ParseDeltaIndexRanges(rawText);
             default:
@@ -380,16 +301,16 @@ public class DialogueMarkup : ScriptableObject
         switch (callType)
         {
             case DialogueCall.FULL:
-                return ParseAppliedIndexRanges(rawText);
+                return ParseAppliedFullIndexRanges(rawText);
             case DialogueCall.DELTA:
-                return ParseDeltaAppliedIndexRanges(rawText);
+                return ParseAppliedDeltaIndexRanges(rawText);
             default:
                 return null;
         }
 
     }
 
-    virtual public List<Vector2Int> ParseFullAppliedIndexRanges(string rawText)
+    virtual public List<Vector2Int> ParseAppliedFullIndexRanges(string rawText)
     {
         List<Vector2Int> indexRanges = new List<Vector2Int>();
         char[] textArray = rawText.ToCharArray();
@@ -416,7 +337,7 @@ public class DialogueMarkup : ScriptableObject
         return indexRanges;
     }
 
-    virtual public List<Vector2Int> ParseDeltaAppliedIndexRanges(string rawText)
+    virtual public List<Vector2Int> ParseAppliedDeltaIndexRanges(string rawText)
     {
         List<Vector2Int> indexRanges = new List<Vector2Int>();
         char[] textArray = rawText.ToCharArray();
