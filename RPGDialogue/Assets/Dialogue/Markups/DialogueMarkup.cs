@@ -156,11 +156,11 @@ public class DialogueMarkup : ScriptableObject
 
         foreach (Vector2Int range in indexRanges)
         {
-            Debug.Log($"Index range:{range}");
+            //Debug.Log($"Index range:{range}");
 
             string textRange;
             if(range.x != range.y)
-                textRange = deltaText.Substring(range.x, range.y - range.x);
+                textRange = deltaText.Substring(range.x, (range.y - range.x) + 1);
             else
             textRange = deltaText[range.x].ToString();
             appliedText.Add(textRange);
@@ -289,7 +289,7 @@ public class DialogueMarkup : ScriptableObject
 
     virtual public List<Vector2Int> ParseAppliedDeltaIndexRanges(string deltaText)
     {
-        Debug.Log($"Delta:{deltaText}");
+        //Debug.Log($"Delta:{deltaText}");
         List<Vector2Int> indexRanges = new List<Vector2Int>();
         char[] textArray = deltaText.ToCharArray();
         bool isClosed = false;
@@ -330,7 +330,9 @@ public class DialogueMarkup : ScriptableObject
 
         if(!isClosed && currentRange.x != -1)
         {
+            //Debug.Log("Should end at length of delta");
             currentRange.y = deltaText.Length - 1;
+            //Debug.Log($"Adding {currentRange}");
             indexRanges.Add(currentRange);
         }
 

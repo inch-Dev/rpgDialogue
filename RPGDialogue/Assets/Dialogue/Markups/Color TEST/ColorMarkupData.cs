@@ -33,13 +33,18 @@ public class ColorMarkupData : MarkupData
 
 	public override void CloseDelta(DialogueMarkup markup, string deltaText)
 	{
-		Debug.Log($"Closing for {deltaText}");
+		//Debug.Log($"Closing for {deltaText}");
 		List<string> appliedText = markup.ParseAppliedText(deltaText, DialogueCall.DELTA);
 		foreach(string text in appliedText)
 		{
 			Debug.Log($"Applied text range:{text}");
 		}
 
+		List<Vector2Int> displayRanges = DialogueManager.Instance.GetDisplayIndexRanges(appliedText);
+		foreach(Vector2Int range in displayRanges)
+		{
+			Debug.Log(range);
+		}
 
 		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
 		//DialogueUI.Instance.TextOperation(DialogueManager.Instance.GetDisplayIndexRange(markup.ParseAppliedText(rawText, DialogueCall.DELTA)));
@@ -53,6 +58,13 @@ public class ColorMarkupData : MarkupData
 			Debug.Log($"Applied text range:{text}");
 		}
 
+
+
+		List<Vector2Int> displayRanges = DialogueManager.Instance.GetDisplayIndexRanges(appliedText);
+		foreach (Vector2Int range in displayRanges)
+		{
+			Debug.Log(range);
+		}
 		//Debug.Log("Continue!");
 		//Debug.Log($"Markup applied text is: {markup.ParseAppliedText(rawText, DialogueCall.DELTA)}");
 	}
