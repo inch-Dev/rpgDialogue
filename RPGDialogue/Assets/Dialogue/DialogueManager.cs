@@ -280,35 +280,42 @@ public class DialogueManager : MonoBehaviour
 			string dialogueLine = dialogueLines[i];
             string displayDialogue = RemoveMarkups(dialogueLine);
 
-            //Debug.Log($"First display call good, Clean display:{displayDialogue}");
 
 			this.markupIndexText = null;
 
 			while (charIndex <= displayDialogue.Length)
 			{
+                //Reset interval times
 				float localCharWaitSeconds = charWaitSecondsInterval;
 				float localLineWaitSeconds = lineWaitSecondsInterval;
 
+                //Index text for markups and display
 				curMarkupText = MarkupIndex(charIndex, dialogueLine);
                 curDisplayText = DisplayIndex(charIndex, dialogueLine);
 
+                //Process markups
 				HandleMarkups(markupDeltaText, MarkupType.LOGIC, DialogueCall.DELTA);
 				HandleMarkups(markupDeltaText, MarkupType.DISPLAY, DialogueCall.DELTA);
 
 				yield return new WaitForSeconds(startWaitTime);
+
+                //Display indexed text
 				updateDialogue?.Invoke(dialogue.speaker.speakerName, expression, displayDialogue, charIndex);
 
 				yield return new WaitForSeconds(endWaitTime);
 
+                //Reset wait values
 				startWaitTime = 0;
 				endWaitTime = 0;
 
+                //Increase index every interval 
 				yield return new WaitForSeconds(localCharWaitSeconds);
 				charIndex++;
 
+
+                //If all visible characters have been grabbed and markup logic has been processed, skip to next line
 				if (curMarkupText == dialogueLine)
 				{
-					//Debug.Log($"Logic text equals dialogueLine...all logic ran? after {charIndex}");
 					break;
 				}
 			}
@@ -546,7 +553,6 @@ public class DialogueManager : MonoBehaviour
        for(int i = 0; i < markups.Count; i++)
         {
             handledMarkupText = markups[i].RemoveMarkup(handledMarkupText);
-            //Debug.Log($"Removed instances of {markups[i]}...{handledMarkupText}");
         }
 
         return handledMarkupText;

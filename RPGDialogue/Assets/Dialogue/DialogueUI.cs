@@ -18,6 +18,8 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] GameObject textBox;
     [SerializeField] GameObject altTextBox;
 
+    string currentDialogue = null;
+
     #region EVENTS
 
     void OnEnable()
@@ -41,7 +43,7 @@ public class DialogueUI : MonoBehaviour
 
 	#region GETTERS
 
-    GameObject GetActiveTextbox()
+    public GameObject GetActiveTextbox()
     {
         if (textBox.activeSelf)
             return textBox;
@@ -53,7 +55,7 @@ public class DialogueUI : MonoBehaviour
         return null;
     }
 
-    TMP_Text GetActiveText()
+    public TMP_Text GetActiveText()
     {
         if(GetActiveTextbox() == textBox)
             return textBox.GetComponent<TMP_Text>();
@@ -66,7 +68,15 @@ public class DialogueUI : MonoBehaviour
     #endregion
 
 	#region SETTERS
-	void SetDialogue(string speakerName, DialogueExpression expression, string curText, int index)
+
+    /// <summary>
+    /// Set all dialogue UI
+    /// </summary>
+    /// <param name="speakerName"></param>
+    /// <param name="expression"></param>
+    /// <param name="curText"></param>
+    /// <param name="index"></param>
+	public void SetDialogue(string speakerName, DialogueExpression expression, string curText, int index)
     {
         SetSpeakerName(speakerName);
         SetExpression(expression);
@@ -82,7 +92,11 @@ public class DialogueUI : MonoBehaviour
 
     }
 
-    void SetSpeakerName(string name)
+    public void SetDialogue(string dialogueText)
+    {
+        currentDialogue = dialogueText;
+    }
+    public void SetSpeakerName(string name)
     {
         if(name == null || name == "") 
         {
@@ -96,7 +110,11 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    void SetExpression(DialogueExpression expression)
+    /// <summary>
+    /// Set speaker's expression sprite
+    /// </summary>
+    /// <param name="expression"></param>
+    public void SetExpression(DialogueExpression expression)
     {
         if(expression == null)
         {
@@ -109,7 +127,12 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
-    void SetAltTextbox(String dialogueText, int index)
+    /// <summary>
+    /// Sets alternate Textbox GameObject to active and display text
+    /// </summary>
+    /// <param name="dialogueText"></param>
+    /// <param name="index"></param>
+    public void SetAltTextbox(String dialogueText, int index)
     {
         textBox.SetActive(false);
         altTextBox.SetActive(true);
@@ -118,7 +141,12 @@ public class DialogueUI : MonoBehaviour
 
     }
 
-    void SetTextbox(String dialogueText, int index)
+    /// <summary>
+    /// Sets standard Textbox GameObject to active and display text
+    /// </summary>
+    /// <param name="dialogueText"></param>
+    /// <param name="index"></param>
+    public void SetTextbox(String dialogueText, int index)
     {
         altTextBox.SetActive(false);
         textBox.SetActive(true);
@@ -128,9 +156,20 @@ public class DialogueUI : MonoBehaviour
 
     #endregion
 
-    void IndexTextVisbility(string rawText, int index, TMP_Text textBox)
+    public void IndexTextVisibility(int index, TMP_Text textBox)
     {
-        //Debug.Log($"Text is {rawText}");
+        IndexTextVisbility(currentDialogue, index, textBox);
+    }
+
+    /// <summary>
+    /// Reveals chararacters in display text up to index
+    /// </summary>
+    /// <param name="rawText"></param>
+    /// <param name="index"></param>
+    /// <param name="textBox"></param>
+    public void IndexTextVisbility(string rawText, int index, TMP_Text textBox)
+    {
+        
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
@@ -164,6 +203,11 @@ public class DialogueUI : MonoBehaviour
         TextOperation(startIndex, GetActiveText());
     }
 
+    public void TextOperation(List<Vector2Int> indexRanges)
+    {
+        TextOperation(indexRanges, GetActiveText());
+    }
+
 	public void TextOperation(Vector2Int indexRange)
 	{
 		TextOperation(indexRange, GetActiveText());
@@ -184,7 +228,7 @@ public class DialogueUI : MonoBehaviour
 
     public void TextOperation(Vector2Int indexRange, TMP_Text textBox)
     {
-
+        
     }
 
     #endregion

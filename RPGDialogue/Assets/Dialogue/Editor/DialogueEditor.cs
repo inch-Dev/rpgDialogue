@@ -312,11 +312,7 @@ public class DialogueEditor : Editor
 			serializedObject.Update();
 			SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
 
-			string newCopyString = dialogueLines.GetArrayElementAtIndex(newIndex).stringValue;
-			string oldCopyString = dialogueLines.GetArrayElementAtIndex(oldIndex).stringValue;
-
-			dialogueLines.GetArrayElementAtIndex(newIndex).stringValue = oldCopyString;
-			dialogueLines.GetArrayElementAtIndex(oldIndex).stringValue = newCopyString;
+			dialogueLines.MoveArrayElement(oldIndex, newIndex);
 
 			serializedObject.ApplyModifiedProperties();
 
