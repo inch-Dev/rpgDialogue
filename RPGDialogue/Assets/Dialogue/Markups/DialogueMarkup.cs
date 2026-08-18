@@ -141,7 +141,7 @@ public class DialogueMarkup : ScriptableObject
 
         foreach(Vector2Int range in indexRanges)
         {
-            string textRange = rawText.Substring(range.x, range.y - range.x);
+            string textRange = rawText.Substring(range.x, (range.y - range.x) + 1);
             appliedText.Add(textRange);
         }
 
