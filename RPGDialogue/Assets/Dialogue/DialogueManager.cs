@@ -51,7 +51,6 @@ public class DialogueManager : MonoBehaviour
 
 	#region GETTERS
 
-
     public List<Vector2Int> GetDisplayIndexRanges(List<string> targets)
     {
         List<Vector2Int> displayRanges = new List<Vector2Int>();
@@ -281,7 +280,7 @@ public class DialogueManager : MonoBehaviour
 			string dialogueLine = dialogueLines[i];
             string displayDialogue = RemoveMarkups(dialogueLine);
 
-            //Debug.Log($"First display call good, Clean display:{displayDialogue}");
+            Debug.Log($"First display call good, Clean display:{displayDialogue}");
 
 			this.markupIndexText = null;
 
@@ -383,6 +382,7 @@ public class DialogueManager : MonoBehaviour
 
             else
             {
+                //Debug.Log($"Added {textArray[i]}");
                 indexedText += textArray[i].ToString();
                 visibleCharCount++;
             }
@@ -474,7 +474,10 @@ public class DialogueManager : MonoBehaviour
             }
 
             if (recognizedMarkup || isRichText)
+            {
+                //Debug.Log("Continuing loop");
                 continue;
+            }
 
 			if (textArray[i] == ' ')
 			{
@@ -483,6 +486,7 @@ public class DialogueManager : MonoBehaviour
 
 			else
 			{
+                //Debug.Log($"Added {textArray[i]}");
 				indexedText += textArray[i].ToString();
 				visibleCharCount++;
 			}

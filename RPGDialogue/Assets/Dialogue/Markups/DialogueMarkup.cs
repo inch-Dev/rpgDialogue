@@ -932,16 +932,25 @@ public class DialogueMarkup : ScriptableObject
 	virtual public string RemoveMarkup(string rawText)
     {
         string removedMarkupText = "";
+        bool recognizedMarkup = false;
 
         char[] textArray = rawText.ToCharArray();
 
         for (int i = 0; i < rawText.Length; i++)
         {
-            if (ValidateMarkup(rawText, i))
+			if (i >= rawText.Length)
+				break;
+
+			recognizedMarkup = false;
+            if (ValidateMarkup(ParseMarkup(rawText, i)))
             {
-                //Debug.Log($"Got markup:{ParseMarkup(rawText, i)}....moved to{textArray[i + ParseMarkup(rawText, i).Length]}");
-                i += ParseMarkup(rawText, i).Length;
+                Debug.Log($"Got markup:{ParseMarkup(rawText, i)}....moved to{textArray[i + ParseMarkup(rawText, i).Length - 1]}");
+                i += ParseMarkup(rawText, i).Length - 1;
+                recognizedMarkup = true;
             }
+
+            if (recognizedMarkup)
+                continue;
 
             if (i < rawText.Length)
             {

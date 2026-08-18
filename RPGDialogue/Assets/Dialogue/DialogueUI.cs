@@ -130,6 +130,7 @@ public class DialogueUI : MonoBehaviour
 
     void IndexTextVisbility(string rawText, int index, TMP_Text textBox)
     {
+        //Debug.Log($"Text is {rawText}");
         char[] textArray = rawText.ToCharArray();
         textBox.text = rawText;
         textBox.maxVisibleCharacters = 0;
