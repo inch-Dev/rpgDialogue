@@ -246,63 +246,6 @@ public class DialogueMarkup : ScriptableObject
         return indexRanges;
     }
 
-    /// <summary>
-    /// Get index range of this markup in rawText
-    /// </summary>
-    /// <param name="rawText"></param>
-    /// <returns></returns>
-    /// 
-
-
-    //REPLACE WITH INDEX RANGES
-	virtual public Vector2Int ParseIndexRange(string rawText)
-	{
-		Vector2Int indexRange = new Vector2Int(-1, -1);
-		char[] textArray = rawText.ToCharArray();
-
-		if (!ValidateMarkup(ParseMarkup(rawText)))
-		{
-			return indexRange;
-		}
-
-		for (int i = 0; i < rawText.Length; i++)
-		{
-			if (ParseMarkup(rawText, i) != null)
-			{
-				indexRange.x = i;
-				indexRange.y = ParseMarkup(rawText, i).Length + i;
-			}
-		}
-
-		return indexRange;
-	}
-
-    /// <summary>
-    /// Get index range of the text this markup applies to in rawText
-    /// </summary>
-    /// <param name="rawText"></param>
-    /// <returns></returns>
-    virtual public Vector2Int ParseAppliedIndexRange(string rawText)
-    {
-        //EDIT THIS
-        Vector2Int indexRange = new Vector2Int(-1, -1);
-        char[] textArray = rawText.ToCharArray();
-
-        for(int i = 0; i < rawText.Length; i++)
-        {
-            if(ParseMarkup(rawText, i, openFormat) != null)
-            {
-                indexRange.x = i + ParseMarkup(rawText, i, openFormat).Length;
-            }
-
-            if(ParseMarkup(rawText, i, closeFormat) != null)
-            {
-                indexRange.y = i - 1;
-            }
-        }
-        return indexRange;
-    }
-
     virtual public List<Vector2Int> ParseAppliedIndexRanges(string rawText, DialogueCall callType)
     {
         switch (callType)
@@ -361,7 +304,14 @@ public class DialogueMarkup : ScriptableObject
 
         if(isActiveApplying)
         {
-            currentRange.x = 0;
+            for(int i = 0; i < textArray.Length; i++)
+            {
+                if (textArray[i] != ' ')
+                {
+                    currentRange.x = i;
+                    break;
+                }
+            }
         }
 
         for(int i = 0; i < deltaText.Length; i++)
@@ -379,7 +329,6 @@ public class DialogueMarkup : ScriptableObject
                         indexRanges.Add(currentRange);
                         currentRange = new Vector2Int(-1, -1);
                         isClosed = true;
-                        Debug.Log("Found index range:{currentRange}");
                         break;
                 }
                     
@@ -1121,17 +1070,17 @@ public class DialogueMarkup : ScriptableObject
             {
                     if (ParseMarkup(deltaText) != null)
                     {
-                        Debug.Log($"Got markup:{deltaText}");
+                        //Debug.Log($"Got markup:{deltaText}");
                         switch (ParseFormatType(ParseMarkup(deltaText)))
                         {
                             case FormatType.OPEN:
-                                Debug.Log("Open!");
+                                //Debug.Log("Open!");
                                 theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
                                 isActiveApplying = true;
                                 applyingData = theMarkupData;
                                 break;
                             case FormatType.CLOSE:
-                                Debug.Log("Closing");
+                                //Debug.Log($"Closing with {theMarkupData}");
                                 theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
                                 isActiveApplying = false;
                                 applyingData = null;
