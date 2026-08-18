@@ -304,14 +304,7 @@ public class DialogueMarkup : ScriptableObject
 
         if(isActiveApplying)
         {
-            for(int i = 0; i < textArray.Length; i++)
-            {
-                if (textArray[i] != ' ')
-                {
-                    currentRange.x = i;
-                    break;
-                }
-            }
+            currentRange.x = 0;
         }
 
         for(int i = 0; i < deltaText.Length; i++)
