@@ -944,7 +944,7 @@ public class DialogueMarkup : ScriptableObject
 			recognizedMarkup = false;
             if (ValidateMarkup(ParseMarkup(rawText, i)))
             {
-                Debug.Log($"Got markup:{ParseMarkup(rawText, i)}....moved to{textArray[i + ParseMarkup(rawText, i).Length - 1]}");
+                //Debug.Log($"Got markup:{ParseMarkup(rawText, i)}....moved to{textArray[i + ParseMarkup(rawText, i).Length - 1]}");
                 i += ParseMarkup(rawText, i).Length - 1;
                 recognizedMarkup = true;
             }

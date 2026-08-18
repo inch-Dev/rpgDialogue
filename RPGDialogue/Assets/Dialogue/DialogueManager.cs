@@ -280,7 +280,7 @@ public class DialogueManager : MonoBehaviour
 			string dialogueLine = dialogueLines[i];
             string displayDialogue = RemoveMarkups(dialogueLine);
 
-            Debug.Log($"First display call good, Clean display:{displayDialogue}");
+            //Debug.Log($"First display call good, Clean display:{displayDialogue}");
 
 			this.markupIndexText = null;
 

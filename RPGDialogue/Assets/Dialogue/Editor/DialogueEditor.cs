@@ -303,6 +303,27 @@ public class DialogueEditor : Editor
 
 	void SetDialogueLines(ListView list)
 	{
+
+		list.reorderable = true;
+		list.reorderMode = ListViewReorderMode.Animated;
+
+		list.itemIndexChanged += (oldIndex, newIndex) =>
+		{
+			serializedObject.Update();
+			SerializedProperty dialogueLines = serializedObject.FindProperty("dialogueLines");
+
+			string newCopyString = dialogueLines.GetArrayElementAtIndex(newIndex).stringValue;
+			string oldCopyString = dialogueLines.GetArrayElementAtIndex(oldIndex).stringValue;
+
+			dialogueLines.GetArrayElementAtIndex(newIndex).stringValue = oldCopyString;
+			dialogueLines.GetArrayElementAtIndex(oldIndex).stringValue = newCopyString;
+
+			serializedObject.ApplyModifiedProperties();
+
+			list.RefreshItems();
+		};
+
+
 		list.onRemove = (baseListView) =>
 		{
 			serializedObject.Update();
@@ -312,6 +333,7 @@ public class DialogueEditor : Editor
 			{
 				serializedObject.Update();
 				dialogueLines.DeleteArrayElementAtIndex(focusIndex);
+				serializedObject.ApplyModifiedProperties();
 				//If removed don't store for markup button
 				if(focusIndex == buttonFocusIndex)
 				{
@@ -324,6 +346,7 @@ public class DialogueEditor : Editor
 			{
 				serializedObject.Update();
 				dialogueLines.DeleteArrayElementAtIndex(dialogueLines.arraySize - 1);
+				serializedObject.ApplyModifiedProperties();
 				//If removed don't store for markup button
 				if (dialogueLines.arraySize - 1 == buttonFocusIndex)
 				{
