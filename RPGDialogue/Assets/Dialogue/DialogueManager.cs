@@ -98,10 +98,13 @@ public class DialogueManager : MonoBehaviour
 		{
 			if (displayArray[i] == targetArray[0])
 			{
+                
 				int indexOfEnd = displayIndexText.IndexOf(targetArray[targetArray.Length - 1], i + 1);
+                Debug.Log($"Index of {targetArray[targetArray.Length - 1]} is {displayIndexText.IndexOf(targetArray[targetArray.Length - 1], i + 1)}");
 				if (indexOfEnd != -1)
 				{
-					string targetText = displayIndexText.Substring(i, indexOfEnd - 1 - i);
+					string targetText = displayIndexText.Substring(i, (indexOfEnd - i) + 1);
+                    Debug.Log($"Target text:{targetText}");
 					if (targetText == target)
 					{
 						indexRange = new Vector2Int(i, indexOfEnd);
@@ -162,7 +165,7 @@ public class DialogueManager : MonoBehaviour
 				int indexOfEnd = markupIndexText.IndexOf(targetArray[targetArray.Length - 1]);
 				if (indexOfEnd != -1)
 				{
-					string targetText = markupIndexText.Substring(i, indexOfEnd - 1 - i);
+					string targetText = markupIndexText.Substring(i, (indexOfEnd - i) + 1);
 					if (targetText == target)
 					{
 						indexRange = new Vector2Int(i, indexOfEnd);
