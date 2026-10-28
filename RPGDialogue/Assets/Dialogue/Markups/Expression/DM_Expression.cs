@@ -4,20 +4,4 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DM_Expression", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/DM_Expression", order = 3)]
 public class DM_Expression : DialogueMarkup
 {
-    public override void OpenLogic(DialogueManager dialogueManager, string text)
-    {
-        base.OpenLogic(dialogueManager, text);
-        //    if(hasParameters && GetParameterText(text) != null)
-        //    { 
-        //        lastStoredParameter = GetParameterText(text);
-
-        //        //Run logic with parameter based on enum type
-
-        //        if(Enum.TryParse(lastStoredParameter, out DialogueExpressionID expressionResult))
-        //        {
-        //            dialogueManager.ChangeExpression(expressionResult);
-        //        }
-        //    }
-        //lastStoredParameter = "";
-    }
 }

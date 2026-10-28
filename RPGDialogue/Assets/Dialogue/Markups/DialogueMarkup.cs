@@ -1058,11 +1058,13 @@ public class DialogueMarkup : ScriptableObject
 				{
 					case FormatType.OPEN:
 						theMarkupData.Open(this, deltaText, DialogueCall.DELTA);
+                            Debug.Log($"running {this} open delta....");
 						isActiveApplying = true;
 						break;
 					case FormatType.CLOSE:
 						theMarkupData.Close(this, deltaText, DialogueCall.DELTA);
 						isActiveApplying = false;
+                        Debug.Log($"running {this} close delta....");
 						break;
 					default:
 						break;

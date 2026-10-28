@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 
-[CreateAssetMenu(fileName = "ColorMarkupData", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/MarkupDatas/ColorMarkupData", order = 4)]
+[CreateAssetMenu(fileName = "ColorMarkupData", menuName = "ScriptableObjects/DialogueObjects/DialogueMarkups/MarkupDatas/ColorMarkupData", order = 2)]
 public class ColorMarkupData : MarkupData
 {
 

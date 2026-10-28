@@ -24,6 +24,8 @@ public class DialogueManager : MonoBehaviour
 	DialogueSpeaker speaker;
 	DialogueExpression expression;
 
+    DialogueExpression startExpression;
+
 
 	[SerializeField] List<DialogueSpeed> dialogueSpeeds;
 
@@ -206,6 +208,11 @@ public class DialogueManager : MonoBehaviour
 		if (speaker.getExpressionOf(id) != null)
 			expression = speaker.getExpressionOf(id);
 	}
+
+    public void SetExpression()
+    {
+        expression = startExpression;
+    }
 	#endregion
 
 
@@ -226,6 +233,7 @@ public class DialogueManager : MonoBehaviour
         if(dialogue.hasSpeaker)
         {
             speaker = dialogue.speaker;
+            startExpression = dialogue.startExpression;
             expression = dialogue.startExpression;
         }
         else
@@ -533,6 +541,7 @@ public class DialogueManager : MonoBehaviour
        {
             if(markups[i].GetMarkupType() == type)
             {
+                //Debug.Log($"Handling {markups[i]}");
                 markups[i].Handle(rawText, callType);
             }
        }

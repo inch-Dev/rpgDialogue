@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53f2e61cf31c7bf4c9a85eb7b8f9a3a2, type: 3}
   m_Name: DM_Expression
   m_EditorClassIdentifier: Assembly-CSharp::DM_Expression
+  markupType: 0
   keyName: Expression
-  markupDatas: []
+  markupDatas:
+  - {fileID: 11400000, guid: 77a83072f8a7c0f4eb767a9018785e41, type: 2}
+  - {fileID: 11400000, guid: f4c6635a650b5c94d85e939fe760ea1e, type: 2}
+  - {fileID: 11400000, guid: 356cc4d4444a975489395ead7d95cab3, type: 2}

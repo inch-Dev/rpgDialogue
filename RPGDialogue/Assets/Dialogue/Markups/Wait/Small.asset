@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Small
   m_EditorClassIdentifier: Assembly-CSharp::WaitMarkupData
   keyName: Small
-  time: 1.2
+  time: 5
